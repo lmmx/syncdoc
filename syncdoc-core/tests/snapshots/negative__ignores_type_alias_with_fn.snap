@@ -2,4 +2,5 @@
 source: syncdoc-core/tests/negative.rs
 expression: "apply_doc_injection(input, \"../docs\")"
 ---
+# [doc = include_str ! ("../docs/FnPointer.md")]
 type FnPointer = fn() -> i32;

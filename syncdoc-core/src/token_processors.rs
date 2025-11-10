@@ -1,4 +1,4 @@
-use crate::syncdoc_impl;
+use crate::{syncdoc_impl, inject_doc_attr};
 use proc_macro2::TokenStream;
 use unsynn::*;
 
@@ -55,11 +55,34 @@ impl TokenProcessor {
             ModuleItem::Function(func_sig) => {
                 let mut func_tokens = TokenStream::new();
                 quote::ToTokens::to_tokens(&func_sig, &mut func_tokens);
-                self.inject_doc_into_function(func_tokens, &func_sig.name.to_string())
+                self.inject_doc_into_item(func_tokens, &func_sig.name.to_string())
             }
             ModuleItem::ImplBlock(impl_block) => self.process_impl_block(impl_block),
             ModuleItem::Module(module) => self.process_module_block(module),
             ModuleItem::Trait(trait_def) => self.process_trait_block(trait_def),
+            ModuleItem::Enum(enum_sig) => {
+                self.process_enum(enum_sig)
+            }
+            ModuleItem::Struct(struct_sig) => {
+                let mut struct_tokens = TokenStream::new();
+                quote::ToTokens::to_tokens(&struct_sig, &mut struct_tokens);
+                self.inject_doc_into_item(struct_tokens, &struct_sig.name.to_string())
+            }
+            ModuleItem::TypeAlias(type_alias) => {
+                let mut alias_tokens = TokenStream::new();
+                quote::ToTokens::to_tokens(&type_alias, &mut alias_tokens);
+                self.inject_doc_into_simple_item(alias_tokens, &type_alias.name.to_string())
+            }
+            ModuleItem::Const(const_sig) => {
+                let mut const_tokens = TokenStream::new();
+                quote::ToTokens::to_tokens(&const_sig, &mut const_tokens);
+                self.inject_doc_into_simple_item(const_tokens, &const_sig.name.to_string())
+            }
+            ModuleItem::Static(static_sig) => {
+                let mut static_tokens = TokenStream::new();
+                quote::ToTokens::to_tokens(&static_sig, &mut static_tokens);
+                self.inject_doc_into_simple_item(static_tokens, &static_sig.name.to_string())
+            }  
             ModuleItem::Other(token) => {
                 let mut tokens = TokenStream::new();
                 token.to_tokens(&mut tokens);
@@ -235,6 +258,126 @@ impl TokenProcessor {
         output
     }
 
+	fn process_enum(&self, enum_sig: crate::parse::EnumSig) -> TokenStream {
+        let enum_name = enum_sig.name.to_string();
+        
+        // Get the body content as TokenStream
+        let body_stream = {
+            let mut ts = TokenStream::new();
+            enum_sig.body.to_tokens(&mut ts);
+            // Extract content from within braces
+            if let Some(proc_macro2::TokenTree::Group(group)) = ts.into_iter().next() {
+                group.stream()
+            } else {
+                TokenStream::new()
+            }
+        };
+
+        // Process enum variants
+        let processed_variants = self.process_enum_variants(body_stream, &enum_name);
+        let processed_body = self.wrap_in_braces(processed_variants);
+
+        // Reconstruct the enum with doc attribute
+        let mut output = TokenStream::new();
+
+        if let Some(attrs) = enum_sig.attributes {
+            for attr in attrs.0 {
+                attr.to_tokens(&mut output);
+            }
+        }
+
+        if let Some(vis) = enum_sig.visibility {
+            vis.to_tokens(&mut output);
+        }
+
+        enum_sig._enum.to_tokens(&mut output);
+        
+        let name_ident = enum_sig.name;
+        name_ident.to_tokens(&mut output);
+
+        if let Some(generics) = enum_sig.generics {
+            generics.to_tokens(&mut output);
+        }
+
+        if let Some(where_clause) = enum_sig.where_clause {
+            where_clause.to_tokens(&mut output);
+        }
+
+        // Inject doc for the enum itself using simpler method
+        let enum_with_doc = self.inject_doc_into_simple_item(output, &enum_name);
+
+        // Combine enum declaration with processed body
+        let mut final_output = enum_with_doc;
+        final_output.extend(processed_body);
+
+        final_output
+    }
+
+    fn process_enum_variants(&self, variants_stream: TokenStream, enum_name: &str) -> TokenStream {
+        let mut output = TokenStream::new();
+        let mut current_variant = Vec::new();
+        let mut depth = 0;
+
+        for tt in variants_stream.into_iter() {
+            match &tt {
+                proc_macro2::TokenTree::Punct(punct) if punct.as_char() == ',' && depth == 0 => {
+                    // End of variant
+                    if !current_variant.is_empty() {
+                        let variant_tokens: TokenStream = current_variant.drain(..).collect();
+                        if let Some(variant_name) = extract_first_ident(&variant_tokens) {
+                            let documented = self.inject_doc_for_variant(variant_tokens, enum_name, &variant_name);
+                            output.extend(documented);
+                            output.extend(std::iter::once(tt));
+                        } else {
+                            output.extend(variant_tokens);
+                            output.extend(std::iter::once(tt));
+                        }
+                    }
+                }
+                // proc_macro2::TokenTree::Group(_) => {
+                //     current_variant.push(tt);
+                // }
+                proc_macro2::TokenTree::Group(g) => {
+                    match g.delimiter() {
+                        proc_macro2::Delimiter::Brace | proc_macro2::Delimiter::Parenthesis => {
+                            depth += 1;
+                            current_variant.push(tt);
+                        }
+                        _ => current_variant.push(tt),
+                    }
+                }
+                _ => {
+                    current_variant.push(tt);
+                }
+            }
+        }
+
+        // Handle last variant (no trailing comma)
+        if !current_variant.is_empty() {
+            let variant_tokens: TokenStream = current_variant.drain(..).collect();
+            if let Some(variant_name) = extract_first_ident(&variant_tokens) {
+                let documented = self.inject_doc_for_variant(variant_tokens, enum_name, &variant_name);
+                output.extend(documented);
+            } else {
+                output.extend(variant_tokens);
+            }
+        }
+
+        output
+    }
+
+
+    fn inject_doc_for_variant(&self, variant_tokens: TokenStream, enum_name: &str, variant_name: &str) -> TokenStream {
+        let mut path_parts = vec![self.base_path.clone()];
+        path_parts.extend(self.context.iter().cloned());
+        path_parts.push(format!("{}/{}.md", enum_name, variant_name));
+
+        let full_path = path_parts.join("/");
+
+        // Use simpler injection for variants
+        inject_doc_attr(full_path, variant_tokens)
+    }
+
     fn wrap_in_braces(&self, content: TokenStream) -> TokenStream {
         let mut output = TokenStream::new();
         let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, content);
@@ -242,7 +385,7 @@ impl TokenProcessor {
         output
     }
 
-    fn inject_doc_into_function(&self, func_tokens: TokenStream, fn_name: &str) -> TokenStream {
+    fn inject_doc_into_item(&self, func_tokens: TokenStream, fn_name: &str) -> TokenStream {
         // Construct the full path including context
         let mut path_parts = vec![self.base_path.clone()];
         path_parts.extend(self.context.iter().cloned());
@@ -261,6 +404,18 @@ impl TokenProcessor {
             }
         }
     }
+
+    fn inject_doc_into_simple_item(&self, item_tokens: TokenStream, item_name: &str) -> TokenStream {
+        // Construct the full path including context
+        let mut path_parts = vec![self.base_path.clone()];
+        path_parts.extend(self.context.iter().cloned());
+        path_parts.push(format!("{}.md", item_name));
+        
+        let full_path = path_parts.join("/");
+        
+        // Use the simpler injection that doesn't parse
+        inject_doc_attr(full_path, item_tokens)
+    }
 }
 
 fn extract_type_name(target_type: &unsynn::Many<unsynn::Cons<unsynn::Except<unsynn::Either<crate::parse::KFor, unsynn::BraceGroup>>, proc_macro2::TokenTree>>) -> String {
@@ -272,6 +427,15 @@ fn extract_type_name(target_type: &unsynn::Many<unsynn::Cons<unsynn::Except<unsy
         }
     }
     "Unknown".to_string()
+}
+
+fn extract_first_ident(tokens: &TokenStream) -> Option<String> {
+    for tt in tokens.clone().into_iter() {
+        if let proc_macro2::TokenTree::Ident(ident) = tt {
+            return Some(ident.to_string());
+        }
+    }
+    None
 }
 
 #[cfg(test)]

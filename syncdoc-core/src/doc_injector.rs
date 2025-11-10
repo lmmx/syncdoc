@@ -222,6 +222,14 @@ fn generate_documented_function(args: DocStubArgs, func: SimpleFunction) -> Toke
     }
 }
 
+/// Injects a doc attribute without parsing the item structure
+pub fn inject_doc_attr(doc_path: String, item: TokenStream) -> TokenStream {
+    quote! {
+        #[doc = include_str!(#doc_path)]
+        #item
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -3,6 +3,7 @@ source: syncdoc-core/tests/patterns.rs
 expression: "apply_doc_injection(input, \"../docs\")"
 ---
 use std::collections::HashMap;
+# [doc = include_str ! ("../docs/SOME_CONST.md")]
 const SOME_CONST: i32 = 42;
 struct MyStruct {
     field: String,
@@ -11,12 +12,16 @@ struct MyStruct {
 async fn actual_function() {
     println!("This should be documented");
 }
+# [doc = include_str ! ("../docs/MyEnum.md")]
 enum MyEnum {
+    # [doc = include_str ! ("../docs/MyEnum/Variant1.md")]
     Variant1,
+    # [doc = include_str ! ("../docs/MyEnum/Variant2.md")]
     Variant2(i32),
 }
 # [doc = include_str ! ("../docs/another_function.md")]
 pub unsafe fn another_function() -> Result<(), Error> {
     Ok(())
 }
+# [doc = include_str ! ("../docs/MyType.md")]
 type MyType = HashMap<String, i32>;

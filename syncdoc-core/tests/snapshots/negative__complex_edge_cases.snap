@@ -17,6 +17,7 @@ fn legitimate_function() {
 struct MyStruct {
     field: String,
 }
+# [doc = include_str ! ("../docs/CODE_SAMPLE.md")]
 const CODE_SAMPLE: &str = r#"
             fn example() {
                 println!("This fn is in a string");

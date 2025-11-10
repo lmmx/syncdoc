@@ -8,4 +8,5 @@ fn real_function() {
     let code = r#"fn fake_function() { return "not real"; }"#;
     println!("fn appears in this string too");
 }
+# [doc = include_str ! ("../docs/TEMPLATE.md")]
 const TEMPLATE: &str = "fn template_function() {}";

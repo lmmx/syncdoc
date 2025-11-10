@@ -2,6 +2,7 @@
 source: syncdoc-core/tests/basic.rs
 expression: "apply_doc_injection(input, \"../docs\")"
 ---
+# [doc = include_str ! ("../docs/x.md")]
 const x: String = "fn not_a_function";
 struct Foo {
     field: i32,

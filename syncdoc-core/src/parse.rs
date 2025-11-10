@@ -40,6 +40,14 @@ keyword! {
     pub KSelf = "self";
     /// The "mut" keyword
     pub KMut = "mut";
+	/// The "enum" keyword
+    pub KEnum = "enum";
+    /// The "struct" keyword
+    pub KStruct = "struct";
+    /// The "type" keyword
+    pub KType = "type";
+    /// The "static" keyword
+    pub KStatic = "static";
 }
 
 operator! {
@@ -212,7 +220,17 @@ unsynn! {
         Module(ModuleSig),
         /// A trait definition
         Trait(TraitSig),
-        /// Any other item (struct, enum, use, etc.)
+        /// An enum definition
+        Enum(EnumSig),
+        /// A struct definition
+        Struct(StructSig),
+        /// A type alias
+        TypeAlias(TypeAliasSig),
+        /// A constant
+        Const(ConstSig),
+        /// A static
+        Static(StaticSig),
+        /// Any other item (use, extern crate, etc.)
         Other(TokenTree),
     }
 
@@ -268,6 +286,138 @@ unsynn! {
         pub where_clause: Option<WhereClauses>,
         /// Trait body
         pub body: BraceGroup,
+    }
+
+	/// enum Name { ... } block
+    pub struct EnumSig {
+        /// Optional attributes
+        pub attributes: Option<Many<Attribute>>,
+        /// Optional visibility
+        pub visibility: Option<Visibility>,
+        /// "enum" keyword
+        pub _enum: KEnum,
+        /// Enum name
+        pub name: Ident,
+        /// Optional generic parameters
+        pub generics: Option<Generics>,
+        /// Optional where clause
+        pub where_clause: Option<WhereClauses>,
+        /// Enum body
+        pub body: BraceGroup,
+    }
+
+    /// struct Name { ... } or struct Name;
+    pub struct StructSig {
+        /// Optional attributes
+        pub attributes: Option<Many<Attribute>>,
+        /// Optional visibility
+        pub visibility: Option<Visibility>,
+        /// "struct" keyword
+        pub _struct: KStruct,
+        /// Struct name
+        pub name: Ident,
+        /// Optional generic parameters
+        pub generics: Option<Generics>,
+        /// Optional where clause
+        pub where_clause: Option<WhereClauses>,
+        /// Struct body (could be brace group, tuple, or unit)
+        pub body: StructBody,
+    }
+
+    /// Struct body variants
+    pub enum StructBody {
+        /// Named fields: { field: Type }
+        Named(BraceGroup),
+        /// Tuple fields: (Type, Type)
+        Tuple(Cons<ParenthesisGroup, Semicolon>),
+        /// Unit struct: ;
+        Unit(Semicolon),
+    }
+
+    /// type Alias = Type;
+    pub struct TypeAliasSig {
+        /// Optional attributes
+        pub attributes: Option<Many<Attribute>>,
+        /// Optional visibility
+        pub visibility: Option<Visibility>,
+        /// "type" keyword
+        pub _type: KType,
+        /// Alias name
+        pub name: Ident,
+        /// Optional generic parameters
+        pub generics: Option<Generics>,
+        /// Equals sign
+        pub _eq: Eq,
+        /// Target type (everything until semicolon)
+        pub target: VerbatimUntil<Semicolon>,
+        /// Semicolon
+        pub _semi: Semicolon,
+    }
+
+    /// const NAME: Type = value;
+    pub struct ConstSig {
+        /// Optional attributes
+        pub attributes: Option<Many<Attribute>>,
+        /// Optional visibility
+        pub visibility: Option<Visibility>,
+        /// "const" keyword
+        pub _const: KConst,
+        /// Constant name
+        pub name: Ident,
+        /// Colon
+        pub _colon: Colon,
+        /// Type (everything until equals)
+        pub const_type: VerbatimUntil<Eq>,
+        /// Equals sign
+        pub _eq: Eq,
+        /// Value (everything until semicolon)
+        pub value: VerbatimUntil<Semicolon>,
+        /// Semicolon
+        pub _semi: Semicolon,
+    }
+
+    /// static NAME: Type = value;
+    pub struct StaticSig {
+        /// Optional attributes
+        pub attributes: Option<Many<Attribute>>,
+        /// Optional visibility
+        pub visibility: Option<Visibility>,
+        /// Optional mut keyword
+        pub mut_kw: Option<KMut>,
+        /// "static" keyword
+        pub _static: KStatic,
+        /// Static name
+        pub name: Ident,
+        /// Colon
+        pub _colon: Colon,
+        /// Type (everything until equals)
+        pub static_type: VerbatimUntil<Eq>,
+        /// Equals sign
+        pub _eq: Eq,
+        /// Value (everything until semicolon)
+        pub value: VerbatimUntil<Semicolon>,
+        /// Semicolon
+        pub _semi: Semicolon,
+    }
+
+    /// Single enum variant
+    pub struct EnumVariant {
+        /// Optional attributes
+        pub attributes: Option<Many<Attribute>>,
+        /// Variant name
+        pub name: Ident,
+        /// Optional variant data (fields or discriminant)
+        pub data: Option<EnumVariantData>,
+    }
+
+    /// Enum variant data
+    pub enum EnumVariantData {
+        /// Tuple variant: (Type, Type)
+        Tuple(ParenthesisGroup),
+        /// Struct variant: { field: Type }
+        Struct(BraceGroup),
+        /// Discriminant: = value
+        Discriminant(Cons<Eq, VerbatimUntil<Either<Comma, BraceGroup>>>),
     }
 
     /// A complete module/file content
@@ -548,6 +698,11 @@ impl quote::ToTokens for ModuleItem {
             ModuleItem::ImplBlock(impl_block) => quote::ToTokens::to_tokens(impl_block, tokens),
             ModuleItem::Module(module) => quote::ToTokens::to_tokens(module, tokens),
             ModuleItem::Trait(trait_def) => quote::ToTokens::to_tokens(trait_def, tokens),
+            ModuleItem::Enum(enum_sig) => quote::ToTokens::to_tokens(enum_sig, tokens),
+            ModuleItem::Struct(struct_sig) => quote::ToTokens::to_tokens(struct_sig, tokens),
+            ModuleItem::TypeAlias(type_alias) => quote::ToTokens::to_tokens(type_alias, tokens),
+            ModuleItem::Const(const_sig) => quote::ToTokens::to_tokens(const_sig, tokens),
+            ModuleItem::Static(static_sig) => quote::ToTokens::to_tokens(static_sig, tokens),
             ModuleItem::Other(token_tree) => unsynn::ToTokens::to_tokens(token_tree, tokens),
         }
     }
@@ -622,6 +777,148 @@ impl quote::ToTokens for TraitSig {
 impl quote::ToTokens for ModuleContent {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         unsynn::ToTokens::to_tokens(&self.items, tokens);
+    }
+}
+
+impl quote::ToTokens for EnumSig {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        if let Some(attrs) = &self.attributes {
+            for attr in &attrs.0 {
+                unsynn::ToTokens::to_tokens(attr, tokens);
+            }
+        }
+        if let Some(vis) = &self.visibility {
+            quote::ToTokens::to_tokens(vis, tokens);
+        }
+        unsynn::ToTokens::to_tokens(&self._enum, tokens);
+        quote::ToTokens::to_tokens(&self.name, tokens);
+        if let Some(generics) = &self.generics {
+            unsynn::ToTokens::to_tokens(generics, tokens);
+        }
+        if let Some(where_clause) = &self.where_clause {
+            unsynn::ToTokens::to_tokens(where_clause, tokens);
+        }
+        unsynn::ToTokens::to_tokens(&self.body, tokens);
+    }
+}
+
+impl quote::ToTokens for StructSig {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        if let Some(attrs) = &self.attributes {
+            for attr in &attrs.0 {
+                unsynn::ToTokens::to_tokens(attr, tokens);
+            }
+        }
+        if let Some(vis) = &self.visibility {
+            quote::ToTokens::to_tokens(vis, tokens);
+        }
+        unsynn::ToTokens::to_tokens(&self._struct, tokens);
+        quote::ToTokens::to_tokens(&self.name, tokens);
+        if let Some(generics) = &self.generics {
+            unsynn::ToTokens::to_tokens(generics, tokens);
+        }
+        if let Some(where_clause) = &self.where_clause {
+            unsynn::ToTokens::to_tokens(where_clause, tokens);
+        }
+        quote::ToTokens::to_tokens(&self.body, tokens);
+    }
+}
+
+impl quote::ToTokens for StructBody {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        match self {
+            StructBody::Named(brace) => unsynn::ToTokens::to_tokens(brace, tokens),
+            StructBody::Tuple(tuple) => unsynn::ToTokens::to_tokens(tuple, tokens),
+            StructBody::Unit(semi) => unsynn::ToTokens::to_tokens(semi, tokens),
+        }
+    }
+}
+
+impl quote::ToTokens for TypeAliasSig {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        if let Some(attrs) = &self.attributes {
+            for attr in &attrs.0 {
+                unsynn::ToTokens::to_tokens(attr, tokens);
+            }
+        }
+        if let Some(vis) = &self.visibility {
+            quote::ToTokens::to_tokens(vis, tokens);
+        }
+        unsynn::ToTokens::to_tokens(&self._type, tokens);
+        quote::ToTokens::to_tokens(&self.name, tokens);
+        if let Some(generics) = &self.generics {
+            unsynn::ToTokens::to_tokens(generics, tokens);
+        }
+        unsynn::ToTokens::to_tokens(&self._eq, tokens);
+        unsynn::ToTokens::to_tokens(&self.target, tokens);
+        unsynn::ToTokens::to_tokens(&self._semi, tokens);
+    }
+}
+
+impl quote::ToTokens for ConstSig {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        if let Some(attrs) = &self.attributes {
+            for attr in &attrs.0 {
+                unsynn::ToTokens::to_tokens(attr, tokens);
+            }
+        }
+        if let Some(vis) = &self.visibility {
+            quote::ToTokens::to_tokens(vis, tokens);
+        }
+        unsynn::ToTokens::to_tokens(&self._const, tokens);
+        quote::ToTokens::to_tokens(&self.name, tokens);
+        unsynn::ToTokens::to_tokens(&self._colon, tokens);
+        unsynn::ToTokens::to_tokens(&self.const_type, tokens);
+        unsynn::ToTokens::to_tokens(&self._eq, tokens);
+        unsynn::ToTokens::to_tokens(&self.value, tokens);
+        unsynn::ToTokens::to_tokens(&self._semi, tokens);
+    }
+}
+
+impl quote::ToTokens for StaticSig {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        if let Some(attrs) = &self.attributes {
+            for attr in &attrs.0 {
+                unsynn::ToTokens::to_tokens(attr, tokens);
+            }
+        }
+        if let Some(vis) = &self.visibility {
+            quote::ToTokens::to_tokens(vis, tokens);
+        }
+        if let Some(mut_kw) = &self.mut_kw {
+            unsynn::ToTokens::to_tokens(mut_kw, tokens);
+        }
+        unsynn::ToTokens::to_tokens(&self._static, tokens);
+        quote::ToTokens::to_tokens(&self.name, tokens);
+        unsynn::ToTokens::to_tokens(&self._colon, tokens);
+        unsynn::ToTokens::to_tokens(&self.static_type, tokens);
+        unsynn::ToTokens::to_tokens(&self._eq, tokens);
+        unsynn::ToTokens::to_tokens(&self.value, tokens);
+        unsynn::ToTokens::to_tokens(&self._semi, tokens);
+    }
+}
+
+impl quote::ToTokens for EnumVariant {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        if let Some(attrs) = &self.attributes {
+            for attr in &attrs.0 {
+                unsynn::ToTokens::to_tokens(attr, tokens);
+            }
+        }
+        quote::ToTokens::to_tokens(&self.name, tokens);
+        if let Some(data) = &self.data {
+            quote::ToTokens::to_tokens(data, tokens);
+        }
+    }
+}
+
+impl quote::ToTokens for EnumVariantData {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        match self {
+            EnumVariantData::Tuple(paren) => unsynn::ToTokens::to_tokens(paren, tokens),
+            EnumVariantData::Struct(brace) => unsynn::ToTokens::to_tokens(brace, tokens),
+            EnumVariantData::Discriminant(disc) => unsynn::ToTokens::to_tokens(disc, tokens),
+        }
     }
 }
 
