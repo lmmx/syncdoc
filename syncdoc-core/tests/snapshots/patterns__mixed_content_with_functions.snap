@@ -7,6 +7,7 @@ use std::collections::HashMap;
 const SOME_CONST: i32 = 42;
 # [doc = include_str ! ("../docs/MyStruct.md")]
 struct MyStruct {
+    # [doc = include_str ! ("../docs/MyStruct/field.md")]
     field: String,
 }
 # [doc = include_str ! ("../docs/actual_function.md")]

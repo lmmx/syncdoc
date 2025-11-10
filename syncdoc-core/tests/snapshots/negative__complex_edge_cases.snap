@@ -16,6 +16,7 @@ fn legitimate_function() {
 }
 # [doc = include_str ! ("../docs/MyStruct.md")]
 struct MyStruct {
+    # [doc = include_str ! ("../docs/MyStruct/field.md")]
     field: String,
 }
 # [doc = include_str ! ("../docs/CODE_SAMPLE.md")]

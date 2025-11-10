@@ -3,7 +3,8 @@
 use syncdoc::omnidoc;
 
 #[omnidoc(path = "../docs")]
-pub enum TimeOfDay {
-    Day,
-    Night,
+#[derive(Debug)]
+pub struct Settings {
+    pub name: String,
+    pub switch: bool,
 }

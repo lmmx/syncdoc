@@ -64,9 +64,7 @@ impl TokenProcessor {
                 self.process_enum(enum_sig)
             }
             ModuleItem::Struct(struct_sig) => {
-                let mut struct_tokens = TokenStream::new();
-                quote::ToTokens::to_tokens(&struct_sig, &mut struct_tokens);
-                self.inject_doc_into_simple_item(struct_tokens, &struct_sig.name.to_string())
+                self.process_struct(struct_sig)
             }
             ModuleItem::TypeAlias(type_alias) => {
                 let mut alias_tokens = TokenStream::new();
@@ -258,6 +256,143 @@ impl TokenProcessor {
         output
     }
 
+    fn process_struct(&self, struct_sig: crate::parse::StructSig) -> TokenStream {
+        let struct_name = struct_sig.name.to_string();
+        
+        // Process the struct body to add docs to fields
+        let processed_body = match &struct_sig.body {
+            crate::parse::StructBody::Named(brace_group) => {
+                // Extract fields from brace group
+                let body_stream = {
+                    let mut ts = TokenStream::new();
+                    brace_group.to_tokens(&mut ts);
+                    // Extract content from within braces
+                    if let Some(proc_macro2::TokenTree::Group(group)) = ts.into_iter().next() {
+                        group.stream()
+                    } else {
+                        TokenStream::new()
+                    }
+                };
+                
+                let processed_fields = self.process_struct_fields(body_stream, &struct_name);
+                self.wrap_in_braces(processed_fields)
+            }
+            crate::parse::StructBody::Tuple(tuple) => {
+                // For tuple structs, process tuple fields
+                let tuple_stream = {
+                    let mut ts = TokenStream::new();
+                    tuple.to_tokens(&mut ts);
+                    ts
+                };
+                tuple_stream
+            }
+            crate::parse::StructBody::Unit(semi) => {
+                // Unit structs have no fields
+                let mut ts = TokenStream::new();
+                semi.to_tokens(&mut ts);
+                ts
+            }
+        };
+
+        // Reconstruct the struct with doc attribute
+        let mut output = TokenStream::new();
+
+        if let Some(attrs) = struct_sig.attributes {
+            for attr in attrs.0 {
+                attr.to_tokens(&mut output);
+            }
+        }
+
+        if let Some(vis) = struct_sig.visibility {
+            vis.to_tokens(&mut output);
+        }
+
+        struct_sig._struct.to_tokens(&mut output);
+        
+        let name_ident = struct_sig.name;
+        name_ident.to_tokens(&mut output);
+
+        if let Some(generics) = struct_sig.generics {
+            generics.to_tokens(&mut output);
+        }
+
+        if let Some(where_clause) = struct_sig.where_clause {
+            where_clause.to_tokens(&mut output);
+        }
+
+        // Inject doc for the struct itself
+        let struct_with_doc = self.inject_doc_into_simple_item(output, &struct_name);
+
+        // Combine struct declaration with processed body
+        let mut final_output = struct_with_doc;
+        final_output.extend(processed_body);
+
+        final_output
+    }
+
+    fn process_struct_fields(&self, fields_stream: TokenStream, struct_name: &str) -> TokenStream {
+        let mut output = TokenStream::new();
+        let mut current_field = Vec::new();
+        let mut depth = 0;
+
+        for tt in fields_stream.into_iter() {
+            match &tt {
+                proc_macro2::TokenTree::Punct(punct) if punct.as_char() == ',' && depth == 0 => {
+                    // End of field
+                    if !current_field.is_empty() {
+                        let field_tokens: TokenStream = current_field.drain(..).collect();
+                        if let Some(field_name) = extract_struct_field_name(&field_tokens) {
+                            let documented = self.inject_doc_for_struct_field(field_tokens, struct_name, &field_name);
+                            output.extend(documented);
+                            output.extend(std::iter::once(tt));
+                        } else {
+                            output.extend(field_tokens);
+                            output.extend(std::iter::once(tt));
+                        }
+                    }
+                }
+                proc_macro2::TokenTree::Group(g) => {
+                    match g.delimiter() {
+                        proc_macro2::Delimiter::Brace | 
+                        proc_macro2::Delimiter::Parenthesis | 
+                        proc_macro2::Delimiter::Bracket => {
+                            depth += 1;
+                            current_field.push(tt);
+                        }
+                        _ => current_field.push(tt),
+                    }
+                }
+                _ => {
+                    current_field.push(tt);
+                }
+            }
+        }
+
+        // Handle last field (no trailing comma)
+        if !current_field.is_empty() {
+            let field_tokens: TokenStream = current_field.drain(..).collect();
+            if let Some(field_name) = extract_struct_field_name(&field_tokens) {
+                let documented = self.inject_doc_for_struct_field(field_tokens, struct_name, &field_name);
+                output.extend(documented);
+            } else {
+                output.extend(field_tokens);
+            }
+        }
+
+        output
+    }
+
+    fn inject_doc_for_struct_field(&self, field_tokens: TokenStream, struct_name: &str, field_name: &str) -> TokenStream {
+        let mut path_parts = vec![self.base_path.clone()];
+        path_parts.extend(self.context.iter().cloned());
+        path_parts.push(format!("{}/{}.md", struct_name, field_name));
+
+        let full_path = path_parts.join("/");
+
+        // Use simpler injection for fields
+        inject_doc_attr(full_path, field_tokens)
+    }
+
 	fn process_enum(&self, enum_sig: crate::parse::EnumSig) -> TokenStream {
         let enum_name = enum_sig.name.to_string();
         
@@ -325,7 +460,7 @@ impl TokenProcessor {
                     if !current_variant.is_empty() {
                         let variant_tokens: TokenStream = current_variant.drain(..).collect();
                         if let Some(variant_name) = extract_first_ident(&variant_tokens) {
-                            let documented = self.inject_doc_for_variant(variant_tokens, enum_name, &variant_name);
+                            let documented = self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name);
                             output.extend(documented);
                             output.extend(std::iter::once(tt));
                         } else {
@@ -356,7 +491,7 @@ impl TokenProcessor {
         if !current_variant.is_empty() {
             let variant_tokens: TokenStream = current_variant.drain(..).collect();
             if let Some(variant_name) = extract_first_ident(&variant_tokens) {
-                let documented = self.inject_doc_for_variant(variant_tokens, enum_name, &variant_name);
+                let documented = self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name);
                 output.extend(documented);
             } else {
                 output.extend(variant_tokens);
@@ -366,8 +501,7 @@ impl TokenProcessor {
         output
     }
 
-
-    fn inject_doc_for_variant(&self, variant_tokens: TokenStream, enum_name: &str, variant_name: &str) -> TokenStream {
+    fn inject_doc_for_enum_variant(&self, variant_tokens: TokenStream, enum_name: &str, variant_name: &str) -> TokenStream {
         let mut path_parts = vec![self.base_path.clone()];
         path_parts.extend(self.context.iter().cloned());
         path_parts.push(format!("{}/{}.md", enum_name, variant_name));
@@ -416,6 +550,41 @@ impl TokenProcessor {
         // Use the simpler injection that doesn't parse
         inject_doc_attr(full_path, item_tokens)
     }
+}
+
+fn extract_struct_field_name(tokens: &TokenStream) -> Option<String> {
+    let mut iter = tokens.clone().into_iter();
+    
+    // Skip attributes (#[...])
+    while let Some(tt) = iter.next() {
+        if let proc_macro2::TokenTree::Punct(punct) = &tt {
+            if punct.as_char() == '#' {
+                // Skip the attribute group
+                if let Some(proc_macro2::TokenTree::Group(_)) = iter.next() {
+                    continue;
+                }
+            }
+        }
+        
+        // Skip visibility keywords (pub, pub(crate), etc.)
+        if let proc_macro2::TokenTree::Ident(ident) = &tt {
+            let s = ident.to_string();
+            if s == "pub" {
+                // Might be followed by (crate) or similar
+                if let Some(proc_macro2::TokenTree::Group(_)) = iter.clone().next() {
+                    iter.next();
+                }
+                continue;
+            }
+        }
+        
+        // First ident after visibility/attributes is the field name
+        if let proc_macro2::TokenTree::Ident(ident) = tt {
+            return Some(ident.to_string());
+        }
+    }
+    
+    None
 }
 
 fn extract_type_name(target_type: &unsynn::Many<unsynn::Cons<unsynn::Except<unsynn::Either<crate::parse::KFor, unsynn::BraceGroup>>, proc_macro2::TokenTree>>) -> String {

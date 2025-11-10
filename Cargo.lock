@@ -131,6 +131,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "syncdoc_struct"
+version = "0.1.0"
+dependencies = [
+ "syncdoc",
+]
+
+[[package]]
 name = "syncdoc_submodule"
 version = "0.1.0"
 dependencies = [

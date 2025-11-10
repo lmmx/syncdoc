@@ -3,6 +3,7 @@ members = [
   "examples/syncdoc_enum",
   "examples/syncdoc_impl",
   "examples/syncdoc_module",
+  "examples/syncdoc_struct",
   "examples/syncdoc_submodule",
   "syncdoc",
   "syncdoc-core",
