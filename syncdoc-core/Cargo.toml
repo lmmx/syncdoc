@@ -1,0 +1,21 @@
+[package]
+description = "Core functionality for syncdoc - procedural macro implementation for documentation injection"
+documentation = "https://docs.rs/syncdoc-core"
+edition.workspace = true
+homepage = "https://github.com/yourusername/syncdoc"
+include = ["README.md", "src/**/*"]
+license.workspace = true
+name = "syncdoc-core"
+readme = "README.md"
+repository.workspace = true
+rust-version.workspace = true
+version = "0.1.0"
+
+[dependencies]
+proc-macro2.workspace = true
+quote.workspace = true
+unsynn.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+rust-format.workspace = true

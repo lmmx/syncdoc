@@ -1,0 +1,1 @@
+Multiplies two unsigned integers using the Calculator instance.

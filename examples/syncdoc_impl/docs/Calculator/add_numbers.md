@@ -1,0 +1,1 @@
+Adds two signed integers using the Calculator instance.
