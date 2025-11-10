@@ -90,7 +90,7 @@ checksum = "bbbb5d9659141646ae647b42fe094daf6c6192d1620870b449d9557f748b2daa"
 
 [[package]]
 name = "syncdoc"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "insta",
  "proc-macro2",
@@ -100,7 +100,7 @@ dependencies = [
 
 [[package]]
 name = "syncdoc-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "insta",
  "proc-macro2",
@@ -111,35 +111,35 @@ dependencies = [
 
 [[package]]
 name = "syncdoc_enum"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "syncdoc_impl"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "syncdoc_module"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "syncdoc_struct"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "syncdoc_submodule"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "syncdoc",
 ]
