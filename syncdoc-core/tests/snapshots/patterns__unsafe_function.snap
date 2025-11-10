@@ -1,0 +1,8 @@
+---
+source: syncdoc-core/tests/patterns.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+# [doc = include_str ! ("../docs/hello.md")]
+unsafe fn hello() {
+    println!("world");
+}

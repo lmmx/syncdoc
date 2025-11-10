@@ -1,0 +1,12 @@
+---
+source: syncdoc-core/tests/basic.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+# [doc = include_str ! ("../docs/foo.md")]
+fn foo(x: i32) -> i32 {
+    bar(x + 1)
+}
+# [doc = include_str ! ("../docs/bar.md")]
+fn bar(y: i32) -> i32 {
+    y * 2
+}

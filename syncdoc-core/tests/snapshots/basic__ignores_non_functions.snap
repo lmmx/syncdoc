@@ -1,0 +1,10 @@
+---
+source: syncdoc-core/tests/basic.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+const x: String = "fn not_a_function";
+struct Foo {
+    field: i32,
+}
+# [doc = include_str ! ("../docs/actual_function.md")]
+fn actual_function() {}

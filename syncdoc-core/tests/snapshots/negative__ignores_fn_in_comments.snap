@@ -1,0 +1,11 @@
+---
+source: syncdoc-core/tests/negative.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+# [doc = include_str ! ("../docs/actual_function.md")]
+fn actual_function() {
+    println!("Hello");
+}
+#[doc = r" Documentation comment with fn example() {}"]
+# [doc = include_str ! ("../docs/documented_function.md")]
+fn documented_function() {}

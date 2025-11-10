@@ -1,0 +1,5 @@
+---
+source: syncdoc-core/tests/negative.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+type FnPointer = fn() -> i32;

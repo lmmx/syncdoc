@@ -1,0 +1,22 @@
+---
+source: syncdoc-core/tests/basic.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+impl Calculator {
+    # [doc = include_str ! ("../docs/Calculator/new.md")]
+    pub fn new() -> Self {
+        Self
+    }
+    # [doc = include_str ! ("../docs/Calculator/add.md")]
+    pub fn add(&self, a: i32, b: i32) -> i32 {
+        a + b
+    }
+    # [doc = include_str ! ("../docs/Calculator/multiply.md")]
+    pub fn multiply(&self, x: i32, y: i32) -> i32 {
+        x * y
+    }
+    # [doc = include_str ! ("../docs/Calculator/internal_helper.md")]
+    fn internal_helper(&self, value: i32) -> i32 {
+        value * 2
+    }
+}

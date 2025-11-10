@@ -1,0 +1,11 @@
+---
+source: syncdoc-core/tests/negative.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+# [doc = include_str ! ("../docs/real_function.md")]
+fn real_function() {
+    let msg = "This fn is not a function";
+    let code = r#"fn fake_function() { return "not real"; }"#;
+    println!("fn appears in this string too");
+}
+const TEMPLATE: &str = "fn template_function() {}";

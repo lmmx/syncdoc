@@ -1,0 +1,17 @@
+---
+source: syncdoc-core/tests/negative.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+trait MyTrait {
+    # [doc = include_str ! ("../docs/MyTrait/default_method.md")]
+    fn default_method(&self) {
+        println!("This has a body and should be documented");
+    }
+}
+struct MyStruct;
+impl MyTrait for MyStruct {}
+# [doc = include_str ! ("../docs/main.md")]
+fn main() {
+    let my_struct = MyStruct;
+    my_struct.default_method();
+}

@@ -250,7 +250,7 @@ mod tests {
         let output = result.unwrap();
         let output_str = format_and_print(output);
 
-        assert!(output_str.contains("include_str!"));
+        assert!(output_str.replace(" ", "").contains("include_str!"));
         assert!(output_str.contains("../docs/test_function.md"));
         assert!(output_str.contains("fn test_function"));
     }
@@ -287,7 +287,7 @@ mod tests {
         let output_str = format_and_print(output);
 
         assert!(output_str.contains("async fn test_async"));
-        assert!(output_str.contains("include_str!"));
+        assert!(output_str.replace(" ", "").contains("include_str!"));
     }
 
     #[test]
@@ -306,7 +306,7 @@ mod tests {
         let output_str = format_and_print(output);
 
         assert!(output_str.contains("unsafe fn test_unsafe"));
-        assert!(output_str.contains("include_str!"));
+        assert!(output_str.replace(" ", "").contains("include_str!"));
     }
 
     #[test]
@@ -325,7 +325,7 @@ mod tests {
         let output_str = format_and_print(output);
 
         assert!(output_str.contains("pub async fn test_pub_async"));
-        assert!(output_str.contains("include_str!"));
+        assert!(output_str.replace(" ","").contains("include_str!"));
     }
 
     #[test]

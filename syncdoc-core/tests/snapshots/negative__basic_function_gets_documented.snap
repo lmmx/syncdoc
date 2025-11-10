@@ -1,0 +1,8 @@
+---
+source: syncdoc-core/tests/negative.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+# [doc = include_str ! ("../docs/real_function.md")]
+fn real_function() {
+    println!("Real function");
+}

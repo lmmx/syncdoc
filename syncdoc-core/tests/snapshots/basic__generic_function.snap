@@ -1,0 +1,8 @@
+---
+source: syncdoc-core/tests/basic.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+# [doc = include_str ! ("../docs/generic.md")]
+fn generic<T: Clone>(value: T) -> T {
+    value.clone()
+}

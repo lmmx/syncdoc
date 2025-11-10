@@ -1,0 +1,22 @@
+---
+source: syncdoc-core/tests/patterns.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+use std::collections::HashMap;
+const SOME_CONST: i32 = 42;
+struct MyStruct {
+    field: String,
+}
+# [doc = include_str ! ("../docs/actual_function.md")]
+async fn actual_function() {
+    println!("This should be documented");
+}
+enum MyEnum {
+    Variant1,
+    Variant2(i32),
+}
+# [doc = include_str ! ("../docs/another_function.md")]
+pub unsafe fn another_function() -> Result<(), Error> {
+    Ok(())
+}
+type MyType = HashMap<String, i32>;

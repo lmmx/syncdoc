@@ -1,0 +1,11 @@
+---
+source: syncdoc-core/tests/negative.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+trait MyTrait {
+    fn trait_method(&self);
+    # [doc = include_str ! ("../docs/MyTrait/default_method.md")]
+    fn default_method(&self) {
+        println!("This has a body and should be documented");
+    }
+}

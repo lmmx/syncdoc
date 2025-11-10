@@ -1,0 +1,8 @@
+---
+source: syncdoc-core/tests/negative.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+# [doc = include_str ! ("../docs/returns_fn.md")]
+fn returns_fn() -> fn() -> i32 {
+    || 42
+}

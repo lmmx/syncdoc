@@ -12,7 +12,7 @@ fn test_basic_function_processing() {
 
     let output_str = output.to_string();
     assert!(output_str.contains("fn hello"));
-    assert!(output_str.contains("include_str!"));
+    assert!(output_str.replace(" ", "").contains("include_str!"));
 }
 
 #[test]
@@ -30,7 +30,7 @@ fn test_async_function_processing() {
         "Should preserve async keyword"
     );
     assert!(
-        output_str.contains("include_str!"),
+        output_str.replace(" ", "").contains("include_str!"),
         "Should add documentation"
     );
 }
@@ -57,7 +57,7 @@ fn test_impl_block_processing() {
         "Should preserve method"
     );
     assert!(
-        output_str.contains("include_str!"),
+        output_str.replace(" ", "").contains("include_str!"),
         "Should add documentation"
     );
     assert!(

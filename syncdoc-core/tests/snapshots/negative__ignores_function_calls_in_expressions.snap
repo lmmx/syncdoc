@@ -1,0 +1,11 @@
+---
+source: syncdoc-core/tests/negative.rs
+expression: "apply_doc_injection(input, \"../docs\")"
+---
+# [doc = include_str ! ("../docs/outer_function.md")]
+fn outer_function() {
+    let result = some_fn_call();
+    another_fn_call(42, "hello");
+    nested::module::fn_call();
+    obj.method_fn_call();
+}
