@@ -25,13 +25,22 @@ fn bar() { ... }
 ```
 
 syncdoc solves this by automatically pulling documentation from external files:
+
+- `#[syncdoc(path = "...")]` for a single docstring substitution
+- `#[omnidoc(path = "...")]` for a docstring substitution of all functions, structs, and impls inside a module
+
 ```rust
 #[syncdoc(path = "../docs")]
+fn hello() { ... }  // Docs from ../docs/hello.md
+
+#[omnidoc(path = "../docs")]
 mod my_functions {
     fn foo() { ... }  // Docs from ../docs/my_functions/foo.md
     fn bar() { ... }  // Docs from ../docs/my_functions/bar.md
 }
 ```
+
+See the [examples](https://github.com/lmmx/syncdoc/tree/master/examples) for a working demo.
 
 ## Installation
 
@@ -92,6 +101,7 @@ Documentation files:
 ### Single Function Documentation
 
 You can also document individual functions:
+
 ```rust
 use syncdoc::syncdoc;
 
