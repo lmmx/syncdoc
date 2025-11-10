@@ -1,16 +1,18 @@
 [workspace]
 members = [
+  "examples/syncdoc_enum",
+  "examples/syncdoc_impl",
+  "examples/syncdoc_module",
+  "examples/syncdoc_submodule",
   "syncdoc",
   "syncdoc-core",
-  "examples/syncdoc_module",
-  "examples/syncdoc_impl",
 ]
 resolver = "2"
 
 [workspace.package]
 edition = "2021"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/yourusername/syncdoc"
+repository = "https://github.com/lmmx/syncdoc"
 rust-version = "1.82.0"
 
 [workspace.dependencies]

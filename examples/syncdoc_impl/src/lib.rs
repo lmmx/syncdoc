@@ -1,5 +1,7 @@
+#![doc = include_str!("../docs/lib.md")]
 use syncdoc::omnidoc;
 
+#[doc = include_str!("../docs/Calculator.md")]
 pub struct Calculator;
 
 #[omnidoc(path = "../docs")]

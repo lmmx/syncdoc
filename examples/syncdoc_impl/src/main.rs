@@ -1,3 +1,4 @@
+#![doc = include_str!("../docs/main.md")]
 use syncdoc_impl::*;
 
 fn main() {

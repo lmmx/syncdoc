@@ -1,6 +1,9 @@
 # syncdoc
 
+[![crates.io](https://img.shields.io/crates/v/syncdoc.svg)](https://crates.io/crates/syncdoc)
+[![documentation](https://docs.rs/syncdoc/badge.svg)](https://docs.rs/syncdoc)
 [![MIT/Apache-2.0 licensed](https://img.shields.io/crates/l/syncdoc.svg)](./LICENSE)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/lmmx/syncdoc/master.svg)](https://results.pre-commit.ci/latest/github/lmmx/syncdoc/master)
 [![free of syn](https://img.shields.io/badge/free%20of-syn-hotpink)](https://github.com/fasterthanlime/free-of-syn)
 
 syncdoc is a procedural macro that automatically injects documentation from external files into your Rust code, eliminating the need to manually maintain inline doc comments.
@@ -26,12 +29,8 @@ fn bar() { ... }
 
 syncdoc solves this by automatically pulling documentation from external files:
 
-- `#[syncdoc(path = "...")]` for a single docstring substitution
-- `#[omnidoc(path = "...")]` for a docstring substitution of all functions, structs, and impls inside a module
-
 ```rust
-#[syncdoc(path = "../docs")]
-fn hello() { ... }  // Docs from ../docs/hello.md
+use syncdoc::omnidoc;
 
 #[omnidoc(path = "../docs")]
 mod my_functions {
@@ -39,8 +38,6 @@ mod my_functions {
     fn bar() { ... }  // Docs from ../docs/my_functions/bar.md
 }
 ```
-
-See the [examples](https://github.com/lmmx/syncdoc/tree/master/examples) for a working demo.
 
 ## Installation
 
@@ -101,7 +98,6 @@ Documentation files:
 ### Single Function Documentation
 
 You can also document individual functions:
-
 ```rust
 use syncdoc::syncdoc;
 

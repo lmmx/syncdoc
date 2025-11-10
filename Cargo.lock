@@ -110,6 +110,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "syncdoc_enum"
+version = "0.1.0"
+dependencies = [
+ "syncdoc",
+]
+
+[[package]]
 name = "syncdoc_impl"
 version = "0.1.0"
 dependencies = [
@@ -118,6 +125,13 @@ dependencies = [
 
 [[package]]
 name = "syncdoc_module"
+version = "0.1.0"
+dependencies = [
+ "syncdoc",
+]
+
+[[package]]
+name = "syncdoc_submodule"
 version = "0.1.0"
 dependencies = [
  "syncdoc",

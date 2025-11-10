@@ -1,6 +1,9 @@
 # syncdoc
 
+[![crates.io](https://img.shields.io/crates/v/syncdoc.svg)](https://crates.io/crates/syncdoc)
+[![documentation](https://docs.rs/syncdoc/badge.svg)](https://docs.rs/syncdoc)
 [![MIT/Apache-2.0 licensed](https://img.shields.io/crates/l/syncdoc.svg)](./LICENSE)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/lmmx/syncdoc/master.svg)](https://results.pre-commit.ci/latest/github/lmmx/syncdoc/master)
 [![free of syn](https://img.shields.io/badge/free%20of-syn-hotpink)](https://github.com/fasterthanlime/free-of-syn)
 
 syncdoc is a procedural macro that automatically injects documentation from external files into your Rust code, eliminating the need to manually maintain inline doc comments.
@@ -64,6 +67,19 @@ mod my_functions {
 This will look for documentation in:
 - `../docs/my_functions/foo.md`
 - `../docs/my_functions/bar.md`
+
+> **Note**: you cannot use a proc macro on an external module,
+> see [this](https://github.com/rust-lang/rust/issues/54727) tracking issue.
+> 
+> A workaround to document an entire module is to inline the entire module (`mod mymodule { ... }`)
+> then re-export it with `pub use mymodule::*;`. If you do, note that the name of the inner module is
+> the name the macro will look for at the path.
+>
+> - See
+>   [examples/syncdoc_submodule](https://github.com/lmmx/syncdoc/tree/master/examples/syncdoc_submodule)
+> 
+> If that isn't to your liking, then just use it on impl blocks etc. and use a regular `syncdoc`
+> attribute for individual items.
 
 ### Documenting Impl Blocks
 

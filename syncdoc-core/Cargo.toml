@@ -2,7 +2,7 @@
 description = "Core functionality for syncdoc - procedural macro implementation for documentation injection"
 documentation = "https://docs.rs/syncdoc-core"
 edition.workspace = true
-homepage = "https://github.com/yourusername/syncdoc"
+homepage = "https://github.com/lmmx/syncdoc"
 include = ["README.md", "src/**/*"]
 license.workspace = true
 name = "syncdoc-core"
