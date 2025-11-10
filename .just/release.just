@@ -68,7 +68,7 @@ publish mode="":
 ship-manual:
     #!/usr/bin/env -S echo-comment --shell-flags="-euo pipefail" --color="\\033[38;5;202m"
 
-    # Bump patch version
+    # Bump patch version (with cargo-edit)
     cargo set-version --bump patch
 
     # Commit and tag
