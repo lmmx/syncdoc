@@ -279,12 +279,9 @@ impl TokenProcessor {
             }
             crate::parse::StructBody::Tuple(tuple) => {
                 // For tuple structs, process tuple fields
-                let tuple_stream = {
-                    let mut ts = TokenStream::new();
-                    tuple.to_tokens(&mut ts);
-                    ts
-                };
-                tuple_stream
+                let mut ts = TokenStream::new();
+                tuple.to_tokens(&mut ts);
+                ts
             }
             crate::parse::StructBody::Unit(semi) => {
                 // Unit structs have no fields
