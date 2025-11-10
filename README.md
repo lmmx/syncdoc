@@ -46,6 +46,8 @@ syncdoc = "0.1"
 
 ## Usage
 
+> **Note**: In a future release, you'll be able to configure a default documentation path, eliminating the need to specify `path` in every attribute.
+
 ### Basic Usage
 
 Apply the `#[omnidoc]` attribute to any module:
@@ -117,6 +119,36 @@ fn special_function() {
 }
 ```
 
+### Documenting Structs and Enums
+
+syncdoc automatically documents struct fields and enum variants:
+```rust
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "../docs")]
+mod types {
+    struct Config {
+        port: u16,
+        host: String,
+    }
+
+    enum Status {
+        Active,
+        Inactive,
+        Error(String),
+    }
+}
+```
+
+Documentation files:
+- `../docs/types/Config.md` - struct documentation
+- `../docs/types/Config/port.md` - field documentation
+- `../docs/types/Config/host.md` - field documentation
+- `../docs/types/Status.md` - enum documentation
+- `../docs/types/Status/Active.md` - variant documentation
+- `../docs/types/Status/Inactive.md` - variant documentation
+- `../docs/types/Status/Error.md` - variant documentation
+
 ## How It Works
 
 syncdoc uses a procedural macro to inject `#[doc = include_str!("path")]` attributes before function definitions.
@@ -132,12 +164,19 @@ The macro:
 3. **Injects doc attributes** using `include_str!` for compile-time validation
 4. **Preserves existing attributes** and doesn't interfere with other macros
 
+For examples of the generated output, see the [test snapshots](https://github.com/lmmx/syncdoc/tree/master/syncdoc-core/tests/snapshots) which show the exact documentation attributes injected for various code patterns.
+
 ### What Gets Documented
 
 - Regular functions: `fn foo() { ... }`
 - Generic functions: `fn foo<T>(x: T) { ... }`
 - Methods in impl blocks: `impl MyStruct { fn method(&self) { ... } }`
 - Trait default methods: `trait MyTrait { fn method() { ... } }`
+- Struct fields: `struct Foo { field: i32 }`
+- Enum variants: `enum Bar { Variant1, Variant2(i32) }`
+- Type aliases: `type MyType = String;`
+- Constants: `const X: i32 = 42;`
+- Statics: `static Y: i32 = 42;`
 
 ## File Organization
 ```
