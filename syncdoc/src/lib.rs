@@ -62,7 +62,7 @@ pub fn syncdoc(args: TokenStream, item: TokenStream) -> TokenStream {
 ///         // Docs from ../docs/my_module/function_one.md
 ///         println!("Function one called with {}", x);
 ///     }
-///     
+///
 ///     pub fn function_two() {
 ///         // Docs from ../docs/my_module/function_two.md
 ///         println!("Function two called");
@@ -81,7 +81,7 @@ pub fn syncdoc(args: TokenStream, item: TokenStream) -> TokenStream {
 ///         // Docs from ../docs/MyStruct/method_one.md
 ///         println!("Method called with {}", value);
 ///     }
-///     
+///
 ///     pub fn method_two(&self) {
 ///         // Docs from ../docs/MyStruct/method_two.md
 ///         println!("Another method called");
@@ -92,7 +92,7 @@ pub fn syncdoc(args: TokenStream, item: TokenStream) -> TokenStream {
 pub fn omnidoc(args: TokenStream, input: TokenStream) -> TokenStream {
     let args2: TokenStream2 = args.into();
     let input2: TokenStream2 = input.into();
-    
+
     match syncdoc_core::inject_all_docs_impl(args2, input2) {
         Ok(output) => output.into(),
         Err(error_tokens) => error_tokens.into(),

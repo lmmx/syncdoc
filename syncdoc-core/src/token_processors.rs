@@ -80,7 +80,7 @@ impl TokenProcessor {
                 let mut static_tokens = TokenStream::new();
                 quote::ToTokens::to_tokens(&static_sig, &mut static_tokens);
                 self.inject_doc_into_simple_item(static_tokens, &static_sig.name.to_string())
-            }  
+            }
             ModuleItem::Other(token) => {
                 let mut tokens = TokenStream::new();
                 token.to_tokens(&mut tokens);
@@ -92,7 +92,7 @@ impl TokenProcessor {
     fn process_impl_block(&self, impl_block: ImplBlockSig) -> TokenStream {
         // Extract the struct/type name for context
         let type_name = extract_type_name(&impl_block.target_type);
-        
+
         // Get the body content as TokenStream
         let body_stream = {
             let mut ts = TokenStream::new();
@@ -104,7 +104,7 @@ impl TokenProcessor {
                 TokenStream::new()
             }
         };
-        
+
         // Create new processor with updated context
         let mut new_context = self.context.clone();
         new_context.push(type_name);
@@ -113,7 +113,7 @@ impl TokenProcessor {
             base_path: self.base_path.clone(),
             context: new_context,
         };
-        
+
         let processed_content = new_processor.process();
         let processed_body = self.wrap_in_braces(processed_content);
 
@@ -160,7 +160,7 @@ impl TokenProcessor {
                 TokenStream::new()
             }
         };
-        
+
         // Create new processor with updated context
         let mut new_context = self.context.clone();
         new_context.push(module.name.to_string());
@@ -169,7 +169,7 @@ impl TokenProcessor {
             base_path: self.base_path.clone(),
             context: new_context,
         };
-        
+
         let processed_content = new_processor.process();
         let processed_body = self.wrap_in_braces(processed_content);
 
@@ -206,7 +206,7 @@ impl TokenProcessor {
                 TokenStream::new()
             }
         };
-        
+
         // Create new processor with updated context (traits behave like modules)
         let mut new_context = self.context.clone();
         new_context.push(trait_def.name.to_string());
@@ -215,7 +215,7 @@ impl TokenProcessor {
             base_path: self.base_path.clone(),
             context: new_context,
         };
-        
+
         let processed_content = new_processor.process();
         let processed_body = self.wrap_in_braces(processed_content);
 
@@ -258,7 +258,7 @@ impl TokenProcessor {
 
     fn process_struct(&self, struct_sig: crate::parse::StructSig) -> TokenStream {
         let struct_name = struct_sig.name.to_string();
-        
+
         // Process the struct body to add docs to fields
         let processed_body = match &struct_sig.body {
             crate::parse::StructBody::Named(brace_group) => {
@@ -273,7 +273,7 @@ impl TokenProcessor {
                         TokenStream::new()
                     }
                 };
-                
+
                 let processed_fields = self.process_struct_fields(body_stream, &struct_name);
                 self.wrap_in_braces(processed_fields)
             }
@@ -305,7 +305,7 @@ impl TokenProcessor {
         }
 
         struct_sig._struct.to_tokens(&mut output);
-        
+
         let name_ident = struct_sig.name;
         name_ident.to_tokens(&mut output);
 
@@ -350,8 +350,8 @@ impl TokenProcessor {
                 }
                 proc_macro2::TokenTree::Group(g) => {
                     match g.delimiter() {
-                        proc_macro2::Delimiter::Brace | 
-                        proc_macro2::Delimiter::Parenthesis | 
+                        proc_macro2::Delimiter::Brace |
+                        proc_macro2::Delimiter::Parenthesis |
                         proc_macro2::Delimiter::Bracket => {
                             depth += 1;
                             current_field.push(tt);
@@ -392,7 +392,7 @@ impl TokenProcessor {
 
 	fn process_enum(&self, enum_sig: crate::parse::EnumSig) -> TokenStream {
         let enum_name = enum_sig.name.to_string();
-        
+
         // Get the body content as TokenStream
         let body_stream = {
             let mut ts = TokenStream::new();
@@ -423,7 +423,7 @@ impl TokenProcessor {
         }
 
         enum_sig._enum.to_tokens(&mut output);
-        
+
         let name_ident = enum_sig.name;
         name_ident.to_tokens(&mut output);
 
@@ -521,12 +521,12 @@ impl TokenProcessor {
         let mut path_parts = vec![self.base_path.clone()];
         path_parts.extend(self.context.iter().cloned());
         path_parts.push(format!("{}.md", fn_name));
-        
+
         let full_path = path_parts.join("/");
-        
+
         // Create args token stream with the constructed path
         let args = quote::quote! { path = #full_path };
-        
+
         match syncdoc_impl(args, func_tokens.clone()) {
             Ok(instrumented) => instrumented,
             Err(e) => {
@@ -541,9 +541,9 @@ impl TokenProcessor {
         let mut path_parts = vec![self.base_path.clone()];
         path_parts.extend(self.context.iter().cloned());
         path_parts.push(format!("{}.md", item_name));
-        
+
         let full_path = path_parts.join("/");
-        
+
         // Use the simpler injection that doesn't parse
         inject_doc_attr(full_path, item_tokens)
     }
@@ -551,7 +551,7 @@ impl TokenProcessor {
 
 fn extract_struct_field_name(tokens: &TokenStream) -> Option<String> {
     let mut iter = tokens.clone().into_iter();
-    
+
     // Skip attributes (#[...])
     while let Some(tt) = iter.next() {
         if let proc_macro2::TokenTree::Punct(punct) = &tt {
@@ -562,7 +562,7 @@ fn extract_struct_field_name(tokens: &TokenStream) -> Option<String> {
                 }
             }
         }
-        
+
         // Skip visibility keywords (pub, pub(crate), etc.)
         if let proc_macro2::TokenTree::Ident(ident) = &tt {
             let s = ident.to_string();
@@ -574,13 +574,13 @@ fn extract_struct_field_name(tokens: &TokenStream) -> Option<String> {
                 continue;
             }
         }
-        
+
         // First ident after visibility/attributes is the field name
         if let proc_macro2::TokenTree::Ident(ident) = tt {
             return Some(ident.to_string());
         }
     }
-    
+
     None
 }
 

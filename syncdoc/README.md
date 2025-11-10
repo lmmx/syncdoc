@@ -60,7 +60,7 @@ mod my_functions {
     fn foo(x: i32) -> i32 {
         x * 2
     }
-    
+
     fn bar(y: i32) -> i32 {
         y + 1
     }
@@ -84,7 +84,7 @@ impl Calculator {
     pub fn new() -> Self {
         Self
     }
-    
+
     pub fn add(&self, a: i32, b: i32) -> i32 {
         a + b
     }

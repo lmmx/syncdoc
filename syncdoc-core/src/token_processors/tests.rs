@@ -71,7 +71,7 @@ fn test_nested_module_path_construction() {
     let input = quote! {
         mod outer {
             fn outer_fn() {}
-            
+
             mod inner {
                 fn inner_fn() {}
             }
@@ -85,10 +85,10 @@ fn test_nested_module_path_construction() {
     println!("Nested module output: {}", output);
 
     let output_str = output.to_string();
-    
+
     // Should have docs for outer function
     assert!(output_str.contains("../docs/outer/outer_fn.md"));
-    
+
     // Should have docs for inner function
     assert!(output_str.contains("../docs/outer/inner/inner_fn.md"));
 }

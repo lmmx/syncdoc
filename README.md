@@ -57,7 +57,7 @@ mod my_functions {
     fn foo(x: i32) -> i32 {
         x * 2
     }
-    
+
     fn bar(y: i32) -> i32 {
         y + 1
     }
@@ -70,14 +70,14 @@ This will look for documentation in:
 
 > **Note**: you cannot use a proc macro on an external module,
 > see [this](https://github.com/rust-lang/rust/issues/54727) tracking issue.
-> 
+>
 > A workaround to document an entire module is to inline the entire module (`mod mymodule { ... }`)
 > then re-export it with `pub use mymodule::*;`. If you do, note that the name of the inner module is
 > the name the macro will look for at the path.
 >
 > - See
 >   [examples/syncdoc_submodule](https://github.com/lmmx/syncdoc/tree/master/examples/syncdoc_submodule)
-> 
+>
 > If that isn't to your liking, then just use it on impl blocks etc. and use a regular `syncdoc`
 > attribute for individual items.
 
@@ -94,7 +94,7 @@ impl Calculator {
     pub fn new() -> Self {
         Self
     }
-    
+
     pub fn add(&self, a: i32, b: i32) -> i32 {
         a + b
     }
