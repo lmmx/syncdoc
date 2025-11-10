@@ -5,6 +5,7 @@ expression: "apply_doc_injection(input, \"../docs\")"
 use std::collections::HashMap;
 # [doc = include_str ! ("../docs/SOME_CONST.md")]
 const SOME_CONST: i32 = 42;
+# [doc = include_str ! ("../docs/MyStruct.md")]
 struct MyStruct {
     field: String,
 }

@@ -4,6 +4,7 @@ expression: "apply_doc_injection(input, \"../docs\")"
 ---
 # [doc = include_str ! ("../docs/x.md")]
 const x: String = "fn not_a_function";
+# [doc = include_str ! ("../docs/Foo.md")]
 struct Foo {
     field: i32,
 }

@@ -8,6 +8,7 @@ trait MyTrait {
         println!("This has a body and should be documented");
     }
 }
+# [doc = include_str ! ("../docs/MyStruct.md")]
 struct MyStruct;
 impl MyTrait for MyStruct {}
 # [doc = include_str ! ("../docs/main.md")]

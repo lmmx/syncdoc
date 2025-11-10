@@ -66,7 +66,7 @@ impl TokenProcessor {
             ModuleItem::Struct(struct_sig) => {
                 let mut struct_tokens = TokenStream::new();
                 quote::ToTokens::to_tokens(&struct_sig, &mut struct_tokens);
-                self.inject_doc_into_item(struct_tokens, &struct_sig.name.to_string())
+                self.inject_doc_into_simple_item(struct_tokens, &struct_sig.name.to_string())
             }
             ModuleItem::TypeAlias(type_alias) => {
                 let mut alias_tokens = TokenStream::new();
