@@ -4,8 +4,8 @@ pc_cmd := if env("PRE_COMMIT_HOME", "") != "" { "pre-commit" } else { "prek" }
 precommit:
     just pc{{ci_opt}}
 
-pc:     fmt code-quality
-pc-fix: fmt code-quality-fix
+pc:     fmt code-quality     docs-match
+pc-fix: fmt code-quality-fix docs-mirror
 pc-ci:  pc-fix
 
 prepush: check clippy docs
@@ -17,6 +17,12 @@ prepush-rs:
     just docs
 
 fmt:     code-quality-fix
+
+docs-match:
+    diff README.md syncdoc/README.md
+
+docs-mirror:
+    cp $(ls -t README.md syncdoc/README.md)
 
 full:    pc prepush build test
 full-ci: pc-ci prepush

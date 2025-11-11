@@ -1,4 +1,4 @@
-use crate::{syncdoc_impl, inject_doc_attr};
+use crate::{inject_doc_attr, syncdoc_impl};
 use proc_macro2::TokenStream;
 use unsynn::*;
 
@@ -37,7 +37,12 @@ impl TokenProcessor {
     fn process_module_content(&self) -> TokenStream {
         let mut output = TokenStream::new();
 
-        let content = match self.input.clone().into_token_iter().parse::<ModuleContent>() {
+        let content = match self
+            .input
+            .clone()
+            .into_token_iter()
+            .parse::<ModuleContent>()
+        {
             Ok(c) => c,
             Err(_) => return self.input.clone(),
         };
@@ -60,12 +65,8 @@ impl TokenProcessor {
             ModuleItem::ImplBlock(impl_block) => self.process_impl_block(impl_block),
             ModuleItem::Module(module) => self.process_module_block(module),
             ModuleItem::Trait(trait_def) => self.process_trait_block(trait_def),
-            ModuleItem::Enum(enum_sig) => {
-                self.process_enum(enum_sig)
-            }
-            ModuleItem::Struct(struct_sig) => {
-                self.process_struct(struct_sig)
-            }
+            ModuleItem::Enum(enum_sig) => self.process_enum(enum_sig),
+            ModuleItem::Struct(struct_sig) => self.process_struct(struct_sig),
             ModuleItem::TypeAlias(type_alias) => {
                 let mut alias_tokens = TokenStream::new();
                 quote::ToTokens::to_tokens(&type_alias, &mut alias_tokens);
@@ -339,7 +340,11 @@ impl TokenProcessor {
                     if !current_field.is_empty() {
                         let field_tokens: TokenStream = current_field.drain(..).collect();
                         if let Some(field_name) = extract_struct_field_name(&field_tokens) {
-                            let documented = self.inject_doc_for_struct_field(field_tokens, struct_name, &field_name);
+                            let documented = self.inject_doc_for_struct_field(
+                                field_tokens,
+                                struct_name,
+                                &field_name,
+                            );
                             output.extend(documented);
                             output.extend(std::iter::once(tt));
                         } else {
@@ -348,17 +353,15 @@ impl TokenProcessor {
                         }
                     }
                 }
-                proc_macro2::TokenTree::Group(g) => {
-                    match g.delimiter() {
-                        proc_macro2::Delimiter::Brace |
-                        proc_macro2::Delimiter::Parenthesis |
-                        proc_macro2::Delimiter::Bracket => {
-                            depth += 1;
-                            current_field.push(tt);
-                        }
-                        _ => current_field.push(tt),
+                proc_macro2::TokenTree::Group(g) => match g.delimiter() {
+                    proc_macro2::Delimiter::Brace
+                    | proc_macro2::Delimiter::Parenthesis
+                    | proc_macro2::Delimiter::Bracket => {
+                        depth += 1;
+                        current_field.push(tt);
                     }
-                }
+                    _ => current_field.push(tt),
+                },
                 _ => {
                     current_field.push(tt);
                 }
@@ -369,7 +372,8 @@ impl TokenProcessor {
         if !current_field.is_empty() {
             let field_tokens: TokenStream = current_field.drain(..).collect();
             if let Some(field_name) = extract_struct_field_name(&field_tokens) {
-                let documented = self.inject_doc_for_struct_field(field_tokens, struct_name, &field_name);
+                let documented =
+                    self.inject_doc_for_struct_field(field_tokens, struct_name, &field_name);
                 output.extend(documented);
             } else {
                 output.extend(field_tokens);
@@ -379,7 +383,12 @@ impl TokenProcessor {
         output
     }
 
-    fn inject_doc_for_struct_field(&self, field_tokens: TokenStream, struct_name: &str, field_name: &str) -> TokenStream {
+    fn inject_doc_for_struct_field(
+        &self,
+        field_tokens: TokenStream,
+        struct_name: &str,
+        field_name: &str,
+    ) -> TokenStream {
         let mut path_parts = vec![self.base_path.clone()];
         path_parts.extend(self.context.iter().cloned());
         path_parts.push(format!("{}/{}.md", struct_name, field_name));
@@ -390,7 +399,7 @@ impl TokenProcessor {
         inject_doc_attr(full_path, field_tokens)
     }
 
-	fn process_enum(&self, enum_sig: crate::parse::EnumSig) -> TokenStream {
+    fn process_enum(&self, enum_sig: crate::parse::EnumSig) -> TokenStream {
         let enum_name = enum_sig.name.to_string();
 
         // Get the body content as TokenStream
@@ -457,7 +466,11 @@ impl TokenProcessor {
                     if !current_variant.is_empty() {
                         let variant_tokens: TokenStream = current_variant.drain(..).collect();
                         if let Some(variant_name) = extract_first_ident(&variant_tokens) {
-                            let documented = self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name);
+                            let documented = self.inject_doc_for_enum_variant(
+                                variant_tokens,
+                                enum_name,
+                                &variant_name,
+                            );
                             output.extend(documented);
                             output.extend(std::iter::once(tt));
                         } else {
@@ -469,15 +482,13 @@ impl TokenProcessor {
                 // proc_macro2::TokenTree::Group(_) => {
                 //     current_variant.push(tt);
                 // }
-                proc_macro2::TokenTree::Group(g) => {
-                    match g.delimiter() {
-                        proc_macro2::Delimiter::Brace | proc_macro2::Delimiter::Parenthesis => {
-                            depth += 1;
-                            current_variant.push(tt);
-                        }
-                        _ => current_variant.push(tt),
+                proc_macro2::TokenTree::Group(g) => match g.delimiter() {
+                    proc_macro2::Delimiter::Brace | proc_macro2::Delimiter::Parenthesis => {
+                        depth += 1;
+                        current_variant.push(tt);
                     }
-                }
+                    _ => current_variant.push(tt),
+                },
                 _ => {
                     current_variant.push(tt);
                 }
@@ -488,7 +499,8 @@ impl TokenProcessor {
         if !current_variant.is_empty() {
             let variant_tokens: TokenStream = current_variant.drain(..).collect();
             if let Some(variant_name) = extract_first_ident(&variant_tokens) {
-                let documented = self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name);
+                let documented =
+                    self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name);
                 output.extend(documented);
             } else {
                 output.extend(variant_tokens);
@@ -498,7 +510,12 @@ impl TokenProcessor {
         output
     }
 
-    fn inject_doc_for_enum_variant(&self, variant_tokens: TokenStream, enum_name: &str, variant_name: &str) -> TokenStream {
+    fn inject_doc_for_enum_variant(
+        &self,
+        variant_tokens: TokenStream,
+        enum_name: &str,
+        variant_name: &str,
+    ) -> TokenStream {
         let mut path_parts = vec![self.base_path.clone()];
         path_parts.extend(self.context.iter().cloned());
         path_parts.push(format!("{}/{}.md", enum_name, variant_name));
@@ -536,7 +553,11 @@ impl TokenProcessor {
         }
     }
 
-    fn inject_doc_into_simple_item(&self, item_tokens: TokenStream, item_name: &str) -> TokenStream {
+    fn inject_doc_into_simple_item(
+        &self,
+        item_tokens: TokenStream,
+        item_name: &str,
+    ) -> TokenStream {
         // Construct the full path including context
         let mut path_parts = vec![self.base_path.clone()];
         path_parts.extend(self.context.iter().cloned());
@@ -584,7 +605,14 @@ fn extract_struct_field_name(tokens: &TokenStream) -> Option<String> {
     None
 }
 
-fn extract_type_name(target_type: &unsynn::Many<unsynn::Cons<unsynn::Except<unsynn::Either<crate::parse::KFor, unsynn::BraceGroup>>, proc_macro2::TokenTree>>) -> String {
+fn extract_type_name(
+    target_type: &unsynn::Many<
+        unsynn::Cons<
+            unsynn::Except<unsynn::Either<crate::parse::KFor, unsynn::BraceGroup>>,
+            proc_macro2::TokenTree,
+        >,
+    >,
+) -> String {
     // Extract just the type name from the target_type tokens
     // This is a simplified version - for complex cases we might need more sophistication
     if let Some(first) = target_type.0.first() {

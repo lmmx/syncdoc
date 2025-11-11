@@ -5,7 +5,10 @@ use unsynn::*;
 use crate::parse::{DocStubArg, DocStubInner};
 use crate::token_processors::TokenProcessor;
 
-pub fn inject_all_docs_impl(args: TokenStream, input: TokenStream) -> core::result::Result<TokenStream, TokenStream> {
+pub fn inject_all_docs_impl(
+    args: TokenStream,
+    input: TokenStream,
+) -> core::result::Result<TokenStream, TokenStream> {
     // Parse the path argument
     let base_path = match parse_path_from_args(args) {
         Ok(path) => path,

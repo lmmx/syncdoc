@@ -40,7 +40,7 @@ keyword! {
     pub KSelf = "self";
     /// The "mut" keyword
     pub KMut = "mut";
-	/// The "enum" keyword
+    /// The "enum" keyword
     pub KEnum = "enum";
     /// The "struct" keyword
     pub KStruct = "struct";
@@ -288,7 +288,7 @@ unsynn! {
         pub body: BraceGroup,
     }
 
-	/// enum Name { ... } block
+    /// enum Name { ... } block
     pub struct EnumSig {
         /// Optional attributes
         pub attributes: Option<Many<Attribute>>,

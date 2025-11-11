@@ -6,7 +6,10 @@ use unsynn::*;
 
 use crate::parse::{DocStubArg, DocStubInner, FnSig};
 
-pub fn syncdoc_impl(args: TokenStream, item: TokenStream) -> core::result::Result<TokenStream, TokenStream> {
+pub fn syncdoc_impl(
+    args: TokenStream,
+    item: TokenStream,
+) -> core::result::Result<TokenStream, TokenStream> {
     // Parse the syncdoc arguments
     let syncdoc_args = match parse_syncdoc_args(&mut args.to_token_iter()) {
         Ok(args) => args,
@@ -80,7 +83,8 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<DocStubArgs
             if args.base_path.is_empty() {
                 // Get the call site's file path
                 let call_site = proc_macro2::Span::call_site();
-                let source_file = call_site.local_file()
+                let source_file = call_site
+                    .local_file()
                     .ok_or("Could not determine source file location")?
                     .to_string_lossy()
                     .to_string();
@@ -348,7 +352,7 @@ mod tests {
         let output_str = format_and_print(output);
 
         assert!(output_str.contains("pub async fn test_pub_async"));
-        assert!(output_str.replace(" ","").contains("include_str!"));
+        assert!(output_str.replace(" ", "").contains("include_str!"));
     }
 
     #[test]

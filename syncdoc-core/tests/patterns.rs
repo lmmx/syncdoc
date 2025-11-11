@@ -1,8 +1,8 @@
-use syncdoc_core::inject_all_docs_impl;
 use insta::assert_snapshot;
 use proc_macro2::TokenStream;
 use quote::quote;
 use rust_format::{Formatter, RustFmt};
+use syncdoc_core::inject_all_docs_impl;
 
 fn apply_doc_injection(input: TokenStream, path: &str) -> String {
     let args = quote!(path = #path);

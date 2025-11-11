@@ -52,10 +52,7 @@ fn test_impl_block_processing() {
     println!("Impl block output: {}", output);
 
     let output_str = output.to_string();
-    assert!(
-        output_str.contains("fn method"),
-        "Should preserve method"
-    );
+    assert!(output_str.contains("fn method"), "Should preserve method");
     assert!(
         output_str.replace(" ", "").contains("include_str!"),
         "Should add documentation"

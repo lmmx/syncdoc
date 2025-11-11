@@ -3,7 +3,10 @@
 use demo_struct::Settings;
 
 fn main() {
-    let opts = Settings { name: "FooBar 3000".to_string(), switch: true };
+    let opts = Settings {
+        name: "FooBar 3000".to_string(),
+        switch: true,
+    };
 
     println!("Running with {:?}", opts);
 }

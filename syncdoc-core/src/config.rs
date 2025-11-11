@@ -16,7 +16,8 @@ pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Er
 
     // Get the source file's directory
     let source_path = Path::new(source_file);
-    let source_dir = source_path.parent()
+    let source_dir = source_path
+        .parent()
         .ok_or("Source file has no parent directory")?
         .canonicalize()?;
 
@@ -26,7 +27,8 @@ pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Er
     }
 
     // Calculate number of ".." needed to go from source_dir to manifest_dir
-    let relative_path = source_dir.strip_prefix(&manifest_path)
+    let relative_path = source_dir
+        .strip_prefix(&manifest_path)
         .map_err(|_| "Failed to strip prefix")?;
 
     let depth = relative_path.components().count();
@@ -52,22 +54,20 @@ fn get_docs_path_from_file(cargo_toml_path: &str) -> Result<String, Box<dyn std:
             Target::Literal("[package.metadata.syncdoc]".to_string()),
             BoundaryMode::Exclude,
         ),
-        end: Boundary::new(
-            Target::Literal("[".to_string()),
-            BoundaryMode::Exclude,
-        ),
-    }).resolve(&rope) {
+        end: Boundary::new(Target::Literal("[".to_string()), BoundaryMode::Exclude),
+    })
+    .resolve(&rope)
+    {
         // Found another section
         rope.slice(resolution.start..resolution.end).to_string()
     } else {
         // No next section, go from header to EOF
-        let snippet = Snippet::From(
-            Boundary::new(
-                Target::Literal("[package.metadata.syncdoc]".to_string()),
-                BoundaryMode::Exclude,
-            )
-        );
-        let resolution = snippet.resolve(&rope)
+        let snippet = Snippet::From(Boundary::new(
+            Target::Literal("[package.metadata.syncdoc]".to_string()),
+            BoundaryMode::Exclude,
+        ));
+        let resolution = snippet
+            .resolve(&rope)
             .map_err(|e| format!("Failed to resolve snippet: {:?}", e))?;
         rope.slice(resolution.start..resolution.end).to_string()
     };
@@ -183,7 +183,10 @@ other-field = "value"
 
         let result = get_docs_path_from_file(temp.path().to_str().unwrap());
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("docs-path not found"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("docs-path not found"));
     }
 
     #[test]
