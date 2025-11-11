@@ -188,6 +188,22 @@ For examples of the generated output, see the [test snapshots](https://github.co
 - Constants: `const X: i32 = 42;`
 - Statics: `static Y: i32 = 42;`
 
+## Build Configuration
+
+For faster builds, you can configure syncdoc to only generate documentation during `cargo doc`:
+
+| Example              | Macro invocation                     | Generated attribute form                    | Feature flag required |
+| -------------------- | ------------------------------------ | ------------------------------------------- | --------------------- |
+| `demo_cfg_attr`      | `#[cfg_attr(doc, syncdoc::omnidoc)]` | `#[doc = include_str!(...)]`                | ❌ none                |
+| `demo_cfg_attr_feat` | `#[syncdoc::omnidoc]`                | `#[cfg_attr(doc, doc = include_str!(...))]` | ✅ `cfg-attr-doc`      |
+
+**Option 1** gates the macro itself. **Option 2** (with `features = ["cfg-attr-doc"]`) gates the generated attributes.
+
+When using either approach, gate the `missing_docs` lint:
+```rust
+#![cfg_attr(doc, deny(missing_docs))]
+```
+
 ## File Organization
 ```
 my-project/
