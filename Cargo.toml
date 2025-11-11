@@ -2,6 +2,7 @@
 members = [
   "examples/demo_enum",
   "examples/demo_impl",
+  "examples/demo_double_doc",
   "examples/demo_module",
   "examples/demo_struct",
   "examples/demo_submodule",
