@@ -2,7 +2,7 @@
 edition = "2021"
 name = "demo_module"
 publish = false
-version = "0.1.2"
+version = "0.1.3"
 
 [dependencies]
 syncdoc.workspace = true

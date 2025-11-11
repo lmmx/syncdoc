@@ -28,56 +28,56 @@ dependencies = [
 
 [[package]]
 name = "demo_cfg_attr"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_double_doc"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_enum"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_impl"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_module"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_struct"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_submodule"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_toml_path"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "syncdoc",
 ]
@@ -233,7 +233,7 @@ checksum = "d08889ec5408683408db66ad89e0e1f93dff55c73a4ccc71c427d5b277ee47e6"
 
 [[package]]
 name = "syncdoc"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "insta",
  "proc-macro2",
@@ -243,7 +243,7 @@ dependencies = [
 
 [[package]]
 name = "syncdoc-core"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "insta",
  "proc-macro2",
