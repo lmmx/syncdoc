@@ -1,0 +1,14 @@
+[package]
+edition = "2021"
+name = "syncdoc_toml_path"
+publish = false
+version = "0.1.1"
+
+[package.metadata.syncdoc]
+docs-path = "docs"
+
+[dependencies]
+syncdoc.workspace = true
+
+[lints.rust]
+missing_docs = "deny"

@@ -1,8 +1,48 @@
-use textum::{Boundary, BoundaryMode, Snippet, Target};
 use ropey::Rope;
 use std::fs;
+use std::path::{Path, PathBuf};
+use textum::{Boundary, BoundaryMode, Snippet, Target};
 
-fn get_docs_path(cargo_toml_path: &str) -> Result<String, Box<dyn std::error::Error>> {
+/// Get the docs-path from the current crate's Cargo.toml, relative to the source file
+pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
+        .map_err(|_| "CARGO_MANIFEST_DIR not set - must be called from within a Cargo project")?;
+
+    let cargo_toml_path = PathBuf::from(&manifest_dir).join("Cargo.toml");
+    let docs_path = get_docs_path_from_file(cargo_toml_path.to_str().unwrap())?;
+
+    // Now calculate relative path from source_file to manifest_dir
+    let manifest_path = Path::new(&manifest_dir).canonicalize()?;
+
+    // Get the source file's directory
+    let source_path = Path::new(source_file);
+    let source_dir = source_path.parent()
+        .ok_or("Source file has no parent directory")?
+        .canonicalize()?;
+
+    // Security check: ensure source_dir is within manifest_dir
+    if !source_dir.starts_with(&manifest_path) {
+        return Err("Source file is outside the manifest directory (security violation)".into());
+    }
+
+    // Calculate number of ".." needed to go from source_dir to manifest_dir
+    let relative_path = source_dir.strip_prefix(&manifest_path)
+        .map_err(|_| "Failed to strip prefix")?;
+
+    let depth = relative_path.components().count();
+    let mut result = PathBuf::new();
+
+    for _ in 0..depth {
+        result.push("..");
+    }
+
+    // Append the docs path
+    result.push(&docs_path);
+
+    Ok(result.to_string_lossy().to_string())
+}
+
+fn get_docs_path_from_file(cargo_toml_path: &str) -> Result<String, Box<dyn std::error::Error>> {
     let content = fs::read_to_string(cargo_toml_path)?;
     let rope = Rope::from_str(&content);
 
@@ -68,7 +108,7 @@ serde = "1.0"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path(temp.path().to_str().unwrap()).unwrap();
+        let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
         assert_eq!(result, "docs");
     }
 
@@ -85,7 +125,7 @@ docs-path = "documentation"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path(temp.path().to_str().unwrap()).unwrap();
+        let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
         assert_eq!(result, "documentation");
     }
 
@@ -99,7 +139,7 @@ docs-path = "documentation"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path(temp.path().to_str().unwrap()).unwrap();
+        let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
         assert_eq!(result, "my-docs");
     }
 
@@ -113,7 +153,7 @@ docs-path = docs
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path(temp.path().to_str().unwrap()).unwrap();
+        let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
         assert_eq!(result, "docs");
     }
 
@@ -127,7 +167,7 @@ name = "myproject"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path(temp.path().to_str().unwrap());
+        let result = get_docs_path_from_file(temp.path().to_str().unwrap());
         assert!(result.is_err());
     }
 
@@ -141,7 +181,7 @@ other-field = "value"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path(temp.path().to_str().unwrap());
+        let result = get_docs_path_from_file(temp.path().to_str().unwrap());
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("docs-path not found"));
     }
@@ -160,7 +200,7 @@ output-format = "markdown"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path(temp.path().to_str().unwrap()).unwrap();
+        let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
         assert_eq!(result, "api-docs");
     }
 }

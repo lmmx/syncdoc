@@ -11,7 +11,11 @@ pub fn inject_all_docs_impl(args: TokenStream, input: TokenStream) -> core::resu
         Ok(path) => path,
         Err(e) => {
             let error_msg = e.to_string();
-            return Err(quote! { compile_error!(#error_msg) });
+            // Return both the error and the original input to avoid syntax errors
+            return Ok(quote! {
+                compile_error!(#error_msg);
+                #input
+            });
         }
     };
 
@@ -20,8 +24,17 @@ pub fn inject_all_docs_impl(args: TokenStream, input: TokenStream) -> core::resu
 }
 
 fn parse_path_from_args(args: TokenStream) -> core::result::Result<String, String> {
+    // Get call site for relative path calculation
+    let call_site = proc_macro2::Span::call_site();
+    let source_file = call_site.local_file()
+        .ok_or("Could not determine source file location")?
+        .to_string_lossy()
+        .to_string();
+
+    // If no args provided, try to get from config
     if args.is_empty() {
-        return Err("omnidoc requires a path argument".to_string());
+        return crate::config::get_docs_path(&source_file)
+            .map_err(|e| format!("Failed to get docs path from config: {}", e));
     }
 
     let mut args_iter = args.into_token_iter();
@@ -34,7 +47,9 @@ fn parse_path_from_args(args: TokenStream) -> core::result::Result<String, Strin
                     }
                 }
             }
-            Err("path argument not found".to_string())
+            // If parsed but no path found, try config
+            crate::config::get_docs_path(&source_file)
+                .map_err(|e| format!("Failed to get docs path from config: {}", e))
         }
         Err(_e) => Err("Failed to parse arguments".to_string()),
     }
