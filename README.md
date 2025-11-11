@@ -49,7 +49,14 @@ syncdoc = "0.1"
 
 ## Usage
 
-> **Note**: In a future release, you'll be able to configure a default documentation path, eliminating the need to specify `path` in every attribute.
+To avoid specifying `path` in every attribute, add this to your `Cargo.toml`:
+```toml
+[package.metadata.syncdoc]
+docs-path = "docs"
+```
+
+Now you can use `#[omnidoc]` without arguments - syncdoc calculates the correct relative path automatically
+(thanks to [this](https://docs.rs/proc-macro2/latest/proc_macro2/struct.Span.html#method.local_file) little trick specifically).
 
 ### Basic Usage
 
