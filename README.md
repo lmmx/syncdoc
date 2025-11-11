@@ -28,8 +28,11 @@ fn bar() { ... }
 ```
 
 syncdoc solves this by automatically pulling documentation from external files:
+
 ```rust
-#[syncdoc(path = "../docs")]
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "../docs")]
 mod my_functions {
     fn foo() { ... }  // Docs from ../docs/my_functions/foo.md
     fn bar() { ... }  // Docs from ../docs/my_functions/bar.md
