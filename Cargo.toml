@@ -11,6 +11,7 @@ members = [
   "examples/demo_toml_path",
   "syncdoc",
   "syncdoc-core",
+  "syncdoc-migrate",
 ]
 resolver = "2"
 
@@ -28,6 +29,7 @@ ropey = "1.6.1"
 rust-format = { features = ["proc-macro2", "token_stream"], version = "0.3.4" }
 syncdoc = { path = "syncdoc", version = "0.1.5" }
 syncdoc-core = { path = "syncdoc-core", version = "0.1.5" }
+syncdoc-migrate = { path = "syncdoc-migrate", version = "0.1.5" }
 tempfile = "3"
 textum = "0.1.2"
 unsynn = { default-features = false, version = "0.1.1" }
