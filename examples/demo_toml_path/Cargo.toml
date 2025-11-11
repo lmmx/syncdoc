@@ -1,8 +1,11 @@
 [package]
 edition = "2021"
-name = "syncdoc_submodule"
+name = "demo_toml_path"
 publish = false
 version = "0.1.2"
+
+[package.metadata.syncdoc]
+docs-path = "docs"
 
 [dependencies]
 syncdoc.workspace = true

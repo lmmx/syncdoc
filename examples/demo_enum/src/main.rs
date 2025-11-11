@@ -1,6 +1,6 @@
 #![doc = include_str!("../docs/main.md")]
 
-use syncdoc_enum::TimeOfDay;
+use demo_enum::TimeOfDay;
 
 fn main() {
     let current = TimeOfDay::Day;

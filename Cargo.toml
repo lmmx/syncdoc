@@ -1,11 +1,11 @@
 [workspace]
 members = [
-  "examples/syncdoc_enum",
-  "examples/syncdoc_impl",
-  "examples/syncdoc_module",
-  "examples/syncdoc_struct",
-  "examples/syncdoc_submodule",
-  "examples/syncdoc_toml_path",
+  "examples/demo_enum",
+  "examples/demo_impl",
+  "examples/demo_module",
+  "examples/demo_struct",
+  "examples/demo_submodule",
+  "examples/demo_toml_path",
   "syncdoc",
   "syncdoc-core",
 ]

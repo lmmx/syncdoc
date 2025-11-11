@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "syncdoc_impl"
+name = "demo_impl"
 publish = false
 version = "0.1.2"
 

@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "syncdoc_enum"
+name = "demo_submodule"
 publish = false
 version = "0.1.2"
 

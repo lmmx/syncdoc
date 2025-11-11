@@ -88,7 +88,7 @@ This will look for documentation in:
 > the name the macro will look for at the path.
 >
 > - See
->   [examples/syncdoc_submodule](https://github.com/lmmx/syncdoc/tree/master/examples/syncdoc_submodule)
+>   [examples/demo_submodule](https://github.com/lmmx/syncdoc/tree/master/examples/demo_submodule)
 >
 > If that isn't to your liking, then just use it on impl blocks etc. and use a regular `syncdoc`
 > attribute for individual items.

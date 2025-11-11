@@ -1,6 +1,5 @@
 #![doc = include_str!("../docs/main.md")]
-
-use syncdoc_module::*;
+use demo_submodule::*;
 
 fn main() {
     println!("=== Testing syncdoc ===");

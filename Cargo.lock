@@ -27,6 +27,48 @@ dependencies = [
 ]
 
 [[package]]
+name = "demo_enum"
+version = "0.1.2"
+dependencies = [
+ "syncdoc",
+]
+
+[[package]]
+name = "demo_impl"
+version = "0.1.2"
+dependencies = [
+ "syncdoc",
+]
+
+[[package]]
+name = "demo_module"
+version = "0.1.2"
+dependencies = [
+ "syncdoc",
+]
+
+[[package]]
+name = "demo_struct"
+version = "0.1.2"
+dependencies = [
+ "syncdoc",
+]
+
+[[package]]
+name = "demo_submodule"
+version = "0.1.2"
+dependencies = [
+ "syncdoc",
+]
+
+[[package]]
+name = "demo_toml_path"
+version = "0.1.2"
+dependencies = [
+ "syncdoc",
+]
+
+[[package]]
 name = "encode_unicode"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -197,48 +239,6 @@ dependencies = [
  "tempfile",
  "textum",
  "unsynn",
-]
-
-[[package]]
-name = "syncdoc_enum"
-version = "0.1.2"
-dependencies = [
- "syncdoc",
-]
-
-[[package]]
-name = "syncdoc_impl"
-version = "0.1.2"
-dependencies = [
- "syncdoc",
-]
-
-[[package]]
-name = "syncdoc_module"
-version = "0.1.2"
-dependencies = [
- "syncdoc",
-]
-
-[[package]]
-name = "syncdoc_struct"
-version = "0.1.2"
-dependencies = [
- "syncdoc",
-]
-
-[[package]]
-name = "syncdoc_submodule"
-version = "0.1.2"
-dependencies = [
- "syncdoc",
-]
-
-[[package]]
-name = "syncdoc_toml_path"
-version = "0.1.2"
-dependencies = [
- "syncdoc",
 ]
 
 [[package]]
