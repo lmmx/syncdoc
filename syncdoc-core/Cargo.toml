@@ -14,8 +14,11 @@ version = "0.1.1"
 [dependencies]
 proc-macro2.workspace = true
 quote.workspace = true
+ropey.workspace = true
+textum.workspace = true
 unsynn.workspace = true
 
 [dev-dependencies]
 insta.workspace = true
 rust-format.workspace = true
+tempfile.workspace = true
