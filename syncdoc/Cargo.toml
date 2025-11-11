@@ -12,8 +12,8 @@ rust-version.workspace = true
 version = "0.1.5"
 
 [features]
+cli = ["dep:syncdoc-migrate"]
 default = []
-cli = ["syncdoc-migrate"]
 
 [lib]
 proc-macro = true
@@ -21,6 +21,7 @@ proc-macro = true
 [dependencies]
 proc-macro2.workspace = true
 syncdoc-core = { workspace = true }
+syncdoc-migrate = { optional = true, workspace = true }
 
 [dev-dependencies]
 insta.workspace = true

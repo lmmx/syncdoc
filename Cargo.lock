@@ -246,6 +246,7 @@ dependencies = [
  "proc-macro2",
  "rust-format",
  "syncdoc-core",
+ "syncdoc-migrate",
 ]
 
 [[package]]
@@ -260,6 +261,13 @@ dependencies = [
  "tempfile",
  "textum",
  "unsynn",
+]
+
+[[package]]
+name = "syncdoc-migrate"
+version = "0.1.5"
+dependencies = [
+ "syncdoc-core",
 ]
 
 [[package]]
