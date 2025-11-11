@@ -27,6 +27,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "demo_cfg_attr"
+version = "0.1.2"
+dependencies = [
+ "syncdoc",
+]
+
+[[package]]
 name = "demo_double_doc"
 version = "0.1.2"
 dependencies = [
