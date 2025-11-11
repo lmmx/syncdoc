@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use unsynn::*;
 
-use crate::parse::{DocStubArg, DocStubInner};
+use crate::parse::{SyncDocArg, SyncDocInner};
 use crate::token_processors::TokenProcessor;
 
 pub fn inject_all_docs_impl(
@@ -40,11 +40,11 @@ fn parse_path_from_args(args: TokenStream) -> core::result::Result<String, Strin
     }
 
     let mut args_iter = args.into_token_iter();
-    match args_iter.parse::<DocStubInner>() {
+    match args_iter.parse::<SyncDocInner>() {
         Ok(parsed) => {
             if let Some(arg_list) = parsed.args {
                 for arg in arg_list.0 {
-                    if let DocStubArg::Path(path_arg) = arg.value {
+                    if let SyncDocArg::Path(path_arg) = arg.value {
                         return Ok(path_arg.value.as_str().to_string());
                     }
                 }

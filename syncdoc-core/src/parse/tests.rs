@@ -45,13 +45,13 @@ fn test_path_arg_parsing() {
     let input = quote!(path = "../docs");
     let mut iter = input.into_token_iter();
 
-    match iter.parse::<DocStubInner>() {
+    match iter.parse::<SyncDocInner>() {
         Ok(parsed) => {
             assert!(parsed.args.is_some(), "Should have parsed arguments");
             let args = parsed.args.as_ref().unwrap();
             assert_eq!(args.0.len(), 1, "Should have 1 argument");
 
-            if let DocStubArg::Path(path_arg) = &args.0[0].value {
+            if let SyncDocArg::Path(path_arg) = &args.0[0].value {
                 assert_eq!(path_arg.value.as_str(), "../docs");
             } else {
                 panic!("Expected Path argument");
@@ -66,7 +66,7 @@ fn test_syncdoc_inner_parsing() {
     let input = quote!(path = "../docs", name = "custom");
     let mut iter = input.into_token_iter();
 
-    match iter.parse::<DocStubInner>() {
+    match iter.parse::<SyncDocInner>() {
         Ok(parsed) => {
             assert!(parsed.args.is_some());
             let args = parsed.args.as_ref().unwrap();
@@ -77,11 +77,11 @@ fn test_syncdoc_inner_parsing() {
 
             for arg in &args.0 {
                 match &arg.value {
-                    DocStubArg::Path(path_arg) => {
+                    SyncDocArg::Path(path_arg) => {
                         assert_eq!(path_arg.value.as_str(), "../docs");
                         found_path = true;
                     }
-                    DocStubArg::Name(name_arg) => {
+                    SyncDocArg::Name(name_arg) => {
                         assert_eq!(name_arg.value.as_str(), "custom");
                         found_name = true;
                     }

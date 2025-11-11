@@ -65,13 +65,13 @@ unsynn! {
     );
 
     /// Declarative syncdoc arguments structure
-    pub struct DocStubInner {
+    pub struct SyncDocInner {
         /// Comma-delimited list of arguments
-        pub args: Option<CommaDelimitedVec<DocStubArg>>,
+        pub args: Option<CommaDelimitedVec<SyncDocArg>>,
     }
 
     /// Single syncdoc argument
-    pub enum DocStubArg {
+    pub enum SyncDocArg {
         /// path = "../docs"
         Path(PathArg),
         /// name = "custom"

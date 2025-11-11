@@ -4,7 +4,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use unsynn::*;
 
-use crate::parse::{DocStubArg, DocStubInner, FnSig};
+use crate::parse::{SyncDocArg, SyncDocInner, FnSig};
 
 pub fn syncdoc_impl(
     args: TokenStream,
@@ -38,7 +38,7 @@ pub fn syncdoc_impl(
 }
 
 #[derive(Debug)]
-struct DocStubArgs {
+struct SyncDocArgs {
     base_path: String,
     name: Option<String>,
 }
@@ -58,10 +58,10 @@ struct SimpleFunction {
     body: TokenStream,
 }
 
-fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<DocStubArgs, String> {
-    match input.parse::<DocStubInner>() {
+fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<SyncDocArgs, String> {
+    match input.parse::<SyncDocInner>() {
         Ok(parsed) => {
-            let mut args = DocStubArgs {
+            let mut args = SyncDocArgs {
                 base_path: String::new(),
                 name: None,
             };
@@ -69,10 +69,10 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<DocStubArgs
             if let Some(arg_list) = parsed.args {
                 for arg in arg_list.0 {
                     match arg.value {
-                        DocStubArg::Path(path_arg) => {
+                        SyncDocArg::Path(path_arg) => {
                             args.base_path = path_arg.value.as_str().to_string();
                         }
-                        DocStubArg::Name(name_arg) => {
+                        SyncDocArg::Name(name_arg) => {
                             args.name = Some(name_arg.value.as_str().to_string());
                         }
                     }
@@ -197,7 +197,7 @@ fn parse_simple_function(input: &mut TokenIter) -> core::result::Result<SimpleFu
     }
 }
 
-fn generate_documented_function(args: DocStubArgs, func: SimpleFunction) -> TokenStream {
+fn generate_documented_function(args: SyncDocArgs, func: SimpleFunction) -> TokenStream {
     let SimpleFunction {
         attrs,
         vis,
