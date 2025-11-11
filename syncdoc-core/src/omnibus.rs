@@ -24,17 +24,16 @@ pub fn inject_all_docs_impl(args: TokenStream, input: TokenStream) -> core::resu
 }
 
 fn parse_path_from_args(args: TokenStream) -> core::result::Result<String, String> {
-    // Get call site for relative path calculation
-    let call_site = proc_macro2::Span::call_site();
-    let source_file = call_site.local_file()
-        .ok_or("Could not determine source file location")?
-        .to_string_lossy()
-        .to_string();
-
-    // If no args provided, try to get from config
+    // If no args provided, try to get from config (only if span info available)
     if args.is_empty() {
-        return crate::config::get_docs_path(&source_file)
-            .map_err(|e| format!("Failed to get docs path from config: {}", e));
+        let call_site = proc_macro2::Span::call_site();
+        if let Some(source_path) = call_site.local_file() {
+            let source_file = source_path.to_string_lossy().to_string();
+            return crate::config::get_docs_path(&source_file)
+                .map_err(|e| format!("Failed to get docs path from config: {}", e));
+        } else {
+            return Err("omnidoc requires a path argument".to_string());
+        }
     }
 
     let mut args_iter = args.into_token_iter();
@@ -47,9 +46,15 @@ fn parse_path_from_args(args: TokenStream) -> core::result::Result<String, Strin
                     }
                 }
             }
-            // If parsed but no path found, try config
-            crate::config::get_docs_path(&source_file)
-                .map_err(|e| format!("Failed to get docs path from config: {}", e))
+            // If parsed but no path found, try config (only if span info available)
+            let call_site = proc_macro2::Span::call_site();
+            if let Some(source_path) = call_site.local_file() {
+                let source_file = source_path.to_string_lossy().to_string();
+                crate::config::get_docs_path(&source_file)
+                    .map_err(|e| format!("Failed to get docs path from config: {}", e))
+            } else {
+                Err("path argument not found".to_string())
+            }
         }
         Err(_e) => Err("Failed to parse arguments".to_string()),
     }
