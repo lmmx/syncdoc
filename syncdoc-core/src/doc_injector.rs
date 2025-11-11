@@ -8,13 +8,14 @@ use crate::parse::{DocStubArg, DocStubInner, FnSig};
 
 pub fn syncdoc_impl(args: TokenStream, item: TokenStream) -> core::result::Result<TokenStream, TokenStream> {
     // Parse the syncdoc arguments
-    let mut args_iter = args.to_token_iter();
-    let syncdoc_args = if args.is_empty() {
-        return Err(quote! { compile_error!("syncdoc requires a path argument") });
-    } else {
-        match parse_syncdoc_args(&mut args_iter) {
-            Ok(args) => args,
-            Err(e) => return Err(quote! { compile_error!(#e) }),
+    let syncdoc_args = match parse_syncdoc_args(&mut args.to_token_iter()) {
+        Ok(args) => args,
+        Err(e) => {
+            // Return both error and original item to preserve valid syntax
+            return Ok(quote! {
+                compile_error!(#e);
+                #item
+            });
         }
     };
 
@@ -22,7 +23,12 @@ pub fn syncdoc_impl(args: TokenStream, item: TokenStream) -> core::result::Resul
     let mut item_iter = item.to_token_iter();
     let func = match parse_simple_function(&mut item_iter) {
         Ok(func) => func,
-        Err(e) => return Err(quote! { compile_error!(#e) }),
+        Err(e) => {
+            return Ok(quote! {
+                compile_error!(#e);
+                #item
+            });
+        }
     };
 
     Ok(generate_documented_function(syncdoc_args, func))
@@ -70,8 +76,17 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<DocStubArgs
                 }
             }
 
+            // If no path provided, try to get from config
             if args.base_path.is_empty() {
-                return Err("path argument is required".to_string());
+                // Get the call site's file path
+                let call_site = proc_macro2::Span::call_site();
+                let source_file = call_site.local_file()
+                    .ok_or("Could not determine source file location")?
+                    .to_string_lossy()
+                    .to_string();
+
+                args.base_path = crate::config::get_docs_path(&source_file)
+                    .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
             }
 
             Ok(args)

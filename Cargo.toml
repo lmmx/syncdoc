@@ -5,6 +5,7 @@ members = [
   "examples/syncdoc_module",
   "examples/syncdoc_struct",
   "examples/syncdoc_submodule",
+  "examples/syncdoc_toml_path",
   "syncdoc",
   "syncdoc-core",
 ]
@@ -20,7 +21,10 @@ rust-version = "1.82.0"
 syncdoc = { path = "syncdoc", version = "0.1.1" }
 syncdoc-core = { path = "syncdoc-core", version = "0.1.1" }
 insta = "1.0"
-proc-macro2 = "1.0"
+proc-macro2 = { version = "1.0", features = ["span-locations"] }
 quote = "1.0"
+ropey = "1.6.1"
 rust-format = { features = ["proc-macro2", "token_stream"], version = "0.3.4" }
+tempfile = "3"
+textum = "0.1.2"
 unsynn = { default-features = false, version = "0.1.1" }
