@@ -75,15 +75,15 @@ ship-manual:
     git add .
     git commit -m "chore(release): 🦀 Upgrades"
 
-    version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name=="whichdoc") | .version')
-    git tag whichdoc-v${version}
+    version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name=="syncdoc") | .version')
+    git tag syncdoc-v${version}
 
     # Push to remote
     git push
     git push --tags
 
     # Create GitHub release with changelog
-    gh release create whichdoc-v${version} --title "whichdoc-v${version}" --notes-file <(sed -n "/## \[${version}\]/,/## \[/p" CHANGELOG.md | sed '1d;$d')
+    gh release create syncdoc-v${version} --title "syncdoc-v${version}" --notes-file <(sed -n "/## \[${version}\]/,/## \[/p" CHANGELOG.md | sed '1d;$d')
 
     # Publish
     cargo publish
