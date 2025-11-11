@@ -1,0 +1,19 @@
+[package]
+edition = "2021"
+name = "demo_cfg_attr_feat"
+publish = false
+version = "0.1.2"
+
+[package.metadata.syncdoc]
+docs-path = "docs"
+
+[dependencies]
+syncdoc = { workspace = true, features = ["cfg-attr-doc"]}
+
+# The `missing_docs` "rustdoc-specific lint" is rustc not rustdoc scoped!
+# https://doc.rust-lang.org/rustdoc/lints.html#missing_docs
+#
+# So it cannot be set here when gating the #[doc = ...] codegen behind #[cfg_attr(doc, ...)]
+#
+# [lints.rust]
+# missing_docs = "deny"
