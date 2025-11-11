@@ -18,8 +18,8 @@ repository = "https://github.com/lmmx/syncdoc"
 rust-version = "1.82.0"
 
 [workspace.dependencies]
-syncdoc = { path = "syncdoc", version = "0.1.1" }
-syncdoc-core = { path = "syncdoc-core", version = "0.1.1" }
+syncdoc = { path = "syncdoc", version = "0.1.2" }
+syncdoc-core = { path = "syncdoc-core", version = "0.1.2" }
 insta = "1.0"
 proc-macro2 = { version = "1.0", features = ["span-locations"] }
 quote = "1.0"

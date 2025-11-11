@@ -2,7 +2,7 @@
 edition = "2021"
 name = "syncdoc_toml_path"
 publish = false
-version = "0.1.1"
+version = "0.1.2"
 
 [package.metadata.syncdoc]
 docs-path = "docs"
