@@ -234,18 +234,35 @@ fn generate_documented_function(args: DocStubArgs, func: SimpleFunction) -> Toke
     let where_tokens = where_clause.unwrap_or_default();
 
     // Generate the documented function
+    let doc_attr = if cfg!(feature = "cfg-attr-doc") {
+        // Feature-gated doc attribute
+        quote! { #[cfg_attr(doc, doc = include_str!(#doc_path))] }
+    } else {
+        // Regular doc attribute
+        quote! { #[doc = include_str!(#doc_path)] }
+    };
+
     quote! {
         #(#attrs)*
-        #[doc = include_str!(#doc_path)]
+        #doc_attr
         #vis_tokens #const_tokens #async_tokens #unsafe_tokens #extern_tokens fn #fn_name #generics_tokens #params #ret_tokens #where_tokens #body
     }
 }
 
 /// Injects a doc attribute without parsing the item structure
 pub fn inject_doc_attr(doc_path: String, item: TokenStream) -> TokenStream {
-    quote! {
-        #[doc = include_str!(#doc_path)]
-        #item
+    if cfg!(feature = "cfg-attr-doc") {
+        // Feature-gated doc attribute
+        quote! {
+            #[cfg_attr(doc, doc = include_str!(#doc_path))]
+            #item
+        }
+    } else {
+        // Regular doc attribute
+        quote! {
+            #[doc = include_str!(#doc_path)]
+            #item
+        }
     }
 }
 
