@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use syncdoc_core::parse::{
-    EnumSig, ImplBlockSig, ModuleContent, ModuleItem, ModuleSig, StructSig, TraitSig,
+    Attribute, EnumSig, ImplBlockSig, ModuleContent, ModuleItem, ModuleSig, StructSig, TraitSig,
 };
 use unsynn::*;
 
@@ -28,6 +28,21 @@ pub struct WriteReport {
     pub files_written: usize,
     pub files_skipped: usize,
     pub errors: Vec<String>,
+}
+
+// Helper structures for parsing fields and variants
+#[derive(Debug)]
+struct FieldInfo {
+    name: String,
+    attrs: Option<Many<Attribute>>,
+    line: usize,
+}
+
+#[derive(Debug)]
+struct VariantInfo {
+    name: String,
+    attrs: Option<Many<Attribute>>,
+    line: usize,
 }
 
 /// Extracts all documentation from a parsed file
@@ -322,40 +337,18 @@ fn extract_enum_docs(
     // Extract variant documentation
     let body_stream = extract_brace_content(&enum_sig.body);
 
-    // Parse variants manually since we need their attributes
-    let mut tokens = body_stream.into_iter().peekable();
-    let mut current_attrs = None;
-
-    while let Some(tt) = tokens.next() {
-        match tt {
-            proc_macro2::TokenTree::Punct(ref p) if p.as_char() == '#' => {
-                // Collect attributes - simplified for now
-                if let Some(proc_macro2::TokenTree::Group(_)) = tokens.peek() {
-                    tokens.next();
-                }
-            }
-            proc_macro2::TokenTree::Ident(ident) => {
-                // This is a variant name
-                let variant_name = ident.to_string();
-                let path = build_path(
-                    base_path,
-                    &context,
-                    &format!("{}/{}", enum_name, variant_name),
-                );
-
-                // Would need to properly parse attributes here
-                // For now, skip variant docs - this is a limitation
-
-                // Skip to next comma
-                while let Some(tt) = tokens.next() {
-                    if let proc_macro2::TokenTree::Punct(ref p) = tt {
-                        if p.as_char() == ',' {
-                            break;
-                        }
-                    }
-                }
-            }
-            _ => {}
+    for variant in parse_enum_variants(body_stream) {
+        if let Some(content) = extract_doc_content(&variant.attrs) {
+            let path = build_path(
+                base_path,
+                &context,
+                &format!("{}/{}", enum_name, variant.name),
+            );
+            extractions.push(DocExtraction {
+                markdown_path: PathBuf::from(path),
+                content,
+                source_location: format!("{}:{}", source_file.display(), variant.line),
+            });
         }
     }
 
@@ -389,8 +382,22 @@ fn extract_struct_docs(
 
     // Extract field documentation (only for named fields)
     if let syncdoc_core::parse::StructBody::Named(brace_group) = &struct_sig.body {
-        // Similar manual parsing needed for fields
-        // This is a limitation - would need proper field parsing
+        let body_stream = extract_brace_content(brace_group);
+
+        for field in parse_struct_fields(body_stream) {
+            if let Some(content) = extract_doc_content(&field.attrs) {
+                let path = build_path(
+                    base_path,
+                    &context,
+                    &format!("{}/{}", struct_name, field.name),
+                );
+                extractions.push(DocExtraction {
+                    markdown_path: PathBuf::from(path),
+                    content,
+                    source_location: format!("{}:{}", source_file.display(), field.line),
+                });
+            }
+        }
     }
 
     extractions
@@ -472,6 +479,117 @@ fn extract_brace_content(brace_group: &BraceGroup) -> TokenStream {
     } else {
         TokenStream::new()
     }
+}
+
+/// Parse enum variants from a token stream
+fn parse_enum_variants(body_stream: TokenStream) -> Vec<VariantInfo> {
+    let mut variants = Vec::new();
+    let mut tokens = body_stream.into_iter().peekable();
+    let mut current_attrs: Option<Many<Attribute>> = None;
+
+    while let Some(tt) = tokens.next() {
+        match tt {
+            proc_macro2::TokenTree::Punct(ref p) if p.as_char() == '#' => {
+                // Start of attribute - would need proper parsing
+                // For now just skip the bracket group
+                if let Some(proc_macro2::TokenTree::Group(_)) = tokens.peek() {
+                    tokens.next();
+                }
+            }
+            proc_macro2::TokenTree::Ident(ident) => {
+                // This is a variant name
+                let variant = VariantInfo {
+                    name: ident.to_string(),
+                    attrs: current_attrs.take(),
+                    line: ident.span().start().line,
+                };
+                variants.push(variant);
+
+                // Skip to next comma
+                let mut depth = 0;
+                while let Some(tt) = tokens.next() {
+                    match tt {
+                        proc_macro2::TokenTree::Group(g) => match g.delimiter() {
+                            proc_macro2::Delimiter::Brace | proc_macro2::Delimiter::Parenthesis => {
+                                depth += 1;
+                            }
+                            _ => {}
+                        },
+                        proc_macro2::TokenTree::Punct(ref p)
+                            if p.as_char() == ',' && depth == 0 =>
+                        {
+                            break;
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    variants
+}
+
+/// Parse struct fields from a token stream
+fn parse_struct_fields(body_stream: TokenStream) -> Vec<FieldInfo> {
+    let mut fields = Vec::new();
+    let mut tokens = body_stream.into_iter().peekable();
+    let mut current_attrs: Option<Many<Attribute>> = None;
+
+    while let Some(tt) = tokens.next() {
+        match tt {
+            proc_macro2::TokenTree::Punct(ref p) if p.as_char() == '#' => {
+                // Start of attribute - simplified
+                if let Some(proc_macro2::TokenTree::Group(_)) = tokens.peek() {
+                    tokens.next();
+                }
+            }
+            proc_macro2::TokenTree::Ident(ident) => {
+                let ident_str = ident.to_string();
+
+                // Skip visibility keywords
+                if ident_str == "pub" {
+                    if let Some(proc_macro2::TokenTree::Group(_)) = tokens.peek() {
+                        tokens.next(); // Skip (crate) or similar
+                    }
+                    continue;
+                }
+
+                // This should be a field name
+                let field = FieldInfo {
+                    name: ident.to_string(),
+                    attrs: current_attrs.take(),
+                    line: ident.span().start().line,
+                };
+                fields.push(field);
+
+                // Skip to next comma
+                let mut depth = 0;
+                while let Some(tt) = tokens.next() {
+                    match tt {
+                        proc_macro2::TokenTree::Group(g) => match g.delimiter() {
+                            proc_macro2::Delimiter::Brace
+                            | proc_macro2::Delimiter::Parenthesis
+                            | proc_macro2::Delimiter::Bracket => {
+                                depth += 1;
+                            }
+                            _ => {}
+                        },
+                        proc_macro2::TokenTree::Punct(ref p)
+                            if p.as_char() == ',' && depth == 0 =>
+                        {
+                            break;
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fields
 }
 
 #[cfg(test)]
