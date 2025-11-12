@@ -1,6 +1,6 @@
 [workspace]
 members = [
-  "examples/demo_cfg_attr",
+  "examples/demo_cfg_attr_call",
   "examples/demo_cfg_attr_toml",
   "examples/demo_double_doc",
   "examples/demo_enum",

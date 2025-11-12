@@ -85,21 +85,21 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<SyncDocArgs
             }
 
             if args.base_path.is_empty() || args.cfg_attr.is_none() {
-                // Get the call site's file path if there might be config we could use there
-                let call_site = proc_macro2::Span::call_site();
-                let source_file = call_site.local_file()
-                    .ok_or("Could not determine source file location")?
-                    .to_string_lossy()
-                    .to_string();
-
                 // If macro path and TOML docs-path both unset, we don't know where to find the docs
                 if args.base_path.is_empty() {
+                    // Get the call site's file path if there might be config we could use there
+                    let call_site = proc_macro2::Span::call_site();
+                    let source_file = call_site.local_file()
+                        .ok_or("Could not determine source file location")?
+                        .to_string_lossy()
+                        .to_string();
+
                     args.base_path = crate::config::get_docs_path(&source_file)
                         .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
                 }
 
                 // We don't error on unconfigured cfg_attr, it's optional
-                if let Ok(cfg) = crate::config::get_cfg_attr(&source_file) {
+                if let Ok(cfg) = crate::config::get_cfg_attr() {
                     args.cfg_attr = cfg;
                 }
             }
@@ -260,7 +260,7 @@ fn generate_documented_function(args: SyncDocArgs, func: SimpleFunction) -> Toke
 }
 
 /// Injects a doc attribute without parsing the item structure
-pub fn inject_doc_attr(doc_path: String, item: TokenStream) -> TokenStream {
+pub fn inject_doc_attr(doc_path: String, cfg_attr: Option<String>, item: TokenStream) -> TokenStream {
     if let Some(cfg_value) = cfg_attr {
         let cfg_ident = proc_macro2::Ident::new(&cfg_value, proc_macro2::Span::call_site());
         quote! {

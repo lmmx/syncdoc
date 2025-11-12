@@ -114,6 +114,7 @@ impl TokenProcessor {
         let new_processor = TokenProcessor {
             input: body_stream,
             base_path: self.base_path.clone(),
+            cfg_attr: self.cfg_attr.clone(),
             context: new_context,
         };
 
@@ -170,6 +171,7 @@ impl TokenProcessor {
         let new_processor = TokenProcessor {
             input: body_stream,
             base_path: self.base_path.clone(),
+            cfg_attr: self.cfg_attr.clone(),
             context: new_context,
         };
 
@@ -216,6 +218,7 @@ impl TokenProcessor {
         let new_processor = TokenProcessor {
             input: body_stream,
             base_path: self.base_path.clone(),
+            cfg_attr: self.cfg_attr.clone(),
             context: new_context,
         };
 
@@ -398,7 +401,7 @@ impl TokenProcessor {
         let full_path = path_parts.join("/");
 
         // Use simpler injection for fields
-        inject_doc_attr(full_path, field_tokens, self.cfg_attr.clone())
+        inject_doc_attr(full_path, self.cfg_attr.clone(), field_tokens)
     }
 
     fn process_enum(&self, enum_sig: crate::parse::EnumSig) -> TokenStream {
@@ -525,7 +528,7 @@ impl TokenProcessor {
         let full_path = path_parts.join("/");
 
         // Use simpler injection for variants
-        inject_doc_attr(full_path, variant_tokens, self.cfg_attr.clone())
+        inject_doc_attr(full_path, self.cfg_attr.clone(), variant_tokens)
     }
 
     fn wrap_in_braces(&self, content: TokenStream) -> TokenStream {
@@ -568,7 +571,7 @@ impl TokenProcessor {
         let full_path = path_parts.join("/");
 
         // Use the simpler injection that doesn't parse
-        inject_doc_attr(full_path, item_tokens, self.cfg_attr.clone())
+        inject_doc_attr(full_path, self.cfg_attr.clone(), item_tokens)
     }
 }
 

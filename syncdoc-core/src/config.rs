@@ -45,7 +45,7 @@ fn get_attribute_from_cargo_toml(cargo_toml_path: &str, attribute: &str) -> Resu
 }
 
 /// Get the cfg-attr from the current crate's Cargo.toml, relative to the source file
-pub fn get_cfg_attr(source_file: &str) -> Result<Option<String>, Box<dyn std::error::Error>> {
+pub fn get_cfg_attr() -> Result<Option<String>, Box<dyn std::error::Error>> {
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
         .map_err(|_| "CARGO_MANIFEST_DIR not set - must be called from within a Cargo project")?;
 

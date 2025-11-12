@@ -31,7 +31,7 @@ fn parse_path_from_args(args: TokenStream) -> core::result::Result<(String, Opti
             let source_file = source_path.to_string_lossy().to_string();
             let path = crate::config::get_docs_path(&source_file)
                 .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
-            let cfg_attr = crate::config::get_cfg_attr(&source_file).ok().flatten();
+            let cfg_attr = crate::config::get_cfg_attr().ok().flatten();
             return Ok((path, cfg_attr));
         } else {
             return Err("omnidoc requires a path argument".to_string());
@@ -74,11 +74,7 @@ fn parse_path_from_args(args: TokenStream) -> core::result::Result<(String, Opti
             
             // If cfg_attr still None, try config
             if cfg_attr.is_none() {
-                let call_site = proc_macro2::Span::call_site();
-                if let Some(source_path) = call_site.local_file() {
-                    let source_file = source_path.to_string_lossy().to_string();
-                    cfg_attr = crate::config::get_cfg_attr(&source_file).ok().flatten();
-                }
+                cfg_attr = crate::config::get_cfg_attr().ok().flatten();
             }
             
             Ok((path, cfg_attr))
