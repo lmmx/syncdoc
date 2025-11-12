@@ -422,7 +422,7 @@ pub fn write_extractions(
     for extraction in extractions {
         if let Some(parent) = extraction.markdown_path.parent() {
             dirs.entry(parent.to_path_buf())
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(extraction);
         }
     }

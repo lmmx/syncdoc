@@ -92,10 +92,10 @@ fn extract_string_literal(s: &str) -> Option<String> {
 
 /// Finds the closing quote, accounting for escaped quotes
 fn find_closing_quote(s: &str, start: usize) -> Option<usize> {
-    let mut chars = s[start..].chars().enumerate();
+    let chars = s[start..].chars().enumerate();
     let mut escaped = false;
 
-    while let Some((i, ch)) = chars.next() {
+    for (i, ch) in chars {
         if escaped {
             escaped = false;
             continue;
