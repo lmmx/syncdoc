@@ -1,14 +1,14 @@
 [package]
 edition = "2021"
-name = "demo_cfg_attr"
+name = "demo_cfg_attr_toml"
 publish = false
-version = "0.1.4"
+version = "0.1.3"
 
 [package.metadata.syncdoc]
 docs-path = "docs"
 
 [dependencies]
-syncdoc.workspace = true
+syncdoc = { workspace = true, features = ["cfg-attr-doc"]}
 
 # The `missing_docs` "rustdoc-specific lint" is rustc not rustdoc scoped!
 # https://doc.rust-lang.org/rustdoc/lints.html#missing_docs

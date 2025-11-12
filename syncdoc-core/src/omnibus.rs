@@ -9,12 +9,10 @@ pub fn inject_all_docs_impl(
     args: TokenStream,
     input: TokenStream,
 ) -> core::result::Result<TokenStream, TokenStream> {
-    // Parse the path argument
-    let base_path = match parse_path_from_args(args) {
-        Ok(path) => path,
+    let (base_path, cfg_attr) = match parse_path_from_args(args) {
+        Ok(result) => result,
         Err(e) => {
             let error_msg = e.to_string();
-            // Return both the error and the original input to avoid syntax errors
             return Ok(quote! {
                 compile_error!(#error_msg);
                 #input
@@ -22,18 +20,19 @@ pub fn inject_all_docs_impl(
         }
     };
 
-    // Process the input with the base path
-    Ok(TokenProcessor::new(input, base_path).process())
+    Ok(TokenProcessor::new(input, base_path, cfg_attr).process())
 }
 
-fn parse_path_from_args(args: TokenStream) -> core::result::Result<String, String> {
-    // If no args provided, try to get from config (only if span info available)
+fn parse_path_from_args(args: TokenStream) -> core::result::Result<(String, Option<String>), String> {
+    // If no args provided, try to get from config
     if args.is_empty() {
         let call_site = proc_macro2::Span::call_site();
         if let Some(source_path) = call_site.local_file() {
             let source_file = source_path.to_string_lossy().to_string();
-            return crate::config::get_docs_path(&source_file)
-                .map_err(|e| format!("Failed to get docs path from config: {}", e));
+            let path = crate::config::get_docs_path(&source_file)
+                .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
+            let cfg_attr = crate::config::get_cfg_attr(&source_file).ok().flatten();
+            return Ok((path, cfg_attr));
         } else {
             return Err("omnidoc requires a path argument".to_string());
         }
@@ -42,22 +41,47 @@ fn parse_path_from_args(args: TokenStream) -> core::result::Result<String, Strin
     let mut args_iter = args.into_token_iter();
     match args_iter.parse::<SyncDocInner>() {
         Ok(parsed) => {
+            let mut path = None;
+            let mut cfg_attr = None;
+            
             if let Some(arg_list) = parsed.args {
                 for arg in arg_list.0 {
-                    if let SyncDocArg::Path(path_arg) = arg.value {
-                        return Ok(path_arg.value.as_str().to_string());
+                    match arg.value {
+                        SyncDocArg::Path(path_arg) => {
+                            path = Some(path_arg.value.as_str().to_string());
+                        }
+                        SyncDocArg::CfgAttr(cfg_arg) => {
+                            cfg_attr = Some(cfg_arg.value.as_str().to_string());
+                        }
+                        _ => {}
                     }
                 }
             }
-            // If parsed but no path found, try config (only if span info available)
-            let call_site = proc_macro2::Span::call_site();
-            if let Some(source_path) = call_site.local_file() {
-                let source_file = source_path.to_string_lossy().to_string();
-                crate::config::get_docs_path(&source_file)
-                    .map_err(|e| format!("Failed to get docs path from config: {}", e))
+            
+            let path = if let Some(p) = path {
+                p
             } else {
-                Err("path argument not found".to_string())
+                // Try config
+                let call_site = proc_macro2::Span::call_site();
+                if let Some(source_path) = call_site.local_file() {
+                    let source_file = source_path.to_string_lossy().to_string();
+                    crate::config::get_docs_path(&source_file)
+                        .map_err(|e| format!("Failed to get docs path from config: {}", e))?
+                } else {
+                    return Err("path argument not found".to_string());
+                }
+            };
+            
+            // If cfg_attr still None, try config
+            if cfg_attr.is_none() {
+                let call_site = proc_macro2::Span::call_site();
+                if let Some(source_path) = call_site.local_file() {
+                    let source_file = source_path.to_string_lossy().to_string();
+                    cfg_attr = crate::config::get_cfg_attr(&source_file).ok().flatten();
+                }
             }
+            
+            Ok((path, cfg_attr))
         }
         Err(_e) => Err("Failed to parse arguments".to_string()),
     }

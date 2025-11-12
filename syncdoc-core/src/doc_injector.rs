@@ -245,11 +245,10 @@ fn generate_documented_function(args: SyncDocArgs, func: SimpleFunction) -> Toke
     let where_tokens = where_clause.unwrap_or_default();
 
     // Generate the documented function
-    let doc_attr = if cfg!(feature = "cfg-attr-doc") {
-        // Feature-gated doc attribute
-        quote! { #[cfg_attr(doc, doc = include_str!(#doc_path))] }
+    let doc_attr = if let Some(cfg_value) = args.cfg_attr {
+        let cfg_ident = proc_macro2::Ident::new(&cfg_value, proc_macro2::Span::call_site());
+        quote! { #[cfg_attr(#cfg_ident, doc = include_str!(#doc_path))] }
     } else {
-        // Regular doc attribute
         quote! { #[doc = include_str!(#doc_path)] }
     };
 
@@ -262,14 +261,13 @@ fn generate_documented_function(args: SyncDocArgs, func: SimpleFunction) -> Toke
 
 /// Injects a doc attribute without parsing the item structure
 pub fn inject_doc_attr(doc_path: String, item: TokenStream) -> TokenStream {
-    if cfg!(feature = "cfg-attr-doc") {
-        // Feature-gated doc attribute
+    if let Some(cfg_value) = cfg_attr {
+        let cfg_ident = proc_macro2::Ident::new(&cfg_value, proc_macro2::Span::call_site());
         quote! {
-            #[cfg_attr(doc, doc = include_str!(#doc_path))]
+            #[cfg_attr(#cfg_ident, doc = include_str!(#doc_path))]
             #item
         }
     } else {
-        // Regular doc attribute
         quote! {
             #[doc = include_str!(#doc_path)]
             #item

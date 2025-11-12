@@ -47,9 +47,13 @@ Add syncdoc to your `Cargo.toml`:
 syncdoc = "0.1"
 ```
 
-## Usage
+## Setup
 
-To avoid specifying `path` in every attribute, add this to your `Cargo.toml`:
+### `docs-path` (recommended)
+
+To avoid specifying `path` in every attribute, add a default to your `Cargo.toml`
+(it must be set one way or the other or the build will error).
+
 ```toml
 [package.metadata.syncdoc]
 docs-path = "docs"
@@ -58,9 +62,22 @@ docs-path = "docs"
 Now you can use `#[omnidoc]` without arguments - syncdoc calculates the correct relative path automatically
 (thanks to [this](https://docs.rs/proc-macro2/latest/proc_macro2/struct.Span.html#method.local_file) little trick specifically).
 
-### Basic Usage
+### `cfg-attr` (optional)
+
+To generate `#[cfg_attr(doc, doc = "...")]` instead of `#[doc = "..."]` (meaning your docstrings will be `#[cfg(doc)]`-gated
+(so `cargo doc` will generate them but `cargo build`/`check`/`test` will not), set the `cfg-attr` key to "doc" in your `Cargo.toml`.
+
+```toml
+[package.metadata.syncdoc]
+cfg-attr = "doc"
+```
+
+See the _Build Configuration_ section below for more details.
+
+### Usage
 
 Apply the `#[omnidoc]` attribute to any module:
+
 ```rust
 use syncdoc::omnidoc;
 
@@ -194,8 +211,8 @@ For faster builds, you can configure syncdoc to only generate documentation duri
 
 | Example              | Macro invocation                     | Generated attribute form                    | Feature flag required |
 | -------------------- | ------------------------------------ | ------------------------------------------- | --------------------- |
-| `demo_cfg_attr`      | `#[cfg_attr(doc, syncdoc::omnidoc)]` | `#[doc = include_str!(...)]`                | ❌ none                |
-| `demo_cfg_attr_feat` | `#[syncdoc::omnidoc]`                | `#[cfg_attr(doc, doc = include_str!(...))]` | ✅ `cfg-attr-doc`      |
+| `demo_cfg_attr_call` | `#[cfg_attr(doc, syncdoc::omnidoc)]` | `#[doc = include_str!(...)]`                | ❌ none                |
+| `demo_cfg_attr_toml` | `#[syncdoc::omnidoc]`                | `#[cfg_attr(doc, doc = include_str!(...))]` | ✅ `cfg-attr-doc`      |
 
 **Option 1** gates the macro itself. **Option 2** (with `features = ["cfg-attr-doc"]`) gates the generated attributes.
 

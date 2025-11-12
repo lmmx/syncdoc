@@ -1,16 +1,17 @@
-An example of how to use this crate to document an enum with docstrings generated to look like:
+An example of how to use this crate to document an enum with the attribute macro gated with
 
 ```rust
-#[cfg_attr(doc, doc = ...)]
+#[cfg_attr(doc, syncdoc::omnidoc)]
 ```
 
-Such that only docs builds have docstrings. To get this, add the `cfg-attr-doc` feature for the syncdoc crate.
+Such that it will only be compiled for docs builds.
 
-- Note: If you want all builds to have docstrings (i.e. to generate `#[doc = ...]`), see the other example:
-  [demo_cfg_attr][demo_cfg_attr], and do not set the `cfg-attr-doc` feature on the syncdoc crate in
-  your Cargo.toml dependencies.
+- Note: if you want to always run the codegen, but have the generated `#[doc]` attributes themselves
+  be only present in docs builds, use the `cfg-attr-doc` feature on the syncdoc crate.
+  See the other example: [demo_cfg_attr_toml][demo_cfg_attr_toml], and set the `cfg-attr-doc` feature on the
+  syncdoc crate in your Cargo.toml dependencies.
 
-[demo_cfg_attr]: https://github.com/lmmx/syncdoc/blob/master/examples/demo_cfg_attr
+[demo_cfg_attr_toml]: https://github.com/lmmx/syncdoc/blob/master/examples/demo_cfg_attr_toml
 
 If using cargo's `missing_docs` lint level (recommended!) then you should gate it behind `cfg_attr(doc)`
 and ensure the rustdoc build is part of your development checks (pre-commit hooks, etc).
