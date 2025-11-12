@@ -76,13 +76,13 @@ pub mod inner {
         println!("  syncdoc");
         println!();
         println!("  # 'Cut' docstrings out of src/ as well as creating in docs/ .");
-        println!("  syncdoc --cut (or -c)");
+        println!("  syncdoc --cut (or `-c`)");
         println!();
         println!("  # 'Cut and paste' by replacing doc comments with omnidoc attributes.");
-        println!("  syncdoc --cut --add (or -ca)");
+        println!("  syncdoc --cut --add (or `-c -a`)");
         println!();
         println!("  # Preview what would happen if you ran a 'cut and paste'.");
-        println!("  syncdoc --cut --add --dry-run (or -can)");
+        println!("  syncdoc --cut --add --dry-run (or `-c -a -n`)");
     }
 
     /// Entry point for the `syncdoc` command-line interface.
