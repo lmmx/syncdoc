@@ -1,0 +1,11 @@
+[package]
+edition = "2021"
+name = "demo_fn"
+publish = false
+version = "0.1.5"
+
+[dependencies]
+syncdoc.workspace = true
+
+[lints.rust]
+missing_docs = "deny"

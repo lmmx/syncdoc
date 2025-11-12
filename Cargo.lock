@@ -55,6 +55,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "demo_fn"
+version = "0.1.5"
+dependencies = [
+ "syncdoc",
+]
+
+[[package]]
 name = "demo_impl"
 version = "0.1.5"
 dependencies = [
@@ -266,8 +273,10 @@ dependencies = [
 name = "syncdoc-migrate"
 version = "0.1.5"
 dependencies = [
+ "insta",
  "proc-macro2",
  "quote",
+ "rust-format",
  "syncdoc-core",
  "tempfile",
  "unsynn",

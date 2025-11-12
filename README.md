@@ -107,8 +107,8 @@ This will look for documentation in:
 > - See
 >   [examples/demo_submodule](https://github.com/lmmx/syncdoc/tree/master/examples/demo_submodule)
 >
-> If that isn't to your liking, then just use it on impl blocks etc. and use a regular `syncdoc`
-> attribute for individual items.
+> If that isn't to your liking, then just use it on impl blocks etc. and use a regular
+> `syncdoc::omnidoc` attribute for individual items.
 
 ### Documenting Impl Blocks
 
@@ -136,13 +136,22 @@ Documentation files:
 
 ### Single Function Documentation
 
-You can also document individual functions:
-```rust
-use syncdoc::syncdoc;
+You can also document individual functions. The difference between the syncdoc and omnidoc macros
+comes down to whether or not you want to specify the exact path (typically you don't, so use omnidoc).
 
-#[syncdoc(path = "../docs/special_function.md")]
-fn special_function() {
-    // Implementation
+```rust
+use syncdoc::{omnidoc, syncdoc};
+
+#[omnidoc(path = "../docs")]
+fn func1() {
+    // -> ../docs/func1.md
+    // = omnidoc(path) to root docs dir + submodule + fn name + .md
+}
+
+#[syncdoc(path = "../docs/new_func_name.md")]
+fn func2() {
+    // -> ../docs/new_func_name.md
+    // = syncdoc(path) to single documentation file
 }
 ```
 

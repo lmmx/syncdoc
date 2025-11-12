@@ -127,7 +127,7 @@ fn test_extract_and_write_struct_and_field_docs() {
             .find(|e| {
                 e.markdown_path.to_str().unwrap() == format!("docs/MyStruct/{}.md", field_name)
             })
-            .expect(&format!("Should find {} doc", field_name));
+            .unwrap_or_else(|| panic!("Should find {} doc", field_name));
         assert_eq!(field_doc.content, expected_content);
     }
 }
@@ -168,7 +168,7 @@ fn test_extract_and_write_enum_and_variant_docs() {
             .find(|e| {
                 e.markdown_path.to_str().unwrap() == format!("docs/MyEnum/{}.md", variant_name)
             })
-            .expect(&format!("Should find {} doc", variant_name));
+            .unwrap_or_else(|| panic!("Should find {} doc", variant_name));
         assert_eq!(variant_doc.content, expected_content);
     }
 }

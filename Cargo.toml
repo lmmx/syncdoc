@@ -4,6 +4,7 @@ members = [
   "examples/demo_cfg_attr_toml",
   "examples/demo_double_doc",
   "examples/demo_enum",
+  "examples/demo_fn",
   "examples/demo_impl",
   "examples/demo_module",
   "examples/demo_struct",

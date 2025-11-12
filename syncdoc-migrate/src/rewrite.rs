@@ -36,6 +36,47 @@ pub fn strip_doc_attrs(item: TokenStream) -> TokenStream {
     output
 }
 
+/// Recursively strips doc attributes from nested items
+fn strip_doc_attrs_recursive(item: TokenStream) -> TokenStream {
+    let mut output = TokenStream::new();
+    let tokens: Vec<TokenTree> = item.into_iter().collect();
+    let mut i = 0;
+
+    while i < tokens.len() {
+        match &tokens[i] {
+            // Handle attributes
+            TokenTree::Punct(p) if p.as_char() == '#' => {
+                if matches!(tokens.get(i + 1), Some(TokenTree::Group(g)) if g.delimiter() == proc_macro2::Delimiter::Bracket)
+                {
+                    if let Some(TokenTree::Group(attr_group)) = tokens.get(i + 1) {
+                        if is_doc_attribute(attr_group.stream()) {
+                            // Skip doc attribute
+                            i += 2;
+                            continue;
+                        }
+                    }
+                }
+                output.extend(std::iter::once(tokens[i].clone()));
+                i += 1;
+            }
+            // Recursively handle groups (braces, brackets, parens)
+            TokenTree::Group(g) => {
+                let stripped_inner = strip_doc_attrs_recursive(g.stream());
+                let new_group = proc_macro2::Group::new(g.delimiter(), stripped_inner);
+                output.extend(std::iter::once(TokenTree::Group(new_group)));
+                i += 1;
+            }
+            // Pass through other tokens
+            _ => {
+                output.extend(std::iter::once(tokens[i].clone()));
+                i += 1;
+            }
+        }
+    }
+
+    output
+}
+
 /// Checks if an attribute group contains "doc"
 fn is_doc_attribute(attr_content: TokenStream) -> bool {
     let attr_str = attr_content.to_string();
@@ -68,11 +109,14 @@ fn is_doc_attribute(attr_content: TokenStream) -> bool {
 /// Determines if an item should receive `#[omnidoc]` vs `#[syncdoc]`
 ///
 /// Returns true for items that contain multiple documentable children:
-/// - Modules
-/// - Impl blocks
-/// - Traits
+/// - Modules (always have potential children)
+/// - Impl blocks (always have potential methods)
+/// - Traits (always have potential methods)
 /// - Enums (if they have variants)
 /// - Structs (if they have named fields)
+///
+/// These items get `#[omnidoc]` on the parent, and their children get NO annotation
+/// (because omnidoc automatically handles them).
 pub fn needs_omnidoc(item: &ModuleItem) -> bool {
     match item {
         ModuleItem::Module(_) => true,
@@ -207,6 +251,9 @@ fn inject_attr_after_visibility(item: TokenStream, doc_path: &str, attr_name: &s
 ///
 /// Returns `None` if neither strip nor annotate is requested (no rewrite needed).
 /// Returns `Some(String)` with the rewritten source code otherwise.
+///
+/// **Important**: If an item gets `#[omnidoc]`, its children do NOT get annotated,
+/// because omnidoc automatically handles all nested documentation.
 pub fn rewrite_file(
     parsed: &ParsedFile,
     docs_root: &str,
@@ -224,20 +271,23 @@ pub fn rewrite_file(
         let mut item_tokens = TokenStream::new();
         unsynn::ToTokens::to_tokens(item, &mut item_tokens);
 
-        // Apply strip if requested
+        // Apply strip if requested (recursively strips from nested items too)
         if strip {
-            item_tokens = strip_doc_attrs(item_tokens);
+            item_tokens = strip_doc_attrs_recursive(item_tokens);
         }
 
         // Apply annotation if requested
+        // Only annotate top-level items; omnidoc handles children automatically
         if annotate {
             let item_name = get_item_name(item);
             if let Some(name) = item_name {
                 let doc_path = format!("{}/{}.md", docs_root, name);
 
                 if needs_omnidoc(item) {
+                    // Parent gets omnidoc, children get nothing
                     item_tokens = inject_omnidoc_attr(item_tokens, &doc_path);
                 } else {
+                    // Standalone item gets syncdoc
                     item_tokens = inject_syncdoc_attr(item_tokens, &doc_path);
                 }
             }
