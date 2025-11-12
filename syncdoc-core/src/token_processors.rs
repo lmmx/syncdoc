@@ -443,54 +443,35 @@ impl TokenProcessor {
 
     fn process_enum_variants(&self, variants_stream: TokenStream, enum_name: &str) -> TokenStream {
         let mut output = TokenStream::new();
-        let mut current_variant = Vec::new();
-        let mut depth = 0;
 
-        for tt in variants_stream.into_iter() {
-            match &tt {
-                proc_macro2::TokenTree::Punct(punct) if punct.as_char() == ',' && depth == 0 => {
-                    // End of variant
-                    if !current_variant.is_empty() {
-                        let variant_tokens: TokenStream = current_variant.drain(..).collect();
-                        if let Some(variant_name) = extract_first_ident(&variant_tokens) {
-                            let documented = self.inject_doc_for_enum_variant(
-                                variant_tokens,
-                                enum_name,
-                                &variant_name,
-                            );
-                            output.extend(documented);
-                            output.extend(std::iter::once(tt));
-                        } else {
-                            output.extend(variant_tokens);
-                            output.extend(std::iter::once(tt));
-                        }
-                    }
-                }
-                // proc_macro2::TokenTree::Group(_) => {
-                //     current_variant.push(tt);
-                // }
-                proc_macro2::TokenTree::Group(g) => match g.delimiter() {
-                    proc_macro2::Delimiter::Brace | proc_macro2::Delimiter::Parenthesis => {
-                        depth += 1;
-                        current_variant.push(tt);
-                    }
-                    _ => current_variant.push(tt),
-                },
-                _ => {
-                    current_variant.push(tt);
-                }
-            }
-        }
+        // Parse using EnumVariant parser
+        let variants = match variants_stream
+            .into_token_iter()
+            .parse::<unsynn::CommaDelimitedVec<crate::parse::EnumVariant>>()
+        {
+            Ok(variants) => variants,
+            Err(_) => return output, // Return empty if parsing fails
+        };
 
-        // Handle last variant (no trailing comma)
-        if !current_variant.is_empty() {
-            let variant_tokens: TokenStream = current_variant.drain(..).collect();
-            if let Some(variant_name) = extract_first_ident(&variant_tokens) {
-                let documented =
-                    self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name);
-                output.extend(documented);
-            } else {
-                output.extend(variant_tokens);
+        for (idx, variant_delimited) in variants.0.iter().enumerate() {
+            let variant = &variant_delimited.value;
+            let variant_name = variant.name.to_string();
+
+            // Convert variant back to tokens
+            let mut variant_tokens = TokenStream::new();
+            quote::ToTokens::to_tokens(variant, &mut variant_tokens);
+
+            // Inject doc
+            let documented = self.inject_doc_for_enum_variant(
+                variant_tokens,
+                enum_name,
+                &variant_name,
+            );
+            output.extend(documented);
+
+            // Add comma if not last variant
+            if idx < variants.0.len() - 1 {
+                output.extend(quote::quote! { , });
             }
         }
 
@@ -573,15 +554,6 @@ fn extract_type_name(
         }
     }
     "Unknown".to_string()
-}
-
-fn extract_first_ident(tokens: &TokenStream) -> Option<String> {
-    for tt in tokens.clone().into_iter() {
-        if let proc_macro2::TokenTree::Ident(ident) = tt {
-            return Some(ident.to_string());
-        }
-    }
-    None
 }
 
 #[cfg(test)]
