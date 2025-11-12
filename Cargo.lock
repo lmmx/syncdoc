@@ -27,6 +27,9 @@ version = "0.1.5"
 [[package]]
 name = "cli_demo_basic_migrated"
 version = "0.1.5"
+dependencies = [
+ "syncdoc",
+]
 
 [[package]]
 name = "console"
