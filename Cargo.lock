@@ -267,7 +267,10 @@ dependencies = [
 name = "syncdoc-migrate"
 version = "0.1.5"
 dependencies = [
+ "proc-macro2",
+ "quote",
  "syncdoc-core",
+ "unsynn",
 ]
 
 [[package]]
