@@ -60,104 +60,52 @@ fn test_strip_removes_cfg_attr_doc() {
 }
 
 #[test]
-fn test_inject_syncdoc_after_visibility() {
+fn test_inject_omnidoc_after_visibility() {
     let input = quote! {
         pub fn test() {}
     };
 
-    let output = inject_syncdoc_attr(input, "docs/test.md");
+    let output = inject_omnidoc_attr(input, "docs");
     let output_str = output.to_string();
 
-    // Should have syncdoc attribute
-    assert!(output_str.contains("syncdoc"));
-    assert!(output_str.contains("path"));
-    assert!(output_str.contains("docs/test.md"));
-
-    // syncdoc should come after pub
-    let pub_pos = output_str.find("pub").unwrap();
-    let syncdoc_pos = output_str.find("syncdoc").unwrap();
-    assert!(syncdoc_pos > pub_pos);
-}
-
-#[test]
-fn test_inject_omnidoc_after_visibility() {
-    let input = quote! {
-        pub struct MyStruct {
-            field: i32
-        }
-    };
-
-    let output = inject_omnidoc_attr(input, "docs/MyStruct.md");
-    let output_str = output.to_string();
-
+    // Should have omnidoc attribute with docs root
     assert!(output_str.contains("omnidoc"));
-    assert!(output_str.contains("docs/MyStruct.md"));
+    assert!(output_str.contains("path"));
+    assert!(output_str.contains("\"docs\""));
+
+    // omnidoc should come after pub
+    let pub_pos = output_str.find("pub").unwrap();
+    let omnidoc_pos = output_str.find("omnidoc").unwrap();
+    assert!(omnidoc_pos > pub_pos);
 }
 
 #[test]
-fn test_inject_before_derive() {
+fn test_inject_omnidoc_before_derive() {
     let input = quote! {
         #[derive(Debug)]
         pub struct MyStruct;
     };
 
-    let output = inject_syncdoc_attr(input, "docs/MyStruct.md");
+    let output = inject_omnidoc_attr(input, "docs");
     let output_str = output.to_string();
 
-    // syncdoc should come before derive
-    let syncdoc_pos = output_str.find("syncdoc").unwrap();
+    // omnidoc should come before derive
+    let omnidoc_pos = output_str.find("omnidoc").unwrap();
     let derive_pos = output_str.find("derive").unwrap();
-    assert!(syncdoc_pos < derive_pos);
+    assert!(omnidoc_pos < derive_pos);
 }
 
 #[test]
-fn test_inject_no_visibility() {
+fn test_inject_omnidoc_no_visibility() {
     let input = quote! {
         fn private_func() {}
     };
 
-    let output = inject_syncdoc_attr(input, "docs/private_func.md");
+    let output = inject_omnidoc_attr(input, "docs");
     let output_str = output.to_string();
 
-    assert!(output_str.contains("syncdoc"));
-    assert!(output_str.contains("docs/private_func.md"));
-}
-
-#[test]
-fn test_needs_omnidoc_logic() {
-    use proc_macro2::TokenStream;
-    use std::str::FromStr;
-    use syncdoc_core::parse::*;
-
-    // Module should need omnidoc
-    let module_code = "mod test { fn inner() {} }";
-    let tokens = TokenStream::from_str(module_code).unwrap();
-    let module: ModuleItem = tokens.into_token_iter().parse().unwrap();
-    assert!(needs_omnidoc(&module));
-
-    // Function should NOT need omnidoc
-    let func_code = "fn test() {}";
-    let tokens = TokenStream::from_str(func_code).unwrap();
-    let func: ModuleItem = tokens.into_token_iter().parse().unwrap();
-    assert!(!needs_omnidoc(&func));
-
-    // Enum with variants should need omnidoc
-    let enum_code = "enum Test { A, B }";
-    let tokens = TokenStream::from_str(enum_code).unwrap();
-    let enum_item: ModuleItem = tokens.into_token_iter().parse().unwrap();
-    assert!(needs_omnidoc(&enum_item));
-
-    // Struct with named fields should need omnidoc
-    let struct_code = "struct Test { field: i32 }";
-    let tokens = TokenStream::from_str(struct_code).unwrap();
-    let struct_item: ModuleItem = tokens.into_token_iter().parse().unwrap();
-    assert!(needs_omnidoc(&struct_item));
-
-    // Tuple struct should NOT need omnidoc
-    let tuple_struct_code = "struct Test(i32);";
-    let tokens = TokenStream::from_str(tuple_struct_code).unwrap();
-    let tuple_struct: ModuleItem = tokens.into_token_iter().parse().unwrap();
-    assert!(!needs_omnidoc(&tuple_struct));
+    assert!(output_str.contains("omnidoc"));
+    assert!(output_str.contains("\"docs\""));
 }
 
 #[test]

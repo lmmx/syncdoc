@@ -189,7 +189,7 @@ fn test_strip_and_annotate_struct() {
 }
 
 #[test]
-fn test_unit_struct_gets_syncdoc() {
+fn test_unit_struct() {
     let source = r#"
         pub struct UnitStruct;
     "#;
@@ -198,7 +198,7 @@ fn test_unit_struct_gets_syncdoc() {
 }
 
 #[test]
-fn test_tuple_struct_gets_syncdoc() {
+fn test_tuple_struct() {
     let source = r#"
         pub struct TupleStruct(pub i32, String);
     "#;
@@ -207,7 +207,7 @@ fn test_tuple_struct_gets_syncdoc() {
 }
 
 #[test]
-fn test_empty_struct_gets_syncdoc() {
+fn test_empty_struct() {
     let source = r#"
         pub struct EmptyStruct {}
     "#;

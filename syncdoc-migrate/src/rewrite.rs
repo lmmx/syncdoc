@@ -106,83 +106,13 @@ fn is_doc_attribute(attr_content: TokenStream) -> bool {
     }
 }
 
-/// Determines if an item should receive `#[omnidoc]` vs `#[syncdoc]`
-///
-/// Returns true for items that contain multiple documentable children:
-/// - Modules (always have potential children)
-/// - Impl blocks (always have potential methods)
-/// - Traits (always have potential methods)
-/// - Enums (if they have variants)
-/// - Structs (if they have named fields)
-///
-/// These items get `#[omnidoc]` on the parent, and their children get NO annotation
-/// (because omnidoc automatically handles them).
-pub fn needs_omnidoc(item: &ModuleItem) -> bool {
-    match item {
-        ModuleItem::Module(_) => true,
-        ModuleItem::ImplBlock(_) => true,
-        ModuleItem::Trait(_) => true,
-        ModuleItem::Enum(enum_sig) => {
-            // Check if enum has variants
-            has_enum_variants(&enum_sig.body)
-        }
-        ModuleItem::Struct(struct_sig) => {
-            // Only named structs with fields get omnidoc
-            matches!(struct_sig.body, syncdoc_core::parse::StructBody::Named(_))
-                && has_struct_fields(&struct_sig.body)
-        }
-        ModuleItem::Function(_) => false,
-        ModuleItem::TypeAlias(_) => false,
-        ModuleItem::Const(_) => false,
-        ModuleItem::Static(_) => false,
-        ModuleItem::Other(_) => false,
-    }
-}
-
-fn has_enum_variants(body: &unsynn::BraceGroup) -> bool {
-    let mut ts = TokenStream::new();
-    unsynn::ToTokens::to_tokens(body, &mut ts);
-
-    if let Some(TokenTree::Group(g)) = ts.into_iter().next() {
-        let content = g.stream().to_string();
-        // Simple heuristic: if there's content and it's not just whitespace
-        !content.trim().is_empty()
-    } else {
-        false
-    }
-}
-
-fn has_struct_fields(body: &syncdoc_core::parse::StructBody) -> bool {
-    if let syncdoc_core::parse::StructBody::Named(brace_group) = body {
-        let mut ts = TokenStream::new();
-        unsynn::ToTokens::to_tokens(brace_group, &mut ts);
-
-        if let Some(TokenTree::Group(g)) = ts.into_iter().next() {
-            let content = g.stream().to_string();
-            !content.trim().is_empty()
-        } else {
-            false
-        }
-    } else {
-        false
-    }
-}
-
-/// Injects `#[syncdoc(path = "...")]` attribute into an item's token stream
-///
-/// Places the attribute after visibility modifiers but before other attributes
-pub fn inject_syncdoc_attr(item: TokenStream, doc_path: &str) -> TokenStream {
-    inject_attr_after_visibility(item, doc_path, "syncdoc")
-}
-
 /// Injects `#[omnidoc(path = "...")]` attribute into an item's token stream
 ///
-/// Places the attribute after visibility modifiers but before other attributes
-pub fn inject_omnidoc_attr(item: TokenStream, doc_path: &str) -> TokenStream {
-    inject_attr_after_visibility(item, doc_path, "omnidoc")
-}
-
-fn inject_attr_after_visibility(item: TokenStream, doc_path: &str, attr_name: &str) -> TokenStream {
+/// The path should be the docs root directory, not the specific file.
+/// omnidoc automatically finds the right file based on the item name.
+///
+/// Places the attribute after visibility modifiers but before other attributes.
+pub fn inject_omnidoc_attr(item: TokenStream, docs_root: &str) -> TokenStream {
     let tokens: Vec<TokenTree> = item.into_iter().collect();
     let mut output = TokenStream::new();
     let mut vis_end_idx = 0;
@@ -234,10 +164,9 @@ fn inject_attr_after_visibility(item: TokenStream, doc_path: &str, attr_name: &s
     // Add tokens up to visibility end
     output.extend(tokens[..vis_end_idx].iter().cloned());
 
-    // Add the syncdoc/omnidoc attribute
-    let attr_ident = proc_macro2::Ident::new(attr_name, proc_macro2::Span::call_site());
+    // Add the omnidoc attribute with docs root
     let attr = quote! {
-        #[#attr_ident(path = #doc_path)]
+        #[omnidoc(path = #docs_root)]
     };
     output.extend(attr);
 
@@ -247,13 +176,15 @@ fn inject_attr_after_visibility(item: TokenStream, doc_path: &str, attr_name: &s
     output
 }
 
-/// Rewrites a parsed file by stripping doc attrs and/or injecting syncdoc/omnidoc attributes
+/// Rewrites a parsed file by stripping doc attrs and/or injecting omnidoc attributes
 ///
 /// Returns `None` if neither strip nor annotate is requested (no rewrite needed).
 /// Returns `Some(String)` with the rewritten source code otherwise.
 ///
-/// **Important**: If an item gets `#[omnidoc]`, its children do NOT get annotated,
-/// because omnidoc automatically handles all nested documentation.
+/// **All items get `#[omnidoc(path = docs_root)]`**, which:
+/// - For containers (modules, impls, traits, structs with fields, enums with variants):
+///   automatically documents the container and all its children
+/// - For leaf items (functions, type aliases, etc.): acts like syncdoc and documents just that item
 pub fn rewrite_file(
     parsed: &ParsedFile,
     docs_root: &str,
@@ -277,19 +208,11 @@ pub fn rewrite_file(
         }
 
         // Apply annotation if requested
-        // Only annotate top-level items; omnidoc handles children automatically
+        // All items get omnidoc with the docs root path
         if annotate {
-            let item_name = get_item_name(item);
-            if let Some(name) = item_name {
-                let doc_path = format!("{}/{}.md", docs_root, name);
-
-                if needs_omnidoc(item) {
-                    // Parent gets omnidoc, children get nothing
-                    item_tokens = inject_omnidoc_attr(item_tokens, &doc_path);
-                } else {
-                    // Standalone item gets syncdoc
-                    item_tokens = inject_syncdoc_attr(item_tokens, &doc_path);
-                }
+            // Only annotate items that have names (skip Other variants)
+            if get_item_name(item).is_some() {
+                item_tokens = inject_omnidoc_attr(item_tokens, docs_root);
             }
         }
 
