@@ -74,6 +74,53 @@ cfg-attr = "doc"
 
 See the _Build Configuration_ section below for more details.
 
+### Migration
+
+To automatically migrate code from doc comments to syncdoc `#[omnidoc]` attributes, install the CLI:
+
+- pre-built binary: `cargo binstall syncdoc` (requires [cargo-binstall][cargo-binstall]),
+- build from source: `cargo install syncdoc --features cli`
+
+[cargo-binstall]: https://github.com/cargo-bins/cargo-binstall
+
+Commit your code before running with `-c`/`--cut` or `-r`/`--rewrite` as they modify source files.
+
+```help
+Usage: syncdoc [OPTIONS] <SOURCE>
+
+Migrate Rust documentation to external markdown files.
+
+Arguments:
+  <SOURCE>           Path to source directory to process
+
+Options:
+  -d, --docs <dir>   Path to docs directory (default: from Cargo.toml or 'docs')
+  -c, --cut          Cut out doc comments from source files
+  -r, --rewrite      Rewrite code with #[omnidoc] attributes
+  -n, --dry-run      Preview changes without writing files
+  -v, --verbose      Show verbose output
+  -h, --help         Show this help message
+```
+
+#### Examples
+
+- 'Sync' the docs dir with the docstrings in src/
+```sh
+syncdoc
+```
+- 'Cut' docstrings out of src/ as well as creating in docs/
+```sh
+syncdoc --cut # or -c
+```
+- 'Cut and paste' by replacing doc comments with omnidoc attributes
+```sh
+syncdoc --cut --add # or -ca
+```
+- Preview what would happen
+```sh
+syncdoc --cut --add --dry-run # or -can
+```
+
 ### Usage
 
 Apply the `#[omnidoc]` attribute to any module:

@@ -91,10 +91,10 @@ Usage: syncdoc [OPTIONS] <SOURCE>
 Migrate Rust documentation to external markdown files.
 
 Arguments:
-  <SOURCE>           Path to source directory to process
+  <SOURCE>           Path to source directory to process (default: 'src')
 
 Options:
-  -d, --docs <dir>   Path to docs directory (default: from Cargo.toml or 'docs')
+  -d, --docs <dir>   Path to docs directory (default: 'docs' or from Cargo.toml if set)
   -c, --cut          Cut out doc comments from source files
   -r, --rewrite      Rewrite code with #[omnidoc] attributes
   -n, --dry-run      Preview changes without writing files

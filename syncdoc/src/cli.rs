@@ -28,7 +28,7 @@ pub mod inner {
         #[facet(positional, default = "src".to_string())]
         source: String,
 
-        /// Path to docs directory (default: from Cargo.toml or 'docs')
+        /// Path to docs directory (default: 'docs' or from Cargo.toml if set)
         #[facet(named, short = 'd', long, default)]
         docs: Option<String>,
 
@@ -59,11 +59,11 @@ pub mod inner {
         println!("Migrate Rust documentation to external markdown files.");
         println!();
         println!("Arguments:");
-        println!("  <SOURCE>           Path to source directory to process");
+        println!("  <SOURCE>           Path to source directory to process (default: 'src')");
         println!();
         println!("Options:");
         println!(
-            "  -d, --docs <dir>   Path to docs directory (default: from Cargo.toml or 'docs')"
+            "  -d, --docs <dir>   Path to docs directory (default: 'docs' or from Cargo.toml if set)"
         );
         println!("  -c, --cut          Cut out doc comments from source files");
         println!("  -a, --add          Rewrite code with #[omnidoc] attributes");
