@@ -345,6 +345,20 @@ unsynn! {
         Unit(Semicolon),
     }
 
+    /// Named struct field: pub name: Type
+    pub struct StructField {
+        /// Optional attributes
+        pub attributes: Option<Many<Attribute>>,
+        /// Optional visibility
+        pub visibility: Option<Visibility>,
+        /// Field name
+        pub name: Ident,
+        /// Colon
+        pub _colon: Colon,
+        /// Field type (everything until comma or brace closing)
+        pub field_type: VerbatimUntil<Either<Comma, BraceGroup>>,
+    }
+
     /// type Alias = Type;
     pub struct TypeAliasSig {
         /// Optional attributes
@@ -842,6 +856,22 @@ impl quote::ToTokens for StructBody {
             StructBody::Tuple(tuple) => unsynn::ToTokens::to_tokens(tuple, tokens),
             StructBody::Unit(semi) => unsynn::ToTokens::to_tokens(semi, tokens),
         }
+    }
+}
+
+impl quote::ToTokens for StructField {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        if let Some(attrs) = &self.attributes {
+            for attr in &attrs.0 {
+                unsynn::ToTokens::to_tokens(attr, tokens);
+            }
+        }
+        if let Some(vis) = &self.visibility {
+            quote::ToTokens::to_tokens(vis, tokens);
+        }
+        quote::ToTokens::to_tokens(&self.name, tokens);
+        unsynn::ToTokens::to_tokens(&self._colon, tokens);
+        unsynn::ToTokens::to_tokens(&self.field_type, tokens);
     }
 }
 

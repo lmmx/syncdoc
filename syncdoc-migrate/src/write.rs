@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use syncdoc_core::parse::{
-    EnumSig, EnumVariant, ImplBlockSig, ModuleContent, ModuleItem, ModuleSig, StructSig, TraitSig,
+    EnumSig, EnumVariant, ImplBlockSig, ModuleContent, ModuleItem, ModuleSig, StructField, StructSig, TraitSig,
 };
 use unsynn::*;
 
@@ -374,9 +374,35 @@ fn extract_struct_docs(
         });
     }
 
-    // TODO: Extract field documentation
-    // Need to add a StructField parser to syncdoc_core::parse module
-    // For now, struct fields are not extracted
+    // Extract field documentation (only for named fields)
+    if let syncdoc_core::parse::StructBody::Named(brace_group) = &struct_sig.body {
+        let body_stream = extract_brace_content(brace_group);
+
+        if let Ok(fields) = body_stream
+            .into_token_iter()
+            .parse::<CommaDelimitedVec<StructField>>()
+        {
+            for field_delimited in &fields.0 {
+                let field = &field_delimited.value;
+                if let Some(content) = extract_doc_content(&field.attributes) {
+                    let path = build_path(
+                        base_path,
+                        &context,
+                        &format!("{}/{}", struct_name, field.name),
+                    );
+                    extractions.push(DocExtraction {
+                        markdown_path: PathBuf::from(path),
+                        content,
+                        source_location: format!(
+                            "{}:{}",
+                            source_file.display(),
+                            field.name.span().start().line
+                        ),
+                    });
+                }
+            }
+        }
+    }
 
     extractions
 }
