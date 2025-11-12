@@ -1,0 +1,10 @@
+---
+source: syncdoc-migrate/tests/rewrite_integration.rs
+expression: "test_rewrite(source, false, true)"
+---
+#[omnidoc(path = "docs")]
+impl MyStruct {
+    pub fn method(&self) -> i32 {
+        42
+    }
+}

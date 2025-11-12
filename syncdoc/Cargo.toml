@@ -1,3 +1,8 @@
+[[bin]]
+name = "syncdoc"
+path = "src/cli.rs"
+required-features = ["cli"]
+
 [package]
 description = "Procedural macro attributes to inject documentation from external files"
 documentation = "https://docs.rs/syncdoc"
@@ -11,7 +16,20 @@ repository.workspace = true
 rust-version.workspace = true
 version = "0.1.5"
 
+[package.metadata.binstall]
+pkg-fmt = "tgz"
+pkg-url = "https://github.com/lmmx/syncdoc/releases/download/syncdoc-v{ version }/syncdoc-{ target }-v{ version }.tar.gz"
+
+[package.metadata.binstall.overrides.aarch64-pc-windows-msvc]
+pkg-fmt = "zip"
+pkg-url = "https://github.com/lmmx/syncdoc/releases/download/syncdoc-v{ version }/syncdoc-aarch64-pc-windows-msvc-v{ version }.zip"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
+pkg-url = "https://github.com/lmmx/syncdoc/releases/download/syncdoc-v{ version }/syncdoc-x86_64-pc-windows-msvc-v{ version }.zip"
+
 [features]
+cli = ["dep:facet", "dep:facet-args", "dep:syncdoc-migrate"]
 default = []
 
 [lib]
@@ -21,6 +39,20 @@ proc-macro = true
 proc-macro2.workspace = true
 syncdoc-core = { workspace = true }
 
+# Optional dependencies for CLI
+facet = { optional = true, workspace = true }
+facet-args = { optional = true, workspace = true }
+syncdoc-migrate = { optional = true, workspace = true }
+
 [dev-dependencies]
 insta.workspace = true
 rust-format.workspace = true
+
+# [lints.clippy]
+# all = "deny"
+# cargo = "deny"
+# pedantic = "deny"
+#
+# [lints.rust]
+# missing_docs = "deny"
+# unsafe_code = "forbid"

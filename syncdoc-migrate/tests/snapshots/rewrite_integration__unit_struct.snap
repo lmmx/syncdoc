@@ -1,0 +1,5 @@
+---
+source: syncdoc-migrate/tests/rewrite_integration.rs
+expression: "test_rewrite(source, false, true)"
+---
+pub # [omnidoc (path = "docs")] struct UnitStruct ;

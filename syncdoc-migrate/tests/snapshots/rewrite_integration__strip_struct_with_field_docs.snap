@@ -1,0 +1,8 @@
+---
+source: syncdoc-migrate/tests/rewrite_integration.rs
+expression: "test_rewrite(source, true, false)"
+---
+pub struct MyStruct {
+    pub field: i32,
+    another: String,
+}

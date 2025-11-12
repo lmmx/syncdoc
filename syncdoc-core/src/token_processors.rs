@@ -335,53 +335,32 @@ impl TokenProcessor {
 
     fn process_struct_fields(&self, fields_stream: TokenStream, struct_name: &str) -> TokenStream {
         let mut output = TokenStream::new();
-        let mut current_field = Vec::new();
-        let mut depth = 0;
 
-        for tt in fields_stream.into_iter() {
-            match &tt {
-                proc_macro2::TokenTree::Punct(punct) if punct.as_char() == ',' && depth == 0 => {
-                    // End of field
-                    if !current_field.is_empty() {
-                        let field_tokens: TokenStream = current_field.drain(..).collect();
-                        if let Some(field_name) = extract_struct_field_name(&field_tokens) {
-                            let documented = self.inject_doc_for_struct_field(
-                                field_tokens,
-                                struct_name,
-                                &field_name,
-                            );
-                            output.extend(documented);
-                            output.extend(std::iter::once(tt));
-                        } else {
-                            output.extend(field_tokens);
-                            output.extend(std::iter::once(tt));
-                        }
-                    }
-                }
-                proc_macro2::TokenTree::Group(g) => match g.delimiter() {
-                    proc_macro2::Delimiter::Brace
-                    | proc_macro2::Delimiter::Parenthesis
-                    | proc_macro2::Delimiter::Bracket => {
-                        depth += 1;
-                        current_field.push(tt);
-                    }
-                    _ => current_field.push(tt),
-                },
-                _ => {
-                    current_field.push(tt);
-                }
-            }
-        }
+        // Parse using StructField parser
+        let fields = match fields_stream
+            .into_token_iter()
+            .parse::<unsynn::CommaDelimitedVec<crate::parse::StructField>>()
+        {
+            Ok(fields) => fields,
+            Err(_) => return output, // Return empty if parsing fails
+        };
 
-        // Handle last field (no trailing comma)
-        if !current_field.is_empty() {
-            let field_tokens: TokenStream = current_field.drain(..).collect();
-            if let Some(field_name) = extract_struct_field_name(&field_tokens) {
-                let documented =
-                    self.inject_doc_for_struct_field(field_tokens, struct_name, &field_name);
-                output.extend(documented);
-            } else {
-                output.extend(field_tokens);
+        for (idx, field_delimited) in fields.0.iter().enumerate() {
+            let field = &field_delimited.value;
+            let field_name = field.name.to_string();
+
+            // Convert field back to tokens
+            let mut field_tokens = TokenStream::new();
+            quote::ToTokens::to_tokens(field, &mut field_tokens);
+
+            // Inject doc
+            let documented =
+                self.inject_doc_for_struct_field(field_tokens, struct_name, &field_name);
+            output.extend(documented);
+
+            // Add comma if not last field
+            if idx < fields.0.len() - 1 {
+                output.extend(quote::quote! { , });
             }
         }
 
@@ -461,54 +440,32 @@ impl TokenProcessor {
 
     fn process_enum_variants(&self, variants_stream: TokenStream, enum_name: &str) -> TokenStream {
         let mut output = TokenStream::new();
-        let mut current_variant = Vec::new();
-        let mut depth = 0;
 
-        for tt in variants_stream.into_iter() {
-            match &tt {
-                proc_macro2::TokenTree::Punct(punct) if punct.as_char() == ',' && depth == 0 => {
-                    // End of variant
-                    if !current_variant.is_empty() {
-                        let variant_tokens: TokenStream = current_variant.drain(..).collect();
-                        if let Some(variant_name) = extract_first_ident(&variant_tokens) {
-                            let documented = self.inject_doc_for_enum_variant(
-                                variant_tokens,
-                                enum_name,
-                                &variant_name,
-                            );
-                            output.extend(documented);
-                            output.extend(std::iter::once(tt));
-                        } else {
-                            output.extend(variant_tokens);
-                            output.extend(std::iter::once(tt));
-                        }
-                    }
-                }
-                // proc_macro2::TokenTree::Group(_) => {
-                //     current_variant.push(tt);
-                // }
-                proc_macro2::TokenTree::Group(g) => match g.delimiter() {
-                    proc_macro2::Delimiter::Brace | proc_macro2::Delimiter::Parenthesis => {
-                        depth += 1;
-                        current_variant.push(tt);
-                    }
-                    _ => current_variant.push(tt),
-                },
-                _ => {
-                    current_variant.push(tt);
-                }
-            }
-        }
+        // Parse using EnumVariant parser
+        let variants = match variants_stream
+            .into_token_iter()
+            .parse::<unsynn::CommaDelimitedVec<crate::parse::EnumVariant>>()
+        {
+            Ok(variants) => variants,
+            Err(_) => return output, // Return empty if parsing fails
+        };
 
-        // Handle last variant (no trailing comma)
-        if !current_variant.is_empty() {
-            let variant_tokens: TokenStream = current_variant.drain(..).collect();
-            if let Some(variant_name) = extract_first_ident(&variant_tokens) {
-                let documented =
-                    self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name);
-                output.extend(documented);
-            } else {
-                output.extend(variant_tokens);
+        for (idx, variant_delimited) in variants.0.iter().enumerate() {
+            let variant = &variant_delimited.value;
+            let variant_name = variant.name.to_string();
+
+            // Convert variant back to tokens
+            let mut variant_tokens = TokenStream::new();
+            quote::ToTokens::to_tokens(variant, &mut variant_tokens);
+
+            // Inject doc
+            let documented =
+                self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name);
+            output.extend(documented);
+
+            // Add comma if not last variant
+            if idx < variants.0.len() - 1 {
+                output.extend(quote::quote! { , });
             }
         }
 
@@ -575,41 +532,6 @@ impl TokenProcessor {
     }
 }
 
-fn extract_struct_field_name(tokens: &TokenStream) -> Option<String> {
-    let mut iter = tokens.clone().into_iter();
-
-    // Skip attributes (#[...])
-    while let Some(tt) = iter.next() {
-        if let proc_macro2::TokenTree::Punct(punct) = &tt {
-            if punct.as_char() == '#' {
-                // Skip the attribute group
-                if let Some(proc_macro2::TokenTree::Group(_)) = iter.next() {
-                    continue;
-                }
-            }
-        }
-
-        // Skip visibility keywords (pub, pub(crate), etc.)
-        if let proc_macro2::TokenTree::Ident(ident) = &tt {
-            let s = ident.to_string();
-            if s == "pub" {
-                // Might be followed by (crate) or similar
-                if let Some(proc_macro2::TokenTree::Group(_)) = iter.clone().next() {
-                    iter.next();
-                }
-                continue;
-            }
-        }
-
-        // First ident after visibility/attributes is the field name
-        if let proc_macro2::TokenTree::Ident(ident) = tt {
-            return Some(ident.to_string());
-        }
-    }
-
-    None
-}
-
 fn extract_type_name(
     target_type: &unsynn::Many<
         unsynn::Cons<
@@ -626,15 +548,6 @@ fn extract_type_name(
         }
     }
     "Unknown".to_string()
-}
-
-fn extract_first_ident(tokens: &TokenStream) -> Option<String> {
-    for tt in tokens.clone().into_iter() {
-        if let proc_macro2::TokenTree::Ident(ident) = tt {
-            return Some(ident.to_string());
-        }
-    }
-    None
 }
 
 #[cfg(test)]

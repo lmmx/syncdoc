@@ -1,0 +1,5 @@
+---
+source: syncdoc-migrate/tests/rewrite_integration.rs
+expression: "test_rewrite(source, true, true)"
+---
+pub # [omnidoc (path = "docs")] mod calculations { pub fn add (a : i32 , b : i32) -> i32 { a + b } } # [omnidoc (path = "docs")] # [derive (Debug)] pub struct Calculator { value : i32 , } # [omnidoc (path = "docs")] impl Calculator { pub fn new () -> Self { Self { value : 0 } } } pub # [omnidoc (path = "docs")] fn standalone () { }
