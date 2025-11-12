@@ -84,28 +84,23 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<SyncDocArgs
                 }
             }
 
-            // If no path provided, try to get from config
-            if args.base_path.is_empty() {
-                // Get the call site's file path
+            if args.base_path.is_empty() || args.cfg_attr.is_none() {
+                // Get the call site's file path if there might be config we could use there
                 let call_site = proc_macro2::Span::call_site();
-                let source_file = call_site
-                    .local_file()
+                let source_file = call_site.local_file()
                     .ok_or("Could not determine source file location")?
                     .to_string_lossy()
                     .to_string();
 
-                args.base_path = crate::config::get_docs_path(&source_file)
-                    .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
-            }
+                // If macro path and TOML docs-path both unset, we don't know where to find the docs
+                if args.base_path.is_empty() {
+                    args.base_path = crate::config::get_docs_path(&source_file)
+                        .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
+                }
 
-            // If no cfg_attr attribute name provided, try to get from config
-            if args.cfg_attr.is_none() {
-                let call_site = proc_macro2::Span::call_site();
-                if let Some(source_path) = call_site.local_file() {
-                    let source_file = source_path.to_string_lossy().to_string();
-                    if let Ok(cfg) = crate::config::get_cfg_attr(&source_file) {
-                        args.cfg_attr = cfg;
-                    }
+                // We don't error on unconfigured cfg_attr, it's optional
+                if let Ok(cfg) = crate::config::get_cfg_attr(&source_file) {
+                    args.cfg_attr = cfg;
                 }
             }
 
