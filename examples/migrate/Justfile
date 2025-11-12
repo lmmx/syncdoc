@@ -10,4 +10,4 @@ demo-basic:
 [working-directory: 'demo_basic_migrated']
 _migrate-basic:
     cargo add syncdoc
-    syncdoc
+    syncdoc --cut
