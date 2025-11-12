@@ -41,6 +41,7 @@ pub fn syncdoc_impl(
 struct SyncDocArgs {
     base_path: String,
     name: Option<String>,
+    cfg_attr: Option<String>,
 }
 
 struct SimpleFunction {
@@ -64,6 +65,7 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<SyncDocArgs
             let mut args = SyncDocArgs {
                 base_path: String::new(),
                 name: None,
+                cfg_attr: None,
             };
 
             if let Some(arg_list) = parsed.args {
@@ -74,6 +76,9 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<SyncDocArgs
                         }
                         SyncDocArg::Name(name_arg) => {
                             args.name = Some(name_arg.value.as_str().to_string());
+                        }
+                        SyncDocArg::CfgAttr(cfg_attr_arg) => {
+                            args.cfg_attr = Some(cfg_attr_arg.value.as_str().to_string());
                         }
                     }
                 }
@@ -91,6 +96,17 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<SyncDocArgs
 
                 args.base_path = crate::config::get_docs_path(&source_file)
                     .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
+            }
+
+            // If no cfg_attr attribute name provided, try to get from config
+            if args.cfg_attr.is_none() {
+                let call_site = proc_macro2::Span::call_site();
+                if let Some(source_path) = call_site.local_file() {
+                    let source_file = source_path.to_string_lossy().to_string();
+                    if let Ok(cfg) = crate::config::get_cfg_attr(&source_file) {
+                        args.cfg_attr = cfg;
+                    }
+                }
             }
 
             Ok(args)
