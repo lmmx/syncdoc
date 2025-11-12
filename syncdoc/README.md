@@ -14,28 +14,42 @@ Stick with inline docs when you prefer co-location of docs and code.
 
 ## Motivation
 
-When writing extensive documentation, keeping it inline can make code harder to read:
+Extensive documentation is great for users, but inline docstrings make code hard to read:
 ```rust
 /// This is a very long doc comment
 /// that spans many lines and makes
-/// the actual function hard to see...
+/// the actual code hard to see...
 /// [more lines]
-fn foo() { ... }
+struct A {
+    /// Another long doc comment
+    /// [many more lines]
+    fn b() { ... }
 
-/// Another long doc comment
-/// [many more lines]
-fn bar() { ... }
+    /// Yet another long doc comment
+    /// [many more lines]
+    fn c() { ... }
+}
 ```
 
-syncdoc solves this by automatically pulling documentation from external files:
+One solution is typically to add an `#[include_str!]` attribute pointing to a file,
+but this creates line noise of its own (relative paths ascending to the doc files).
+
+syncdoc solves this by automatically resolving documentation from external files like `include_str!`
+according to each item's subpath.
+
+One `#[omnidoc]` attribute call produces multiple such `#[doc = !include_str(...)]` annotations.
+
+The example below is for a scenario where `docs-path` has been set in Cargo.toml. Syncdoc never assumes where
+your docs live. When migrating, it stores them by default in `docs/` under the Cargo manifest dir
+(the dir with Cargo.toml in) and writes the `docs-path` metadata in Cargo.toml for you.
 
 ```rust
 use syncdoc::omnidoc;
 
-#[omnidoc(path = "../docs")]
-mod my_functions {
-    fn foo() { ... }  // Docs from ../docs/my_functions/foo.md
-    fn bar() { ... }  // Docs from ../docs/my_functions/bar.md
+#[omnidoc] // Docs from ../docs/A.md
+struct A {
+    fn b() { ... }  // Docs from ../docs/A/b.md
+    fn c() { ... }  // Docs from ../docs/A/c.md
 }
 ```
 
@@ -76,12 +90,16 @@ See the _Build Configuration_ section below for more details.
 
 ### Migration
 
-To automatically migrate code from doc comments to syncdoc `#[omnidoc]` attributes, install the CLI:
+The CLI automatically migrates code from doc comments to syncdoc `#[omnidoc]` attributes.
+
+#### CLI Installation
 
 - pre-built binary: `cargo binstall syncdoc` (requires [cargo-binstall][cargo-binstall]),
 - build from source: `cargo install syncdoc --features cli`
 
 [cargo-binstall]: https://github.com/cargo-bins/cargo-binstall
+
+#### CLI Usage
 
 Commit your code before running with `-c`/`--cut` or `-r`/`--rewrite` as they modify source files.
 
@@ -91,10 +109,10 @@ Usage: syncdoc [OPTIONS] <SOURCE>
 Migrate Rust documentation to external markdown files.
 
 Arguments:
-  <SOURCE>           Path to source directory to process
+  <SOURCE>           Path to source directory to process (default: 'src')
 
 Options:
-  -d, --docs <dir>   Path to docs directory (default: from Cargo.toml or 'docs')
+  -d, --docs <dir>   Path to docs directory (default: 'docs' or from Cargo.toml if set)
   -c, --cut          Cut out doc comments from source files
   -r, --rewrite      Rewrite code with #[omnidoc] attributes
   -n, --dry-run      Preview changes without writing files
@@ -110,20 +128,20 @@ syncdoc
 ```
 - 'Cut' docstrings out of src/ as well as creating in docs/
 ```sh
-syncdoc --cut # or `-c`
+syncdoc --cut # or -c
 ```
 - 'Cut and paste' by replacing doc comments with omnidoc attributes
 ```sh
-syncdoc --cut --add # or `-c -a`
+syncdoc --cut --add # or -ca
 ```
 - Preview what would happen
 ```sh
-syncdoc --cut --add --dry-run # or `-c -a -n`
+syncdoc --cut --add --dry-run # or -can
 ```
 
 ### Usage
 
-Apply the `#[omnidoc]` attribute to any module:
+Apply the `#[omnidoc]` attribute to any struct, function, enum, impl block, or inline module:
 
 ```rust
 use syncdoc::omnidoc;
@@ -277,19 +295,6 @@ When using either approach, gate the `missing_docs` lint (if using it):
 
 ```rust
 #![cfg_attr(doc, deny(missing_docs))]
-```
-
-## File Organization
-```
-my-project/
-├── src/
-│   ├── lib.rs
-│   └── parser/
-│       └── mod.rs       #[omnidoc(path = "../../docs")]
-└── docs/
-    └── parser/
-        ├── parse_expr.md
-        └── parse_stmt.md
 ```
 
 ## License
