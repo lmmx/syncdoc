@@ -335,53 +335,35 @@ impl TokenProcessor {
 
     fn process_struct_fields(&self, fields_stream: TokenStream, struct_name: &str) -> TokenStream {
         let mut output = TokenStream::new();
-        let mut current_field = Vec::new();
-        let mut depth = 0;
 
-        for tt in fields_stream.into_iter() {
-            match &tt {
-                proc_macro2::TokenTree::Punct(punct) if punct.as_char() == ',' && depth == 0 => {
-                    // End of field
-                    if !current_field.is_empty() {
-                        let field_tokens: TokenStream = current_field.drain(..).collect();
-                        if let Some(field_name) = extract_struct_field_name(&field_tokens) {
-                            let documented = self.inject_doc_for_struct_field(
-                                field_tokens,
-                                struct_name,
-                                &field_name,
-                            );
-                            output.extend(documented);
-                            output.extend(std::iter::once(tt));
-                        } else {
-                            output.extend(field_tokens);
-                            output.extend(std::iter::once(tt));
-                        }
-                    }
-                }
-                proc_macro2::TokenTree::Group(g) => match g.delimiter() {
-                    proc_macro2::Delimiter::Brace
-                    | proc_macro2::Delimiter::Parenthesis
-                    | proc_macro2::Delimiter::Bracket => {
-                        depth += 1;
-                        current_field.push(tt);
-                    }
-                    _ => current_field.push(tt),
-                },
-                _ => {
-                    current_field.push(tt);
-                }
-            }
-        }
+        // Parse using StructField parser
+        let fields = match fields_stream
+            .into_token_iter()
+            .parse::<unsynn::CommaDelimitedVec<crate::parse::StructField>>()
+        {
+            Ok(fields) => fields,
+            Err(_) => return output, // Return empty if parsing fails
+        };
 
-        // Handle last field (no trailing comma)
-        if !current_field.is_empty() {
-            let field_tokens: TokenStream = current_field.drain(..).collect();
-            if let Some(field_name) = extract_struct_field_name(&field_tokens) {
-                let documented =
-                    self.inject_doc_for_struct_field(field_tokens, struct_name, &field_name);
-                output.extend(documented);
-            } else {
-                output.extend(field_tokens);
+        for (idx, field_delimited) in fields.0.iter().enumerate() {
+            let field = &field_delimited.value;
+            let field_name = field.name.to_string();
+
+            // Convert field back to tokens
+            let mut field_tokens = TokenStream::new();
+            quote::ToTokens::to_tokens(field, &mut field_tokens);
+
+            // Inject doc
+            let documented = self.inject_doc_for_struct_field(
+                field_tokens,
+                struct_name,
+                &field_name,
+            );
+            output.extend(documented);
+
+            // Add comma if not last field
+            if idx < fields.0.len() - 1 {
+                output.extend(quote::quote! { , });
             }
         }
 
@@ -573,41 +555,6 @@ impl TokenProcessor {
         // Use the simpler injection that doesn't parse
         inject_doc_attr(full_path, self.cfg_attr.clone(), item_tokens)
     }
-}
-
-fn extract_struct_field_name(tokens: &TokenStream) -> Option<String> {
-    let mut iter = tokens.clone().into_iter();
-
-    // Skip attributes (#[...])
-    while let Some(tt) = iter.next() {
-        if let proc_macro2::TokenTree::Punct(punct) = &tt {
-            if punct.as_char() == '#' {
-                // Skip the attribute group
-                if let Some(proc_macro2::TokenTree::Group(_)) = iter.next() {
-                    continue;
-                }
-            }
-        }
-
-        // Skip visibility keywords (pub, pub(crate), etc.)
-        if let proc_macro2::TokenTree::Ident(ident) = &tt {
-            let s = ident.to_string();
-            if s == "pub" {
-                // Might be followed by (crate) or similar
-                if let Some(proc_macro2::TokenTree::Group(_)) = iter.clone().next() {
-                    iter.next();
-                }
-                continue;
-            }
-        }
-
-        // First ident after visibility/attributes is the field name
-        if let proc_macro2::TokenTree::Ident(ident) = tt {
-            return Some(ident.to_string());
-        }
-    }
-
-    None
 }
 
 fn extract_type_name(
