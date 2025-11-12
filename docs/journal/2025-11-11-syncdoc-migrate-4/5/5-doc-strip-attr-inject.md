@@ -30,7 +30,7 @@
 - If strip, walk all items recursively, apply `strip_doc_attrs()` to each item's tokens
 - If annotate, walk all items, check `needs_omnidoc()`, inject appropriate attribute with path relative to docs_root
 - Reconstruct entire file token stream preserving structure and formatting
-- Format via `prettyplease::unparse()` if available in dependencies, otherwise return unformatted token stream as string
+- Format via `ToTokens::tokens_to_string`
 - Unit test `test_strip_preserves_non_doc()` verifies `#[derive(Debug)]` and `#[cfg(test)]` preserved after stripping doc attrs
 - Unit test `test_strip_removes_all_doc()` verifies multiple consecutive doc attrs all removed
 - Unit test `test_inject_omnidoc_after_visibility()` verifies attribute placed after `pub` but before `#[derive]`
