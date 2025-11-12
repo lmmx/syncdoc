@@ -209,14 +209,16 @@ For examples of the generated output, see the [test snapshots](https://github.co
 
 For faster builds, you can configure syncdoc to only generate documentation during `cargo doc`:
 
-| Example              | Macro invocation                     | Generated attribute form                    | Feature flag required |
-| -------------------- | ------------------------------------ | ------------------------------------------- | --------------------- |
-| `demo_cfg_attr_call` | `#[cfg_attr(doc, syncdoc::omnidoc)]` | `#[doc = include_str!(...)]`                | ❌ none                |
-| `demo_cfg_attr_toml` | `#[syncdoc::omnidoc]`                | `#[cfg_attr(doc, doc = include_str!(...))]` | ✅ `cfg-attr-doc`      |
+| Example              | Macro invocation                     | TOML settings required | Generated attribute form                    |
+| -------------------- | ------------------------------------ | ---------------------- | ------------------------------------------- |
+| `demo_cfg_attr_call` | `#[cfg_attr(doc, syncdoc::omnidoc)]` | ❌ none                | `#[doc = include_str!(...)]`                |
+| `demo_cfg_attr_toml` | `#[syncdoc::omnidoc]`                | ✅ `cfg-attr = "doc"`  | `#[cfg_attr(doc, doc = include_str!(...))]` |
 
-**Option 1** gates the macro itself. **Option 2** (with `features = ["cfg-attr-doc"]`) gates the generated attributes.
+**Option 1** gates the macro itself, at the call site. **Option 2** gates the generated attributes, configured in TOML (it can also be done at the call site,
+but I'd recommended to do it in Cargo.toml to reduce the line noise in your code).
 
-When using either approach, gate the `missing_docs` lint:
+When using either approach, gate the `missing_docs` lint (if using it):
+
 ```rust
 #![cfg_attr(doc, deny(missing_docs))]
 ```

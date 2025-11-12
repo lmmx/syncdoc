@@ -7,9 +7,9 @@ An example of how to use this crate to document an enum with the attribute macro
 Such that it will only be compiled for docs builds.
 
 - Note: if you want to always run the codegen, but have the generated `#[doc]` attributes themselves
-  be only present in docs builds, use the `cfg-attr-doc` feature on the syncdoc crate.
-  See the other example: [demo_cfg_attr_toml][demo_cfg_attr_toml], and set the `cfg-attr-doc` feature on the
-  syncdoc crate in your Cargo.toml dependencies.
+  be only present in docs builds, use the `cfg-attr` flag in the syncdoc Cargo TOML metadata section.
+  See the other example: [demo_cfg_attr_toml][demo_cfg_attr_toml], and set the `cfg-attr` key on the
+  `[package.metadata.syncdoc]` section in your Cargo.toml.
 
 [demo_cfg_attr_toml]: https://github.com/lmmx/syncdoc/blob/master/examples/demo_cfg_attr_toml
 

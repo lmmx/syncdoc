@@ -13,7 +13,6 @@ version = "0.1.4"
 
 [features]
 default = []
-cfg-attr-doc = ["syncdoc-core/cfg-attr-doc"]
 
 [lib]
 proc-macro = true
