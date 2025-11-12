@@ -152,7 +152,11 @@ fn test_dry_run_no_files_created() {
 
 #[test]
 fn test_build_path_with_context() {
-    let path = build_path("docs", &["module".to_string(), "submodule".to_string()], "func");
+    let path = build_path(
+        "docs",
+        &["module".to_string(), "submodule".to_string()],
+        "func",
+    );
     assert_eq!(path, "docs/module/submodule/func.md");
 }
 

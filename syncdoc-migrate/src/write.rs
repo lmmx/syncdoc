@@ -1,17 +1,15 @@
 // syncdoc-migrate/src/write.rs
 
 use crate::discover::ParsedFile;
-use crate::extract::{extract_doc_content, has_doc_attrs};
+use crate::extract::extract_doc_content;
 use proc_macro2::TokenStream;
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
-use syncdoc_core::parse::{EnumSig, ImplBlockSig, ModuleItem, ModuleSig, StructSig, TraitSig};
+use syncdoc_core::parse::{
+    EnumSig, ImplBlockSig, ModuleContent, ModuleItem, ModuleSig, StructSig, TraitSig,
+};
 use unsynn::*;
-
-
-// Type alias for the complex impl block target type
-type ImplTargetType = Many<Cons<Except<Either<syncdoc_core::parse::KFor, BraceGroup>>, proc_macro2::TokenTree>>;
 
 /// Represents a documentation extraction with its target path and metadata
 #[derive(Debug, Clone, PartialEq)]
@@ -39,14 +37,13 @@ pub struct WriteReport {
 pub fn extract_all_docs(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtraction> {
     let mut extractions = Vec::new();
     let context = Vec::new();
-    let base_path = docs_root.to_string();
 
     for item_delimited in &parsed.content.items.0 {
         let item = &item_delimited.value;
         extractions.extend(extract_item_docs(
             item,
             context.clone(),
-            &base_path,
+            docs_root,
             &parsed.path,
         ));
     }
@@ -67,7 +64,11 @@ fn extract_item_docs(
         ModuleItem::Function(func_sig) => {
             if let Some(content) = extract_doc_content(&func_sig.attributes) {
                 let path = build_path(base_path, &context, &func_sig.name.to_string());
-                let location = format!("{}:{}", source_file.display(), get_span_line(&func_sig.name));
+                let location = format!(
+                    "{}:{}",
+                    source_file.display(),
+                    func_sig.name.span().start().line
+                );
                 extractions.push(DocExtraction {
                     markdown_path: PathBuf::from(path),
                     content,
@@ -77,7 +78,12 @@ fn extract_item_docs(
         }
 
         ModuleItem::ImplBlock(impl_block) => {
-            extractions.extend(extract_impl_docs(impl_block, context, base_path, source_file));
+            extractions.extend(extract_impl_docs(
+                impl_block,
+                context,
+                base_path,
+                source_file,
+            ));
         }
 
         ModuleItem::Module(module) => {
@@ -85,7 +91,12 @@ fn extract_item_docs(
         }
 
         ModuleItem::Trait(trait_def) => {
-            extractions.extend(extract_trait_docs(trait_def, context, base_path, source_file));
+            extractions.extend(extract_trait_docs(
+                trait_def,
+                context,
+                base_path,
+                source_file,
+            ));
         }
 
         ModuleItem::Enum(enum_sig) => {
@@ -93,13 +104,22 @@ fn extract_item_docs(
         }
 
         ModuleItem::Struct(struct_sig) => {
-            extractions.extend(extract_struct_docs(struct_sig, context, base_path, source_file));
+            extractions.extend(extract_struct_docs(
+                struct_sig,
+                context,
+                base_path,
+                source_file,
+            ));
         }
 
         ModuleItem::TypeAlias(type_alias) => {
             if let Some(content) = extract_doc_content(&type_alias.attributes) {
                 let path = build_path(base_path, &context, &type_alias.name.to_string());
-                let location = format!("{}:{}", source_file.display(), get_span_line(&type_alias.name));
+                let location = format!(
+                    "{}:{}",
+                    source_file.display(),
+                    type_alias.name.span().start().line
+                );
                 extractions.push(DocExtraction {
                     markdown_path: PathBuf::from(path),
                     content,
@@ -111,7 +131,11 @@ fn extract_item_docs(
         ModuleItem::Const(const_sig) => {
             if let Some(content) = extract_doc_content(&const_sig.attributes) {
                 let path = build_path(base_path, &context, &const_sig.name.to_string());
-                let location = format!("{}:{}", source_file.display(), get_span_line(&const_sig.name));
+                let location = format!(
+                    "{}:{}",
+                    source_file.display(),
+                    const_sig.name.span().start().line
+                );
                 extractions.push(DocExtraction {
                     markdown_path: PathBuf::from(path),
                     content,
@@ -123,7 +147,11 @@ fn extract_item_docs(
         ModuleItem::Static(static_sig) => {
             if let Some(content) = extract_doc_content(&static_sig.attributes) {
                 let path = build_path(base_path, &context, &static_sig.name.to_string());
-                let location = format!("{}:{}", source_file.display(), get_span_line(&static_sig.name));
+                let location = format!(
+                    "{}:{}",
+                    source_file.display(),
+                    static_sig.name.span().start().line
+                );
                 extractions.push(DocExtraction {
                     markdown_path: PathBuf::from(path),
                     content,
@@ -132,9 +160,8 @@ fn extract_item_docs(
             }
         }
 
-        ModuleItem::Other(_) => {
-            // No documentation to extract from other items
-        }
+        // No documentation to extract from other items
+        ModuleItem::Other(_) => {}
     }
 
     extractions
@@ -148,21 +175,27 @@ fn extract_impl_docs(
     source_file: &Path,
 ) -> Vec<DocExtraction> {
     let mut extractions = Vec::new();
-    let type_name = extract_type_name(&impl_block.target_type);
 
-    // Update context with the impl type name
+    // Extract type name from target_type - reuse logic from token_processors.rs
+    let type_name = if let Some(first) = impl_block.target_type.0.first() {
+        if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
+            ident.to_string()
+        } else {
+            "Unknown".to_string()
+        }
+    } else {
+        "Unknown".to_string()
+    };
+
     let mut new_context = context;
     new_context.push(type_name);
 
-    // Extract the impl body content
-    let body_stream = extract_group_content(&impl_block.body);
-
-    // Parse body as module content and extract from items
-    if let Ok(content) = body_stream.into_token_iter().parse::<syncdoc_core::parse::ModuleContent>() {
+    // Parse the body content
+    let body_stream = extract_brace_content(&impl_block.body);
+    if let Ok(content) = body_stream.into_token_iter().parse::<ModuleContent>() {
         for item_delimited in &content.items.0 {
-            let item = &item_delimited.value;
             extractions.extend(extract_item_docs(
-                item,
+                &item_delimited.value,
                 new_context.clone(),
                 base_path,
                 source_file,
@@ -185,7 +218,11 @@ fn extract_module_docs(
     // Extract module's own documentation if present
     if let Some(content) = extract_doc_content(&module.attributes) {
         let path = build_path(base_path, &context, &module.name.to_string());
-        let location = format!("{}:{}", source_file.display(), get_span_line(&module.name));
+        let location = format!(
+            "{}:{}",
+            source_file.display(),
+            module.name.span().start().line
+        );
         extractions.push(DocExtraction {
             markdown_path: PathBuf::from(path),
             content,
@@ -198,14 +235,11 @@ fn extract_module_docs(
     new_context.push(module.name.to_string());
 
     // Extract the module body content
-    let body_stream = extract_group_content(&module.body);
-
-    // Parse body as module content and extract from items
-    if let Ok(content) = body_stream.into_token_iter().parse::<syncdoc_core::parse::ModuleContent>() {
+    let body_stream = extract_brace_content(&module.body);
+    if let Ok(content) = body_stream.into_token_iter().parse::<ModuleContent>() {
         for item_delimited in &content.items.0 {
-            let item = &item_delimited.value;
             extractions.extend(extract_item_docs(
-                item,
+                &item_delimited.value,
                 new_context.clone(),
                 base_path,
                 source_file,
@@ -228,7 +262,11 @@ fn extract_trait_docs(
     // Extract trait's own documentation if present
     if let Some(content) = extract_doc_content(&trait_def.attributes) {
         let path = build_path(base_path, &context, &trait_def.name.to_string());
-        let location = format!("{}:{}", source_file.display(), get_span_line(&trait_def.name));
+        let location = format!(
+            "{}:{}",
+            source_file.display(),
+            trait_def.name.span().start().line
+        );
         extractions.push(DocExtraction {
             markdown_path: PathBuf::from(path),
             content,
@@ -241,14 +279,11 @@ fn extract_trait_docs(
     new_context.push(trait_def.name.to_string());
 
     // Extract the trait body content
-    let body_stream = extract_group_content(&trait_def.body);
-
-    // Parse body and extract from methods (only default methods have docs that matter)
-    if let Ok(content) = body_stream.into_token_iter().parse::<syncdoc_core::parse::ModuleContent>() {
+    let body_stream = extract_brace_content(&trait_def.body);
+    if let Ok(content) = body_stream.into_token_iter().parse::<ModuleContent>() {
         for item_delimited in &content.items.0 {
-            let item = &item_delimited.value;
             extractions.extend(extract_item_docs(
-                item,
+                &item_delimited.value,
                 new_context.clone(),
                 base_path,
                 source_file,
@@ -272,7 +307,11 @@ fn extract_enum_docs(
     // Extract enum's own documentation
     if let Some(content) = extract_doc_content(&enum_sig.attributes) {
         let path = build_path(base_path, &context, &enum_name);
-        let location = format!("{}:{}", source_file.display(), get_span_line(&enum_sig.name));
+        let location = format!(
+            "{}:{}",
+            source_file.display(),
+            enum_sig.name.span().start().line
+        );
         extractions.push(DocExtraction {
             markdown_path: PathBuf::from(path),
             content,
@@ -281,17 +320,42 @@ fn extract_enum_docs(
     }
 
     // Extract variant documentation
-    let body_stream = extract_group_content(&enum_sig.body);
-    let variant_context = vec![enum_name.clone()];
+    let body_stream = extract_brace_content(&enum_sig.body);
 
-    for variant in parse_enum_variants(body_stream) {
-        if let Some(content) = extract_doc_content(&variant.attrs) {
-            let path = build_path(base_path, &context, &format!("{}/{}", enum_name, variant.name));
-            extractions.push(DocExtraction {
-                markdown_path: PathBuf::from(path),
-                content,
-                source_location: format!("{}:{}", source_file.display(), variant.line),
-            });
+    // Parse variants manually since we need their attributes
+    let mut tokens = body_stream.into_iter().peekable();
+    let mut current_attrs = None;
+
+    while let Some(tt) = tokens.next() {
+        match tt {
+            proc_macro2::TokenTree::Punct(ref p) if p.as_char() == '#' => {
+                // Collect attributes - simplified for now
+                if let Some(proc_macro2::TokenTree::Group(_)) = tokens.peek() {
+                    tokens.next();
+                }
+            }
+            proc_macro2::TokenTree::Ident(ident) => {
+                // This is a variant name
+                let variant_name = ident.to_string();
+                let path = build_path(
+                    base_path,
+                    &context,
+                    &format!("{}/{}", enum_name, variant_name),
+                );
+
+                // Would need to properly parse attributes here
+                // For now, skip variant docs - this is a limitation
+
+                // Skip to next comma
+                while let Some(tt) = tokens.next() {
+                    if let proc_macro2::TokenTree::Punct(ref p) = tt {
+                        if p.as_char() == ',' {
+                            break;
+                        }
+                    }
+                }
+            }
+            _ => {}
         }
     }
 
@@ -311,7 +375,11 @@ fn extract_struct_docs(
     // Extract struct's own documentation
     if let Some(content) = extract_doc_content(&struct_sig.attributes) {
         let path = build_path(base_path, &context, &struct_name);
-        let location = format!("{}:{}", source_file.display(), get_span_line(&struct_sig.name));
+        let location = format!(
+            "{}:{}",
+            source_file.display(),
+            struct_sig.name.span().start().line
+        );
         extractions.push(DocExtraction {
             markdown_path: PathBuf::from(path),
             content,
@@ -321,18 +389,8 @@ fn extract_struct_docs(
 
     // Extract field documentation (only for named fields)
     if let syncdoc_core::parse::StructBody::Named(brace_group) = &struct_sig.body {
-        let body_stream = extract_group_content(brace_group);
-
-        for field in parse_struct_fields(body_stream) {
-            if let Some(content) = extract_doc_content(&field.attrs) {
-                let path = build_path(base_path, &context, &format!("{}/{}", struct_name, field.name));
-                extractions.push(DocExtraction {
-                    markdown_path: PathBuf::from(path),
-                    content,
-                    source_location: format!("{}:{}", source_file.display(), field.line),
-                });
-            }
-        }
+        // Similar manual parsing needed for fields
+        // This is a limitation - would need proper field parsing
     }
 
     extractions
@@ -406,130 +464,14 @@ fn build_path(base_path: &str, context: &[String], item_name: &str) -> String {
     parts.join("/")
 }
 
-fn extract_type_name(target_type: &ImplTargetType) -> String {
-    if let Some(first) = target_type.0.first() {
-        if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
-            return ident.to_string();
-        }
-    }
-    "Unknown".to_string()
-}
-
-fn extract_group_content(group: &impl quote::ToTokens) -> TokenStream {
+fn extract_brace_content(brace_group: &BraceGroup) -> TokenStream {
     let mut ts = TokenStream::new();
-    group.to_tokens(&mut ts);
+    unsynn::ToTokens::to_tokens(brace_group, &mut ts);
     if let Some(proc_macro2::TokenTree::Group(g)) = ts.into_iter().next() {
         g.stream()
     } else {
         TokenStream::new()
     }
-}
-
-fn get_span_line(ident: &proc_macro2::Ident) -> usize {
-    ident.span().start().line
-}
-
-// Simplified variant/field parsing structures
-
-#[derive(Debug)]
-struct VariantInfo {
-    name: String,
-    attrs: Option<unsynn::Many<syncdoc_core::parse::Attribute>>,
-    line: usize,
-}
-
-#[derive(Debug)]
-struct FieldInfo {
-    name: String,
-    attrs: Option<unsynn::Many<syncdoc_core::parse::Attribute>>,
-    line: usize,
-}
-
-fn parse_enum_variants(body_stream: TokenStream) -> Vec<VariantInfo> {
-    let mut variants = Vec::new();
-    let mut current_attrs: Option<unsynn::Many<syncdoc_core::parse::Attribute>> = None;
-    let mut tokens = body_stream.into_iter().peekable();
-
-    while let Some(tt) = tokens.next() {
-        match tt {
-            proc_macro2::TokenTree::Punct(ref punct) if punct.as_char() == '#' => {
-                // Start of attribute
-                if let Some(proc_macro2::TokenTree::Group(_)) = tokens.peek() {
-                    // Parse attributes - simplified approach
-                    // In production, would parse properly using unsynn
-                    current_attrs = None; // Placeholder
-                }
-            }
-            proc_macro2::TokenTree::Ident(ident) => {
-                // This is a variant name
-                let variant = VariantInfo {
-                    name: ident.to_string(),
-                    attrs: current_attrs.take(),
-                    line: ident.span().start().line,
-                };
-                variants.push(variant);
-
-                // Skip until comma or end
-                while let Some(tt) = tokens.next() {
-                    if let proc_macro2::TokenTree::Punct(ref punct) = tt {
-                        if punct.as_char() == ',' {
-                            break;
-                        }
-                    }
-                }
-            }
-            _ => {}
-        }
-    }
-
-    variants
-}
-
-fn parse_struct_fields(body_stream: TokenStream) -> Vec<FieldInfo> {
-    let mut fields = Vec::new();
-    let mut current_attrs: Option<unsynn::Many<syncdoc_core::parse::Attribute>> = None;
-    let mut tokens = body_stream.into_iter().peekable();
-
-    while let Some(tt) = tokens.next() {
-        match tt {
-            proc_macro2::TokenTree::Punct(ref punct) if punct.as_char() == '#' => {
-                // Start of attribute - simplified
-                if let Some(proc_macro2::TokenTree::Group(_)) = tokens.peek() {
-                    current_attrs = None; // Placeholder
-                }
-            }
-            proc_macro2::TokenTree::Ident(ident) => {
-                let ident_str = ident.to_string();
-                // Skip visibility keywords
-                if ident_str == "pub" {
-                    if let Some(proc_macro2::TokenTree::Group(_)) = tokens.peek() {
-                        tokens.next(); // Skip (crate) or similar
-                    }
-                    continue;
-                }
-
-                // This should be a field name
-                let field = FieldInfo {
-                    name: ident.to_string(),
-                    attrs: current_attrs.take(),
-                    line: ident.span().start().line,
-                };
-                fields.push(field);
-
-                // Skip until comma or end
-                while let Some(tt) = tokens.next() {
-                    if let proc_macro2::TokenTree::Punct(ref punct) = tt {
-                        if punct.as_char() == ',' {
-                            break;
-                        }
-                    }
-                }
-            }
-            _ => {}
-        }
-    }
-
-    fields
 }
 
 #[cfg(test)]
