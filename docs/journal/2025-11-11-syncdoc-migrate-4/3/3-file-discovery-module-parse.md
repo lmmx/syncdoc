@@ -4,7 +4,7 @@
 
 ## Current State
 
-- `syncdoc-core/src/parse/mod.rs` defines `ModuleContent` parser that accepts `TokenStream` and returns parsed items (parse/mod.rs:267-289)
+- `syncdoc-core/src/parse.rs` defines `ModuleContent` parser that accepts `TokenStream` and returns parsed items (parse.rs:434-438)
 - `ModuleContent` contains `Many<Cons<ModuleItem, Eol>>` representing all items in module
 - `ModuleItem` enum covers all documentable items: Function, ImplBlock, Module, Trait, Enum, Struct, TypeAlias, Const, Static, Other
 - `syncdoc-core/src/config.rs` provides `get_docs_path(source_file: &str)` that reads Cargo.toml metadata
