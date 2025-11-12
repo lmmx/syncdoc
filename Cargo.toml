@@ -23,6 +23,9 @@ repository = "https://github.com/lmmx/syncdoc"
 rust-version = "1.82.0"
 
 [workspace.dependencies]
+facet = "0.30.0"
+facet-args = "0.30.0"
+facet-json = "0.30.0"
 insta = "1.0"
 proc-macro2 = { features = ["span-locations"], version = "1.0" }
 quote = "1.0"
