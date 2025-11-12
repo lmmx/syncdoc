@@ -3,16 +3,6 @@
 version = 3
 
 [[package]]
-name = "ariadne"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36f5e3dca4e09a6f340a61a0e9c7b61e030c69fc27bf29d73218f7e5e3b7638f"
-dependencies = [
- "unicode-width",
- "yansi",
-]
-
-[[package]]
 name = "bitflags"
 version = "2.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -163,36 +153,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "facet-deserialize"
-version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65619f47cc99aa39f2f856fb7adc1eadc9c76ab18e54f2a13e43b6bdd60b416d"
-dependencies = [
- "ariadne",
- "facet-core",
- "facet-reflect",
- "log",
- "owo-colors",
-]
-
-[[package]]
-name = "facet-json"
-version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e106da6a35925e57353f31bfb8eb714e630e947efafe137217251a754e7c8d5"
-dependencies = [
- "facet-core",
- "facet-deserialize",
- "facet-reflect",
- "facet-serialize",
- "itoa",
- "lexical-parse-float",
- "lexical-parse-integer",
- "log",
- "ryu",
-]
-
-[[package]]
 name = "facet-macros"
 version = "0.30.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -231,17 +191,6 @@ checksum = "4b6f7fd53a74e86e32b772f9c9f1b2d50027fc569eff75a2c72751d8e3cef9e3"
 dependencies = [
  "bitflags",
  "facet-core",
-]
-
-[[package]]
-name = "facet-serialize"
-version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c4a6cc59bbf34277a12b0b2965d993d673c0c9ccfacab1deeba19cb9e7e0e7c"
-dependencies = [
- "facet-core",
- "facet-reflect",
- "log",
 ]
 
 [[package]]
@@ -295,37 +244,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "itoa"
-version = "1.0.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
-
-[[package]]
-name = "lexical-parse-float"
-version = "1.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52a9f232fbd6f550bc0137dcb5f99ab674071ac2d690ac69704593cb4abbea56"
-dependencies = [
- "lexical-parse-integer",
- "lexical-util",
-]
-
-[[package]]
-name = "lexical-parse-integer"
-version = "1.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a7a039f8fb9c19c996cd7b2fcce303c1b2874fe1aca544edc85c4a5f8489b34"
-dependencies = [
- "lexical-util",
-]
-
-[[package]]
-name = "lexical-util"
-version = "1.0.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2604dd126bb14f13fb5d1bd6a66155079cb9fa655b37f875b3a742c705dbed17"
-
-[[package]]
 name = "libc"
 version = "0.2.177"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -364,12 +282,6 @@ name = "once_cell"
 version = "1.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
-
-[[package]]
-name = "owo-colors"
-version = "4.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c6901729fa79e91a0913333229e9ca5dc725089d1c363b2f4b4760709dc4a52"
 
 [[package]]
 name = "proc-macro2"
@@ -428,12 +340,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ryu"
-version = "1.0.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
-
-[[package]]
 name = "shadow_counted"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -469,7 +375,6 @@ version = "0.1.5"
 dependencies = [
  "facet",
  "facet-args",
- "facet-json",
  "insta",
  "proc-macro2",
  "rust-format",
@@ -637,9 +542,3 @@ name = "wit-bindgen"
 version = "0.46.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f17a85883d4e6d00e8a97c586de764dabcc06133f7f1d55dce5cdc070ad7fe59"
-
-[[package]]
-name = "yansi"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfe53a6657fd280eaa890a3bc59152892ffa3e30101319d168b781ed6529b049"

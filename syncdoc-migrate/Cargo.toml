@@ -6,20 +6,16 @@ homepage = "https://github.com/lmmx/syncdoc"
 include = ["README.md", "src/**/*"]
 license.workspace = true
 name = "syncdoc-migrate"
+publish = false
 readme = "README.md"
 repository.workspace = true
 rust-version.workspace = true
 version = "0.1.5"
 
-[features]
-default = []
-
 [dependencies]
 proc-macro2.workspace = true
 quote.workspace = true
 syncdoc-core.workspace = true
-# ropey.workspace = true
-# textum.workspace = true
 unsynn.workspace = true
 
 [dev-dependencies]
