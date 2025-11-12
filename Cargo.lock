@@ -27,14 +27,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "demo_cfg_attr"
+name = "demo_cfg_attr_call"
 version = "0.1.4"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
-name = "demo_cfg_attr_feat"
+name = "demo_cfg_attr_toml"
 version = "0.1.3"
 dependencies = [
  "syncdoc",

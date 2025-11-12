@@ -10,6 +10,8 @@ keyword! {
     pub KPath = "path";
     /// The "name" keyword
     pub KName = "name";
+    /// The "cfg_attr" keyword
+    pub KCfgAttr = "cfg_attr";
     /// The "fn" keyword
     pub KFn = "fn";
     /// The "pub" keyword
@@ -65,17 +67,19 @@ unsynn! {
     );
 
     /// Declarative syncdoc arguments structure
-    pub struct DocStubInner {
+    pub struct SyncDocInner {
         /// Comma-delimited list of arguments
-        pub args: Option<CommaDelimitedVec<DocStubArg>>,
+        pub args: Option<CommaDelimitedVec<SyncDocArg>>,
     }
 
     /// Single syncdoc argument
-    pub enum DocStubArg {
+    pub enum SyncDocArg {
         /// path = "../docs"
         Path(PathArg),
         /// name = "custom"
         Name(NameArg),
+        /// cfg_attr = "doc"
+        CfgAttr(CfgAttrArg),
     }
 
     /// Path argument: path = "../docs"
@@ -88,6 +92,13 @@ unsynn! {
     /// Name argument: name = "custom"
     pub struct NameArg {
         pub _name: KName,
+        pub _eq: Eq,
+        pub value: LiteralString,
+    }
+
+    /// Name argument: name = "custom"
+    pub struct CfgAttrArg {
+        pub _cfg_attr: KCfgAttr,
         pub _eq: Eq,
         pub value: LiteralString,
     }

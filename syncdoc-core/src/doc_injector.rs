@@ -4,7 +4,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use unsynn::*;
 
-use crate::parse::{DocStubArg, DocStubInner, FnSig};
+use crate::parse::{SyncDocArg, SyncDocInner, FnSig};
 
 pub fn syncdoc_impl(
     args: TokenStream,
@@ -38,9 +38,10 @@ pub fn syncdoc_impl(
 }
 
 #[derive(Debug)]
-struct DocStubArgs {
+struct SyncDocArgs {
     base_path: String,
     name: Option<String>,
+    cfg_attr: Option<String>,
 }
 
 struct SimpleFunction {
@@ -58,39 +59,49 @@ struct SimpleFunction {
     body: TokenStream,
 }
 
-fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<DocStubArgs, String> {
-    match input.parse::<DocStubInner>() {
+fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<SyncDocArgs, String> {
+    match input.parse::<SyncDocInner>() {
         Ok(parsed) => {
-            let mut args = DocStubArgs {
+            let mut args = SyncDocArgs {
                 base_path: String::new(),
                 name: None,
+                cfg_attr: None,
             };
 
             if let Some(arg_list) = parsed.args {
                 for arg in arg_list.0 {
                     match arg.value {
-                        DocStubArg::Path(path_arg) => {
+                        SyncDocArg::Path(path_arg) => {
                             args.base_path = path_arg.value.as_str().to_string();
                         }
-                        DocStubArg::Name(name_arg) => {
+                        SyncDocArg::Name(name_arg) => {
                             args.name = Some(name_arg.value.as_str().to_string());
+                        }
+                        SyncDocArg::CfgAttr(cfg_attr_arg) => {
+                            args.cfg_attr = Some(cfg_attr_arg.value.as_str().to_string());
                         }
                     }
                 }
             }
 
-            // If no path provided, try to get from config
-            if args.base_path.is_empty() {
-                // Get the call site's file path
-                let call_site = proc_macro2::Span::call_site();
-                let source_file = call_site
-                    .local_file()
-                    .ok_or("Could not determine source file location")?
-                    .to_string_lossy()
-                    .to_string();
+            if args.base_path.is_empty() || args.cfg_attr.is_none() {
+                // If macro path and TOML docs-path both unset, we don't know where to find the docs
+                if args.base_path.is_empty() {
+                    // Get the call site's file path if there might be config we could use there
+                    let call_site = proc_macro2::Span::call_site();
+                    let source_file = call_site.local_file()
+                        .ok_or("Could not determine source file location")?
+                        .to_string_lossy()
+                        .to_string();
 
-                args.base_path = crate::config::get_docs_path(&source_file)
-                    .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
+                    args.base_path = crate::config::get_docs_path(&source_file)
+                        .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
+                }
+
+                // We don't error on unconfigured cfg_attr, it's optional
+                if let Ok(cfg) = crate::config::get_cfg_attr() {
+                    args.cfg_attr = cfg;
+                }
             }
 
             Ok(args)
@@ -197,7 +208,7 @@ fn parse_simple_function(input: &mut TokenIter) -> core::result::Result<SimpleFu
     }
 }
 
-fn generate_documented_function(args: DocStubArgs, func: SimpleFunction) -> TokenStream {
+fn generate_documented_function(args: SyncDocArgs, func: SimpleFunction) -> TokenStream {
     let SimpleFunction {
         attrs,
         vis,
@@ -234,11 +245,10 @@ fn generate_documented_function(args: DocStubArgs, func: SimpleFunction) -> Toke
     let where_tokens = where_clause.unwrap_or_default();
 
     // Generate the documented function
-    let doc_attr = if cfg!(feature = "cfg-attr-doc") {
-        // Feature-gated doc attribute
-        quote! { #[cfg_attr(doc, doc = include_str!(#doc_path))] }
+    let doc_attr = if let Some(cfg_value) = args.cfg_attr {
+        let cfg_ident = proc_macro2::Ident::new(&cfg_value, proc_macro2::Span::call_site());
+        quote! { #[cfg_attr(#cfg_ident, doc = include_str!(#doc_path))] }
     } else {
-        // Regular doc attribute
         quote! { #[doc = include_str!(#doc_path)] }
     };
 
@@ -250,15 +260,14 @@ fn generate_documented_function(args: DocStubArgs, func: SimpleFunction) -> Toke
 }
 
 /// Injects a doc attribute without parsing the item structure
-pub fn inject_doc_attr(doc_path: String, item: TokenStream) -> TokenStream {
-    if cfg!(feature = "cfg-attr-doc") {
-        // Feature-gated doc attribute
+pub fn inject_doc_attr(doc_path: String, cfg_attr: Option<String>, item: TokenStream) -> TokenStream {
+    if let Some(cfg_value) = cfg_attr {
+        let cfg_ident = proc_macro2::Ident::new(&cfg_value, proc_macro2::Span::call_site());
         quote! {
-            #[cfg_attr(doc, doc = include_str!(#doc_path))]
+            #[cfg_attr(#cfg_ident, doc = include_str!(#doc_path))]
             #item
         }
     } else {
-        // Regular doc attribute
         quote! {
             #[doc = include_str!(#doc_path)]
             #item

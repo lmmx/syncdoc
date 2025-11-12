@@ -1,6 +1,6 @@
 #![doc = include_str!("../docs/main.md")]
 
-use demo_cfg_attr::TimeOfDay;
+use demo_cfg_attr_toml::TimeOfDay;
 
 fn main() {
     let current = TimeOfDay::Day;

@@ -7,14 +7,16 @@ use crate::parse::{ImplBlockSig, ModuleContent, ModuleItem, ModuleSig, TraitSig}
 pub(crate) struct TokenProcessor {
     input: TokenStream,
     base_path: String,
+    cfg_attr: Option<String>,
     context: Vec<String>,
 }
 
 impl TokenProcessor {
-    pub(crate) fn new(input: TokenStream, base_path: String) -> Self {
+    pub(crate) fn new(input: TokenStream, base_path: String, cfg_attr: Option<String>) -> Self {
         Self {
             input,
             base_path,
+            cfg_attr,
             context: Vec::new(),
         }
     }
@@ -112,6 +114,7 @@ impl TokenProcessor {
         let new_processor = TokenProcessor {
             input: body_stream,
             base_path: self.base_path.clone(),
+            cfg_attr: self.cfg_attr.clone(),
             context: new_context,
         };
 
@@ -168,6 +171,7 @@ impl TokenProcessor {
         let new_processor = TokenProcessor {
             input: body_stream,
             base_path: self.base_path.clone(),
+            cfg_attr: self.cfg_attr.clone(),
             context: new_context,
         };
 
@@ -214,6 +218,7 @@ impl TokenProcessor {
         let new_processor = TokenProcessor {
             input: body_stream,
             base_path: self.base_path.clone(),
+            cfg_attr: self.cfg_attr.clone(),
             context: new_context,
         };
 
@@ -396,7 +401,7 @@ impl TokenProcessor {
         let full_path = path_parts.join("/");
 
         // Use simpler injection for fields
-        inject_doc_attr(full_path, field_tokens)
+        inject_doc_attr(full_path, self.cfg_attr.clone(), field_tokens)
     }
 
     fn process_enum(&self, enum_sig: crate::parse::EnumSig) -> TokenStream {
@@ -523,7 +528,7 @@ impl TokenProcessor {
         let full_path = path_parts.join("/");
 
         // Use simpler injection for variants
-        inject_doc_attr(full_path, variant_tokens)
+        inject_doc_attr(full_path, self.cfg_attr.clone(), variant_tokens)
     }
 
     fn wrap_in_braces(&self, content: TokenStream) -> TokenStream {
@@ -566,7 +571,7 @@ impl TokenProcessor {
         let full_path = path_parts.join("/");
 
         // Use the simpler injection that doesn't parse
-        inject_doc_attr(full_path, item_tokens)
+        inject_doc_attr(full_path, self.cfg_attr.clone(), item_tokens)
     }
 }
 

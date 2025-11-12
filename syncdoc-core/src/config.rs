@@ -3,15 +3,64 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use textum::{Boundary, BoundaryMode, Snippet, Target};
 
-/// Get the docs-path from the current crate's Cargo.toml, relative to the source file
-pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Error>> {
+/// Get a specified attribute from the current crate's Cargo.toml, relative to the source file
+fn get_attribute_from_cargo_toml(cargo_toml_path: &str, attribute: &str) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    let content = fs::read_to_string(cargo_toml_path)?;
+    let rope = Rope::from_str(&content);
+
+    // Try to find the section text
+    let section_text = if let Ok(resolution) = (Snippet::Between {
+        start: Boundary::new(
+            Target::Literal("[package.metadata.syncdoc]".to_string()),
+            BoundaryMode::Exclude,
+        ),
+        end: Boundary::new(Target::Literal("[".to_string()), BoundaryMode::Exclude),
+    })
+    .resolve(&rope)
+    {
+        rope.slice(resolution.start..resolution.end).to_string()
+    } else {
+        let snippet = Snippet::From(Boundary::new(
+            Target::Literal("[package.metadata.syncdoc]".to_string()),
+            BoundaryMode::Exclude,
+        ));
+        match snippet.resolve(&rope) {
+            Ok(resolution) => rope.slice(resolution.start..resolution.end).to_string(),
+            Err(_) => return Ok(None), // No syncdoc section, return None
+        }
+    };
+
+    // Parse the specified attribute's value
+    for line in section_text.lines() {
+        let line = line.trim();
+        if line.starts_with(attribute) {
+            if let Some(value) = line.split('=').nth(1) {
+                let cleaned = value.trim().trim_matches('"').to_string();
+                return Ok(Some(cleaned));
+            }
+        }
+    }
+
+    Ok(None) // Attribute not found, return None
+}
+
+/// Get the cfg-attr from the current crate's Cargo.toml, relative to the source file
+pub fn get_cfg_attr() -> Result<Option<String>, Box<dyn std::error::Error>> {
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
         .map_err(|_| "CARGO_MANIFEST_DIR not set - must be called from within a Cargo project")?;
 
     let cargo_toml_path = PathBuf::from(&manifest_dir).join("Cargo.toml");
-    let docs_path = get_docs_path_from_file(cargo_toml_path.to_str().unwrap())?;
+    get_attribute_from_cargo_toml(cargo_toml_path.to_str().unwrap(), "cfg-attr")
+}
 
-    // Now calculate relative path from source_file to manifest_dir
+/// Get the docs-path from the current crate's Cargo.toml, relative to the source file
+pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")?;
+
+    let cargo_toml_path = PathBuf::from(&manifest_dir).join("Cargo.toml");
+    let docs_path = get_attribute_from_cargo_toml(cargo_toml_path.to_str().unwrap(), "docs-path")?
+        .ok_or("docs-path not found")?;
+
     let manifest_path = Path::new(&manifest_dir).canonicalize()?;
 
     // Get the source file's directory
@@ -27,9 +76,7 @@ pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Er
     }
 
     // Calculate number of ".." needed to go from source_dir to manifest_dir
-    let relative_path = source_dir
-        .strip_prefix(&manifest_path)
-        .map_err(|_| "Failed to strip prefix")?;
+    let relative_path = source_dir.strip_prefix(&manifest_path).map_err(|_| "Failed to strip prefix")?;
 
     let depth = relative_path.components().count();
     let mut result = PathBuf::new();
@@ -38,59 +85,21 @@ pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Er
         result.push("..");
     }
 
-    // Append the docs path
     result.push(&docs_path);
-
     Ok(result.to_string_lossy().to_string())
 }
 
-fn get_docs_path_from_file(cargo_toml_path: &str) -> Result<String, Box<dyn std::error::Error>> {
-    let content = fs::read_to_string(cargo_toml_path)?;
-    let rope = Rope::from_str(&content);
-
-    // Try to find the section text - handle both cases: another section exists or EOF
-    let section_text = if let Ok(resolution) = (Snippet::Between {
-        start: Boundary::new(
-            Target::Literal("[package.metadata.syncdoc]".to_string()),
-            BoundaryMode::Exclude,
-        ),
-        end: Boundary::new(Target::Literal("[".to_string()), BoundaryMode::Exclude),
-    })
-    .resolve(&rope)
-    {
-        // Found another section
-        rope.slice(resolution.start..resolution.end).to_string()
-    } else {
-        // No next section, go from header to EOF
-        let snippet = Snippet::From(Boundary::new(
-            Target::Literal("[package.metadata.syncdoc]".to_string()),
-            BoundaryMode::Exclude,
-        ));
-        let resolution = snippet
-            .resolve(&rope)
-            .map_err(|e| format!("Failed to resolve snippet: {:?}", e))?;
-        rope.slice(resolution.start..resolution.end).to_string()
-    };
-
-    // Parse the docs-path value
-    for line in section_text.lines() {
-        let line = line.trim();
-        if line.starts_with("docs-path") {
-            if let Some(value) = line.split('=').nth(1) {
-                let cleaned = value.trim().trim_matches('"').to_string();
-                return Ok(cleaned);
-            }
-        }
-    }
-
-    Err("docs-path not found in [package.metadata.syncdoc] section".into())
-}
-
 #[cfg(test)]
-mod tests {
+mod docs_path_tests {
     use super::*;
     use std::io::Write;
     use tempfile::NamedTempFile;
+
+    fn get_docs_path_from_file(cargo_toml_path: &str) -> Result<String, Box<dyn std::error::Error>> {
+        let docs_path = get_attribute_from_cargo_toml(cargo_toml_path, "docs-path")?
+            .ok_or("docs-path not found")?;
+        Ok(docs_path)
+    }
 
     #[test]
     fn test_docs_path_with_following_section() {
@@ -205,5 +214,70 @@ output-format = "markdown"
 
         let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
         assert_eq!(result, "api-docs");
+    }
+}
+
+
+#[cfg(test)]
+mod cfg_attr_tests {
+    use super::*;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    fn get_cfg_attr_from_file(cargo_toml_path: &str) -> Result<String, Box<dyn std::error::Error>> {
+        let cfg_attr = get_attribute_from_cargo_toml(cargo_toml_path, "cfg-attr")?
+            .ok_or("cfg-attr not found")?;
+        Ok(cfg_attr)
+    }
+
+    #[test]
+    fn test_cfg_attr_not_set() {
+        let content = r#"
+[package]
+name = "myproject"
+
+[package.metadata.syncdoc]
+"#;
+        let mut temp = NamedTempFile::new().unwrap();
+        write!(temp, "{}", content).unwrap();
+        temp.flush().unwrap();
+
+        let result = get_cfg_attr_from_file(temp.path().to_str().unwrap());
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("cfg-attr not found"));
+    }
+
+    #[test]
+    fn test_cfg_attr_set_as_doc() {
+        let content = r#"
+[package]
+name = "myproject"
+
+[package.metadata.syncdoc]
+cfg-attr = "doc"
+"#;
+        let mut temp = NamedTempFile::new().unwrap();
+        write!(temp, "{}", content).unwrap();
+        temp.flush().unwrap();
+
+        let result = get_cfg_attr_from_file(temp.path().to_str().unwrap()).unwrap();
+        assert_eq!(result, "doc");
+    }
+
+    #[test]
+    fn test_cfg_attr_set_as_custom() {
+        let content = r#"
+[package]
+name = "myproject"
+
+[package.metadata.syncdoc]
+cfg-attr = "a-custom-attr"
+"#;
+        let mut temp = NamedTempFile::new().unwrap();
+        write!(temp, "{}", content).unwrap();
+        temp.flush().unwrap();
+
+        let result = get_cfg_attr_from_file(temp.path().to_str().unwrap()).unwrap();
+        assert_eq!(result, "a-custom-attr");
     }
 }
