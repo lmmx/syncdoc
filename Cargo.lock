@@ -246,7 +246,6 @@ dependencies = [
  "proc-macro2",
  "rust-format",
  "syncdoc-core",
- "syncdoc-migrate",
 ]
 
 [[package]]

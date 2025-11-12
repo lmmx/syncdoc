@@ -7,7 +7,8 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use syncdoc_core::parse::{
-    EnumSig, EnumVariant, ImplBlockSig, ModuleContent, ModuleItem, ModuleSig, StructField, StructSig, TraitSig,
+    EnumSig, EnumVariant, ImplBlockSig, ModuleContent, ModuleItem, ModuleSig, StructField,
+    StructSig, TraitSig,
 };
 use unsynn::*;
 

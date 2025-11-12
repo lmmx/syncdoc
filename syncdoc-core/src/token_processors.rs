@@ -354,11 +354,8 @@ impl TokenProcessor {
             quote::ToTokens::to_tokens(field, &mut field_tokens);
 
             // Inject doc
-            let documented = self.inject_doc_for_struct_field(
-                field_tokens,
-                struct_name,
-                &field_name,
-            );
+            let documented =
+                self.inject_doc_for_struct_field(field_tokens, struct_name, &field_name);
             output.extend(documented);
 
             // Add comma if not last field
@@ -462,11 +459,8 @@ impl TokenProcessor {
             quote::ToTokens::to_tokens(variant, &mut variant_tokens);
 
             // Inject doc
-            let documented = self.inject_doc_for_enum_variant(
-                variant_tokens,
-                enum_name,
-                &variant_name,
-            );
+            let documented =
+                self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name);
             output.extend(documented);
 
             // Add comma if not last variant

@@ -1,6 +1,9 @@
 use std::fs;
+use syncdoc_migrate::{
+    discover::parse_file,
+    write::{extract_all_docs, write_extractions},
+};
 use tempfile::TempDir;
-use syncdoc_migrate::{discover::parse_file, write::{extract_all_docs, write_extractions}};
 
 fn setup_test_file(source: &str) -> (TempDir, std::path::PathBuf) {
     let temp_dir = TempDir::new().unwrap();
@@ -23,7 +26,10 @@ fn test_extract_and_write_function_docs() {
     let extractions = extract_all_docs(&parsed, "docs");
 
     assert_eq!(extractions.len(), 1);
-    assert_eq!(extractions[0].markdown_path.to_str().unwrap(), "docs/my_function.md");
+    assert_eq!(
+        extractions[0].markdown_path.to_str().unwrap(),
+        "docs/my_function.md"
+    );
     assert_eq!(extractions[0].content, "A simple function");
 }
 
@@ -43,12 +49,14 @@ fn test_extract_and_write_module_docs() {
 
     assert_eq!(extractions.len(), 2);
 
-    let module_doc = extractions.iter()
+    let module_doc = extractions
+        .iter()
         .find(|e| e.markdown_path.to_str().unwrap() == "docs/my_module.md")
         .expect("Should find module doc");
     assert_eq!(module_doc.content, "Module documentation");
 
-    let func_doc = extractions.iter()
+    let func_doc = extractions
+        .iter()
         .find(|e| e.markdown_path.to_str().unwrap() == "docs/my_module/inner_func.md")
         .expect("Should find inner function doc");
     assert_eq!(func_doc.content, "Inner function");
@@ -74,15 +82,13 @@ fn test_extract_and_write_impl_method_docs() {
 
     assert_eq!(extractions.len(), 2);
 
-    assert!(extractions.iter().any(|e|
-        e.markdown_path.to_str().unwrap() == "docs/MyType/my_method.md" &&
-        e.content == "A method"
-    ));
+    assert!(extractions.iter().any(|e| e.markdown_path.to_str().unwrap()
+        == "docs/MyType/my_method.md"
+        && e.content == "A method"));
 
-    assert!(extractions.iter().any(|e|
-        e.markdown_path.to_str().unwrap() == "docs/MyType/another_method.md" &&
-        e.content == "Another method"
-    ));
+    assert!(extractions.iter().any(|e| e.markdown_path.to_str().unwrap()
+        == "docs/MyType/another_method.md"
+        && e.content == "Another method"));
 }
 
 #[test]
@@ -105,7 +111,8 @@ fn test_extract_and_write_struct_and_field_docs() {
 
     assert_eq!(extractions.len(), 4, "Should extract struct + 3 fields");
 
-    let struct_doc = extractions.iter()
+    let struct_doc = extractions
+        .iter()
         .find(|e| e.markdown_path.to_str().unwrap() == "docs/MyStruct.md")
         .expect("Should find struct doc");
     assert_eq!(struct_doc.content, "A documented struct");
@@ -115,8 +122,11 @@ fn test_extract_and_write_struct_and_field_docs() {
         ("field2", "Second field"),
         ("field3", "Third field"),
     ] {
-        let field_doc = extractions.iter()
-            .find(|e| e.markdown_path.to_str().unwrap() == format!("docs/MyStruct/{}.md", field_name))
+        let field_doc = extractions
+            .iter()
+            .find(|e| {
+                e.markdown_path.to_str().unwrap() == format!("docs/MyStruct/{}.md", field_name)
+            })
             .expect(&format!("Should find {} doc", field_name));
         assert_eq!(field_doc.content, expected_content);
     }
@@ -142,7 +152,8 @@ fn test_extract_and_write_enum_and_variant_docs() {
 
     assert_eq!(extractions.len(), 4, "Should extract enum + 3 variants");
 
-    let enum_doc = extractions.iter()
+    let enum_doc = extractions
+        .iter()
         .find(|e| e.markdown_path.to_str().unwrap() == "docs/MyEnum.md")
         .expect("Should find enum doc");
     assert_eq!(enum_doc.content, "An enum");
@@ -152,8 +163,11 @@ fn test_extract_and_write_enum_and_variant_docs() {
         ("Variant2", "Second variant"),
         ("Variant3", "Third variant"),
     ] {
-        let variant_doc = extractions.iter()
-            .find(|e| e.markdown_path.to_str().unwrap() == format!("docs/MyEnum/{}.md", variant_name))
+        let variant_doc = extractions
+            .iter()
+            .find(|e| {
+                e.markdown_path.to_str().unwrap() == format!("docs/MyEnum/{}.md", variant_name)
+            })
             .expect(&format!("Should find {} doc", variant_name));
         assert_eq!(variant_doc.content, expected_content);
     }
@@ -177,15 +191,13 @@ fn test_extract_and_write_trait_method_docs() {
 
     assert_eq!(extractions.len(), 2);
 
-    assert!(extractions.iter().any(|e|
-        e.markdown_path.to_str().unwrap() == "docs/MyTrait.md" &&
-        e.content == "A trait"
-    ));
+    assert!(extractions
+        .iter()
+        .any(|e| e.markdown_path.to_str().unwrap() == "docs/MyTrait.md" && e.content == "A trait"));
 
-    assert!(extractions.iter().any(|e|
-        e.markdown_path.to_str().unwrap() == "docs/MyTrait/default_method.md" &&
-        e.content == "Default method with body"
-    ));
+    assert!(extractions.iter().any(|e| e.markdown_path.to_str().unwrap()
+        == "docs/MyTrait/default_method.md"
+        && e.content == "Default method with body"));
 }
 
 #[test]
@@ -207,20 +219,19 @@ fn test_extract_const_static_type_alias() {
 
     assert_eq!(extractions.len(), 3);
 
-    assert!(extractions.iter().any(|e|
-        e.markdown_path.to_str().unwrap() == "docs/MY_CONST.md" &&
-        e.content == "A constant"
+    assert!(extractions
+        .iter()
+        .any(|e| e.markdown_path.to_str().unwrap() == "docs/MY_CONST.md"
+            && e.content == "A constant"));
+
+    assert!(extractions.iter().any(
+        |e| e.markdown_path.to_str().unwrap() == "docs/MY_STATIC.md" && e.content == "A static"
     ));
 
-    assert!(extractions.iter().any(|e|
-        e.markdown_path.to_str().unwrap() == "docs/MY_STATIC.md" &&
-        e.content == "A static"
-    ));
-
-    assert!(extractions.iter().any(|e|
-        e.markdown_path.to_str().unwrap() == "docs/MyType.md" &&
-        e.content == "A type alias"
-    ));
+    assert!(extractions
+        .iter()
+        .any(|e| e.markdown_path.to_str().unwrap() == "docs/MyType.md"
+            && e.content == "A type alias"));
 }
 
 #[test]
