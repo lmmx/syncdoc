@@ -4,7 +4,10 @@ use std::path::{Path, PathBuf};
 use textum::{Boundary, BoundaryMode, Snippet, Target};
 
 /// Get a specified attribute from the current crate's Cargo.toml, relative to the source file
-fn get_attribute_from_cargo_toml(cargo_toml_path: &str, attribute: &str) -> Result<Option<String>, Box<dyn std::error::Error>> {
+fn get_attribute_from_cargo_toml(
+    cargo_toml_path: &str,
+    attribute: &str,
+) -> Result<Option<String>, Box<dyn std::error::Error>> {
     let content = fs::read_to_string(cargo_toml_path)?;
     let rope = Rope::from_str(&content);
 
@@ -76,7 +79,9 @@ pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Er
     }
 
     // Calculate number of ".." needed to go from source_dir to manifest_dir
-    let relative_path = source_dir.strip_prefix(&manifest_path).map_err(|_| "Failed to strip prefix")?;
+    let relative_path = source_dir
+        .strip_prefix(&manifest_path)
+        .map_err(|_| "Failed to strip prefix")?;
 
     let depth = relative_path.components().count();
     let mut result = PathBuf::new();
@@ -95,7 +100,9 @@ mod docs_path_tests {
     use std::io::Write;
     use tempfile::NamedTempFile;
 
-    fn get_docs_path_from_file(cargo_toml_path: &str) -> Result<String, Box<dyn std::error::Error>> {
+    fn get_docs_path_from_file(
+        cargo_toml_path: &str,
+    ) -> Result<String, Box<dyn std::error::Error>> {
         let docs_path = get_attribute_from_cargo_toml(cargo_toml_path, "docs-path")?
             .ok_or("docs-path not found")?;
         Ok(docs_path)
@@ -217,7 +224,6 @@ output-format = "markdown"
     }
 }
 
-
 #[cfg(test)]
 mod cfg_attr_tests {
     use super::*;
@@ -244,7 +250,10 @@ name = "myproject"
 
         let result = get_cfg_attr_from_file(temp.path().to_str().unwrap());
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("cfg-attr not found"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("cfg-attr not found"));
     }
 
     #[test]

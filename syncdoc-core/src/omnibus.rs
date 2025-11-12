@@ -23,7 +23,9 @@ pub fn inject_all_docs_impl(
     Ok(TokenProcessor::new(input, base_path, cfg_attr).process())
 }
 
-fn parse_path_from_args(args: TokenStream) -> core::result::Result<(String, Option<String>), String> {
+fn parse_path_from_args(
+    args: TokenStream,
+) -> core::result::Result<(String, Option<String>), String> {
     // If no args provided, try to get from config
     if args.is_empty() {
         let call_site = proc_macro2::Span::call_site();
@@ -43,7 +45,7 @@ fn parse_path_from_args(args: TokenStream) -> core::result::Result<(String, Opti
         Ok(parsed) => {
             let mut path = None;
             let mut cfg_attr = None;
-            
+
             if let Some(arg_list) = parsed.args {
                 for arg in arg_list.0 {
                     match arg.value {
@@ -57,7 +59,7 @@ fn parse_path_from_args(args: TokenStream) -> core::result::Result<(String, Opti
                     }
                 }
             }
-            
+
             let path = if let Some(p) = path {
                 p
             } else {
@@ -71,12 +73,12 @@ fn parse_path_from_args(args: TokenStream) -> core::result::Result<(String, Opti
                     return Err("path argument not found".to_string());
                 }
             };
-            
+
             // If cfg_attr still None, try config
             if cfg_attr.is_none() {
                 cfg_attr = crate::config::get_cfg_attr().ok().flatten();
             }
-            
+
             Ok((path, cfg_attr))
         }
         Err(_e) => Err("Failed to parse arguments".to_string()),

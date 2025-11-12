@@ -4,7 +4,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use unsynn::*;
 
-use crate::parse::{SyncDocArg, SyncDocInner, FnSig};
+use crate::parse::{FnSig, SyncDocArg, SyncDocInner};
 
 pub fn syncdoc_impl(
     args: TokenStream,
@@ -89,7 +89,8 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<SyncDocArgs
                 if args.base_path.is_empty() {
                     // Get the call site's file path if there might be config we could use there
                     let call_site = proc_macro2::Span::call_site();
-                    let source_file = call_site.local_file()
+                    let source_file = call_site
+                        .local_file()
                         .ok_or("Could not determine source file location")?
                         .to_string_lossy()
                         .to_string();
@@ -260,7 +261,11 @@ fn generate_documented_function(args: SyncDocArgs, func: SimpleFunction) -> Toke
 }
 
 /// Injects a doc attribute without parsing the item structure
-pub fn inject_doc_attr(doc_path: String, cfg_attr: Option<String>, item: TokenStream) -> TokenStream {
+pub fn inject_doc_attr(
+    doc_path: String,
+    cfg_attr: Option<String>,
+    item: TokenStream,
+) -> TokenStream {
     if let Some(cfg_value) = cfg_attr {
         let cfg_ident = proc_macro2::Ident::new(&cfg_value, proc_macro2::Span::call_site());
         quote! {
