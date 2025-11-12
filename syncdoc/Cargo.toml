@@ -29,9 +29,8 @@ pkg-fmt = "zip"
 pkg-url = "https://github.com/lmmx/syncdoc/releases/download/syncdoc-v{ version }/syncdoc-x86_64-pc-windows-msvc-v{ version }.zip"
 
 [features]
-cli = ["dep:syncdoc-migrate", "facet"]
+cli = ["dep:facet", "dep:facet-args", "dep:syncdoc-migrate"]
 default = []
-facet = ["dep:facet-args", "dep:facet", "dep:facet-json"]
 
 [lib]
 proc-macro = true
@@ -43,7 +42,6 @@ syncdoc-core = { workspace = true }
 # Optional dependencies for CLI
 facet = { optional = true, workspace = true }
 facet-args = { optional = true, workspace = true }
-facet-json = { optional = true, workspace = true }
 syncdoc-migrate = { optional = true, workspace = true }
 
 [dev-dependencies]
