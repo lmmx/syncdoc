@@ -1,8 +1,8 @@
 // syncdoc-migrate/src/lib.rs
 
 mod extract;
-mod discover;
-mod write;
+pub mod discover;
+pub mod write;
 mod rewrite;
 mod report;
 
