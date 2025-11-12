@@ -270,6 +270,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syncdoc-core",
+ "tempfile",
  "unsynn",
 ]
 

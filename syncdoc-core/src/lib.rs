@@ -1,5 +1,5 @@
 /// syncdoc-core: documentation injection helper macros
-mod config;
+pub mod config;
 pub mod parse;
 mod token_processors;
 

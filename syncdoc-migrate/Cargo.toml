@@ -22,7 +22,7 @@ quote.workspace = true
 # textum.workspace = true
 unsynn.workspace = true
 
-# [dev-dependencies]
+[dev-dependencies]
 # insta.workspace = true
 # rust-format.workspace = true
-# tempfile.workspace = true
+tempfile.workspace = true
