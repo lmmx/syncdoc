@@ -85,6 +85,9 @@ fn test_syncdoc_inner_parsing() {
                         assert_eq!(name_arg.value.as_str(), "custom");
                         found_name = true;
                     }
+                    SyncDocArg::CfgAttr(_) => {
+                        // Not testing cfg-attr in this test
+                    }
                 }
             }
 

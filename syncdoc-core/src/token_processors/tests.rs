@@ -4,7 +4,7 @@ use quote::quote;
 #[test]
 fn test_basic_function_processing() {
     let input = quote! { fn hello() { println!("world"); } };
-    let processor = TokenProcessor::new(input.clone(), "../docs".to_string());
+    let processor = TokenProcessor::new(input.clone(), "../docs".to_string(), None);
     let output = processor.process();
 
     println!("Input: {}", input);
@@ -18,7 +18,7 @@ fn test_basic_function_processing() {
 #[test]
 fn test_async_function_processing() {
     let input = quote! { async fn hello() { println!("world"); } };
-    let processor = TokenProcessor::new(input.clone(), "../docs".to_string());
+    let processor = TokenProcessor::new(input.clone(), "../docs".to_string(), None);
     let output = processor.process();
 
     println!("Input: {}", input);
@@ -45,7 +45,7 @@ fn test_impl_block_processing() {
         }
     };
 
-    let processor = TokenProcessor::new(input.clone(), "../docs".to_string());
+    let processor = TokenProcessor::new(input.clone(), "../docs".to_string(), None);
     let output = processor.process();
 
     println!("Impl block input: {}", input);
@@ -75,7 +75,7 @@ fn test_nested_module_path_construction() {
         }
     };
 
-    let processor = TokenProcessor::new(input.clone(), "../docs".to_string());
+    let processor = TokenProcessor::new(input.clone(), "../docs".to_string(), None);
     let output = processor.process();
 
     println!("Nested module input: {}", input);
@@ -100,7 +100,7 @@ fn test_impl_block_path_construction() {
         }
     };
 
-    let processor = TokenProcessor::new(input.clone(), "../docs".to_string());
+    let processor = TokenProcessor::new(input.clone(), "../docs".to_string(), None);
     let output = processor.process();
 
     println!("Impl path test input: {}", input);
