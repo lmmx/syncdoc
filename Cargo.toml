@@ -10,6 +10,8 @@ members = [
   "examples/demo_struct",
   "examples/demo_submodule",
   "examples/demo_toml_path",
+  "examples/migrate/demo_basic",
+  "examples/migrate/demo_basic_migrated",
   "syncdoc",
   "syncdoc-core",
   "syncdoc-migrate",

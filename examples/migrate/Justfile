@@ -1,0 +1,12 @@
+demo-basic:
+    #!/usr/bin/env bash
+    cargo check -p cli_demo_basic
+    rm -rf demo_basic_migrated
+    cp -r demo_basic demo_basic_migrated
+    sed -i "s/demo_basic/demo_basic_migrated/g" demo_basic_migrated/{Cargo.toml,src/main.rs}
+    just _migrate-basic
+    cargo check -p cli_demo_basic_migrated
+
+[working-directory: 'demo_basic_migrated']
+_migrate-basic:
+    syncdoc
