@@ -1,6 +1,7 @@
+use crate::path_utils::find_manifest_dir;
 use ropey::Rope;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use textum::{Boundary, BoundaryMode, Snippet, Target};
 
 /// Get a specified attribute from the current crate's Cargo.toml, relative to the source file
@@ -47,51 +48,26 @@ fn get_attribute_from_cargo_toml(
     Ok(None) // Attribute not found, return None
 }
 
-/// Get the cfg-attr from the current crate's Cargo.toml, relative to the source file
+/// Get the cfg-attr from the current crate's Cargo.toml
 pub fn get_cfg_attr() -> Result<Option<String>, Box<dyn std::error::Error>> {
-    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
-        .map_err(|_| "CARGO_MANIFEST_DIR not set - must be called from within a Cargo project")?;
+    let manifest_dir = find_manifest_dir(Path::new("."))
+        .ok_or("Could not find Cargo.toml (not in a Cargo project)")?;
 
-    let cargo_toml_path = PathBuf::from(&manifest_dir).join("Cargo.toml");
-    get_attribute_from_cargo_toml(cargo_toml_path.to_str().unwrap(), "cfg-attr")
+    let cargo_toml_path = manifest_dir.join("Cargo.toml");
+    get_attribute_from_cargo_toml(&cargo_toml_path, "cfg-attr")
 }
 
-/// Get the docs-path from the current crate's Cargo.toml, relative to the source file
+/// Get the docs-path from the current crate's Cargo.toml
 pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Error>> {
-    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")?;
+    let source_path = Path::new(source_file);
+    let manifest_dir = find_manifest_dir(source_path)
+        .ok_or("Could not find Cargo.toml (not in a Cargo project)")?;
 
-    let cargo_toml_path = PathBuf::from(&manifest_dir).join("Cargo.toml");
-    let docs_path = get_attribute_from_cargo_toml(cargo_toml_path.to_str().unwrap(), "docs-path")?
+    let cargo_toml_path = manifest_dir.join("Cargo.toml");
+    let docs_path = get_attribute_from_cargo_toml(&cargo_toml_path, "docs-path")?
         .ok_or("docs-path not found")?;
 
-    let manifest_path = Path::new(&manifest_dir).canonicalize()?;
-
-    // Get the source file's directory
-    let source_path = Path::new(source_file);
-    let source_dir = source_path
-        .parent()
-        .ok_or("Source file has no parent directory")?
-        .canonicalize()?;
-
-    // Security check: ensure source_dir is within manifest_dir
-    if !source_dir.starts_with(&manifest_path) {
-        return Err("Source file is outside the manifest directory (security violation)".into());
-    }
-
-    // Calculate number of ".." needed to go from source_dir to manifest_dir
-    let relative_path = source_dir
-        .strip_prefix(&manifest_path)
-        .map_err(|_| "Failed to strip prefix")?;
-
-    let depth = relative_path.components().count();
-    let mut result = PathBuf::new();
-
-    for _ in 0..depth {
-        result.push("..");
-    }
-
-    result.push(&docs_path);
-    Ok(result.to_string_lossy().to_string())
+    Ok(docs_path)
 }
 
 #[cfg(test)]

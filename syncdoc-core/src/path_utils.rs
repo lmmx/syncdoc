@@ -1,12 +1,31 @@
 use std::path::{Path, PathBuf};
 
 /// Find the Cargo manifest directory by walking up from a given path
+/// First tries CARGO_MANIFEST_DIR env var, then walks up the filesystem
 pub fn find_manifest_dir(start_path: &Path) -> Option<PathBuf> {
+    // Try env var first (more reliable during macro expansion)
+    if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
+        return Some(PathBuf::from(manifest_dir));
+    }
+
+    // Fall back to walking up the filesystem
     let mut current = start_path;
+    let root = if cfg!(windows) {
+        // On Windows, stop at drive root (e.g., C:\)
+        current.ancestors().last()
+    } else {
+        // On Unix, stop at /
+        Some(Path::new("/"))
+    };
 
     loop {
         if current.join("Cargo.toml").exists() {
             return Some(current.to_path_buf());
+        }
+
+        if Some(current) == root {
+            // Reached filesystem root without finding Cargo.toml
+            return None;
         }
 
         current = current.parent()?;
