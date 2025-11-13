@@ -5,6 +5,7 @@ use quote::quote;
 use unsynn::*;
 
 use crate::parse::{FnSig, SyncDocArg, SyncDocInner};
+use crate::path_utils::make_manifest_relative_path;
 
 pub fn syncdoc_impl(
     args: TokenStream,
@@ -266,15 +267,19 @@ pub fn inject_doc_attr(
     cfg_attr: Option<String>,
     item: TokenStream,
 ) -> TokenStream {
+    // Get the call site's file path if there might be config we could use there
+    let call_site = proc_macro2::Span::call_site();
+    let local_file = call_site.local_file().expect("Could not find local file");
+    let rel_doc_path = make_manifest_relative_path(&doc_path, &local_file);
     if let Some(cfg_value) = cfg_attr {
         let cfg_ident = proc_macro2::Ident::new(&cfg_value, proc_macro2::Span::call_site());
         quote! {
-            #[cfg_attr(#cfg_ident, doc = include_str!(#doc_path))]
+            #[cfg_attr(#cfg_ident, doc = include_str!(#rel_doc_path))]
             #item
         }
     } else {
         quote! {
-            #[doc = include_str!(#doc_path)]
+            #[doc = include_str!(#rel_doc_path)]
             #item
         }
     }

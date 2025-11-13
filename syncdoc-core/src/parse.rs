@@ -132,12 +132,29 @@ unsynn! {
         pub body: BraceGroup,
     }
 
-    /// Attribute like #[derive(Debug)]
+    /// (Outer) Attribute like #[derive(Debug)]
+    #[derive(Clone)]
     pub struct Attribute {
         /// Hash symbol
         pub _hash: Pound,
         /// Attribute content
         pub content: BracketGroup,
+    }
+
+    /// Inner attribute like #![forbid(unsafe_code)]
+    pub struct InnerAttribute {
+        /// Hash symbol
+        pub _hash: Pound,
+        /// Bang symbol
+        pub _bang: Bang,
+        /// Attribute content
+        pub content: BracketGroup,
+    }
+
+    /// Either an inner or outer attribute
+    pub enum AnyAttribute {
+        Inner(InnerAttribute),
+        Outer(Attribute),
     }
 
     /// Extern specification with optional ABI
@@ -699,6 +716,23 @@ impl quote::ToTokens for Attribute {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         unsynn::ToTokens::to_tokens(&self._hash, tokens);
         unsynn::ToTokens::to_tokens(&self.content, tokens);
+    }
+}
+
+impl quote::ToTokens for InnerAttribute {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        unsynn::ToTokens::to_tokens(&self._hash, tokens);
+        unsynn::ToTokens::to_tokens(&self._bang, tokens);
+        unsynn::ToTokens::to_tokens(&self.content, tokens);
+    }
+}
+
+impl quote::ToTokens for AnyAttribute {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        match self {
+            AnyAttribute::Inner(inner) => quote::ToTokens::to_tokens(inner, tokens),
+            AnyAttribute::Outer(outer) => quote::ToTokens::to_tokens(outer, tokens),
+        }
     }
 }
 

@@ -56,3 +56,6 @@ rust-format.workspace = true
 # [lints.rust]
 # missing_docs = "deny"
 # unsafe_code = "forbid"
+
+[package.metadata.syncdoc]
+docs-path = "docs"

@@ -72,16 +72,16 @@ pub mod inner {
         println!("  -h, --help         Show this help message");
         println!();
         println!("Examples:");
-        println!("  # 'Sync' the docs dir with the docstrings in src/ .");
+        println!("  # 'Sync' the docs dir with the docstrings in src/");
         println!("  syncdoc");
         println!();
-        println!("  # 'Cut' docstrings out of src/ as well as creating in docs/ .");
+        println!("  # 'Cut' docstrings out of src/ as well as creating in docs/");
         println!("  syncdoc --cut (or `-c`)");
         println!();
-        println!("  # 'Cut and paste' by replacing doc comments with omnidoc attributes.");
+        println!("  # 'Cut and paste' by replacing doc comments with omnidoc attributes");
         println!("  syncdoc --cut --add (or `-c -a`)");
         println!();
-        println!("  # Preview what would happen if you ran a 'cut and paste'.");
+        println!("  # Preview what would happen if you ran a 'cut and paste'");
         println!("  syncdoc --cut --add --dry-run (or `-c -a -n`)");
     }
 

@@ -1,190 +1,500 @@
 // syncdoc-migrate/src/rewrite.rs
 
 use crate::discover::ParsedFile;
-use proc_macro2::{TokenStream, TokenTree};
+use crate::extract::is_outer_doc_attr;
+use proc_macro2::TokenStream;
 use quote::quote;
-use syncdoc_core::parse::ModuleItem;
+use syncdoc_core::parse::{Attribute, ModuleItem};
+use unsynn::*;
 
 /// Strips all doc attributes from a token stream while preserving other attributes
+///
+/// This is a convenience function that parses the input, strips doc attributes,
+/// and returns the modified token stream.
 pub fn strip_doc_attrs(item: TokenStream) -> TokenStream {
-    let mut output = TokenStream::new();
-    let tokens: Vec<TokenTree> = item.into_iter().collect();
-    let mut i = 0;
-
-    while i < tokens.len() {
-        // Check if we're at the start of an attribute
-        if matches!(tokens.get(i), Some(TokenTree::Punct(p)) if p.as_char() == '#') {
-            // Look ahead for the bracket
-            if matches!(tokens.get(i + 1), Some(TokenTree::Group(g)) if g.delimiter() == proc_macro2::Delimiter::Bracket)
-            {
-                if let Some(TokenTree::Group(attr_group)) = tokens.get(i + 1) {
-                    // Check if this is a doc attribute
-                    if is_doc_attribute(attr_group.stream()) {
-                        // Skip both the # and the [...] group
-                        i += 2;
-                        continue;
-                    }
-                }
-            }
-        }
-
-        // Not a doc attribute, preserve the token
-        output.extend(std::iter::once(tokens[i].clone()));
-        i += 1;
-    }
-
-    output
-}
-
-/// Recursively strips doc attributes from nested items
-fn strip_doc_attrs_recursive(item: TokenStream) -> TokenStream {
-    let mut output = TokenStream::new();
-    let tokens: Vec<TokenTree> = item.into_iter().collect();
-    let mut i = 0;
-
-    while i < tokens.len() {
-        match &tokens[i] {
-            // Handle attributes
-            TokenTree::Punct(p) if p.as_char() == '#' => {
-                if matches!(tokens.get(i + 1), Some(TokenTree::Group(g)) if g.delimiter() == proc_macro2::Delimiter::Bracket)
-                {
-                    if let Some(TokenTree::Group(attr_group)) = tokens.get(i + 1) {
-                        if is_doc_attribute(attr_group.stream()) {
-                            // Skip doc attribute
-                            i += 2;
-                            continue;
-                        }
-                    }
-                }
-                output.extend(std::iter::once(tokens[i].clone()));
-                i += 1;
-            }
-            // Recursively handle groups (braces, brackets, parens)
-            TokenTree::Group(g) => {
-                let stripped_inner = strip_doc_attrs_recursive(g.stream());
-                let new_group = proc_macro2::Group::new(g.delimiter(), stripped_inner);
-                output.extend(std::iter::once(TokenTree::Group(new_group)));
-                i += 1;
-            }
-            // Pass through other tokens
-            _ => {
-                output.extend(std::iter::once(tokens[i].clone()));
-                i += 1;
-            }
-        }
-    }
-
-    output
-}
-
-/// Checks if an attribute group contains "doc"
-fn is_doc_attribute(attr_content: TokenStream) -> bool {
-    let attr_str = attr_content.to_string();
-
-    // Check for various doc attribute patterns:
-    // - doc = "..."
-    // - doc(hidden)
-    // - cfg_attr(doc, ...)
-
-    // Simple check: starts with "doc" (possibly with whitespace)
-    let trimmed = attr_str.trim_start();
-
-    // Match "doc" as the first identifier
-    if trimmed.starts_with("doc") {
-        // Make sure it's followed by = or ( or whitespace, not part of another word
-        if let Some(next_char) = trimmed.chars().nth(3) {
-            matches!(next_char, '=' | '(' | ' ' | '\t' | '\n')
-        } else {
-            // "doc" at the end
-            true
-        }
-    } else if trimmed.starts_with("cfg_attr") {
-        // Check if cfg_attr contains doc
-        attr_str.contains("doc")
+    // Try to parse as module content
+    if let Ok(content) = item
+        .clone()
+        .into_token_iter()
+        .parse::<syncdoc_core::parse::ModuleContent>()
+    {
+        strip_doc_attrs_from_items(&content)
     } else {
-        false
+        // If parsing fails, return original
+        item
     }
+}
+
+/// Strips all outer doc attributes from parsed items
+/// NEVER strips inner attributes (#![...]) as they document the containing module
+pub fn strip_doc_attrs_from_items(content: &syncdoc_core::parse::ModuleContent) -> TokenStream {
+    let mut output = TokenStream::new();
+
+    for item_delimited in &content.items.0 {
+        let item = &item_delimited.value;
+        let processed = strip_doc_attrs_from_item(item);
+        output.extend(processed);
+    }
+
+    output
+}
+
+/// Strip doc attributes from a single item recursively
+fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
+    match item {
+        ModuleItem::Function(func) => {
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&func.attributes);
+            let mut output = TokenStream::new();
+
+            // Add non-doc attributes
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            // Add rest of function
+            if let Some(vis) = &func.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            if let Some(const_kw) = &func.const_kw {
+                unsynn::ToTokens::to_tokens(const_kw, &mut output);
+            }
+            if let Some(async_kw) = &func.async_kw {
+                unsynn::ToTokens::to_tokens(async_kw, &mut output);
+            }
+            if let Some(unsafe_kw) = &func.unsafe_kw {
+                unsynn::ToTokens::to_tokens(unsafe_kw, &mut output);
+            }
+            if let Some(extern_kw) = &func.extern_kw {
+                unsynn::ToTokens::to_tokens(extern_kw, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&func._fn, &mut output);
+            quote::ToTokens::to_tokens(&func.name, &mut output);
+            if let Some(generics) = &func.generics {
+                unsynn::ToTokens::to_tokens(generics, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&func.params, &mut output);
+            if let Some(ret_type) = &func.return_type {
+                unsynn::ToTokens::to_tokens(ret_type, &mut output);
+            }
+            if let Some(where_clause) = &func.where_clause {
+                unsynn::ToTokens::to_tokens(where_clause, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&func.body, &mut output);
+
+            output
+        }
+
+        ModuleItem::Enum(enum_sig) => {
+            let mut output = TokenStream::new();
+
+            // Strip attributes
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&enum_sig.attributes);
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            if let Some(vis) = &enum_sig.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&enum_sig._enum, &mut output);
+            quote::ToTokens::to_tokens(&enum_sig.name, &mut output);
+            if let Some(generics) = &enum_sig.generics {
+                unsynn::ToTokens::to_tokens(generics, &mut output);
+            }
+            if let Some(where_clause) = &enum_sig.where_clause {
+                unsynn::ToTokens::to_tokens(where_clause, &mut output);
+            }
+
+            // Process enum body - strip docs from variants
+            let body_stream = extract_brace_content(&enum_sig.body);
+            if let Ok(variants) = body_stream
+                .into_token_iter()
+                .parse::<CommaDelimitedVec<syncdoc_core::parse::EnumVariant>>()
+            {
+                let processed_variants = strip_doc_attrs_from_variants(&variants);
+                output.extend(wrap_in_braces(processed_variants));
+            } else {
+                unsynn::ToTokens::to_tokens(&enum_sig.body, &mut output);
+            }
+
+            output
+        }
+
+        ModuleItem::Struct(struct_sig) => {
+            let mut output = TokenStream::new();
+
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&struct_sig.attributes);
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            if let Some(vis) = &struct_sig.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&struct_sig._struct, &mut output);
+            quote::ToTokens::to_tokens(&struct_sig.name, &mut output);
+            if let Some(generics) = &struct_sig.generics {
+                unsynn::ToTokens::to_tokens(generics, &mut output);
+            }
+            if let Some(where_clause) = &struct_sig.where_clause {
+                unsynn::ToTokens::to_tokens(where_clause, &mut output);
+            }
+
+            // Process struct body - strip docs from fields
+            match &struct_sig.body {
+                syncdoc_core::parse::StructBody::Named(brace) => {
+                    let body_stream = extract_brace_content(brace);
+                    if let Ok(fields) = body_stream
+                        .into_token_iter()
+                        .parse::<CommaDelimitedVec<syncdoc_core::parse::StructField>>()
+                    {
+                        let processed_fields = strip_doc_attrs_from_fields(&fields);
+                        output.extend(wrap_in_braces(processed_fields));
+                    } else {
+                        unsynn::ToTokens::to_tokens(brace, &mut output);
+                    }
+                }
+                syncdoc_core::parse::StructBody::Tuple(tuple) => {
+                    unsynn::ToTokens::to_tokens(tuple, &mut output);
+                }
+                syncdoc_core::parse::StructBody::Unit(semi) => {
+                    unsynn::ToTokens::to_tokens(semi, &mut output);
+                }
+            }
+
+            output
+        }
+
+        ModuleItem::Module(module) => {
+            let mut output = TokenStream::new();
+
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&module.attributes);
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            if let Some(vis) = &module.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&module._mod, &mut output);
+            quote::ToTokens::to_tokens(&module.name, &mut output);
+
+            // Recursively process module body
+            let body_stream = extract_brace_content(&module.body);
+            if let Ok(content) = body_stream
+                .into_token_iter()
+                .parse::<syncdoc_core::parse::ModuleContent>()
+            {
+                let processed = strip_doc_attrs_from_items(&content);
+                output.extend(wrap_in_braces(processed));
+            } else {
+                unsynn::ToTokens::to_tokens(&module.body, &mut output);
+            }
+
+            output
+        }
+
+        ModuleItem::ImplBlock(impl_block) => {
+            let mut output = TokenStream::new();
+
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&impl_block.attributes);
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            unsynn::ToTokens::to_tokens(&impl_block._impl, &mut output);
+            if let Some(generics) = &impl_block.generics {
+                unsynn::ToTokens::to_tokens(generics, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&impl_block.target_type, &mut output);
+            if let Some(for_trait) = &impl_block.for_trait {
+                unsynn::ToTokens::to_tokens(for_trait, &mut output);
+            }
+            if let Some(where_clause) = &impl_block.where_clause {
+                unsynn::ToTokens::to_tokens(where_clause, &mut output);
+            }
+
+            // Recursively process impl body
+            let body_stream = extract_brace_content(&impl_block.body);
+            if let Ok(content) = body_stream
+                .into_token_iter()
+                .parse::<syncdoc_core::parse::ModuleContent>()
+            {
+                let processed = strip_doc_attrs_from_items(&content);
+                output.extend(wrap_in_braces(processed));
+            } else {
+                unsynn::ToTokens::to_tokens(&impl_block.body, &mut output);
+            }
+
+            output
+        }
+
+        ModuleItem::Trait(trait_def) => {
+            let mut output = TokenStream::new();
+
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&trait_def.attributes);
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            if let Some(vis) = &trait_def.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            if let Some(unsafe_kw) = &trait_def.unsafe_kw {
+                unsynn::ToTokens::to_tokens(unsafe_kw, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&trait_def._trait, &mut output);
+            quote::ToTokens::to_tokens(&trait_def.name, &mut output);
+            if let Some(generics) = &trait_def.generics {
+                unsynn::ToTokens::to_tokens(generics, &mut output);
+            }
+            if let Some(bounds) = &trait_def.bounds {
+                unsynn::ToTokens::to_tokens(bounds, &mut output);
+            }
+            if let Some(where_clause) = &trait_def.where_clause {
+                unsynn::ToTokens::to_tokens(where_clause, &mut output);
+            }
+
+            // Recursively process trait body
+            let body_stream = extract_brace_content(&trait_def.body);
+            if let Ok(content) = body_stream
+                .into_token_iter()
+                .parse::<syncdoc_core::parse::ModuleContent>()
+            {
+                let processed = strip_doc_attrs_from_items(&content);
+                output.extend(wrap_in_braces(processed));
+            } else {
+                unsynn::ToTokens::to_tokens(&trait_def.body, &mut output);
+            }
+
+            output
+        }
+
+        ModuleItem::TypeAlias(type_alias) => {
+            let mut output = TokenStream::new();
+
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&type_alias.attributes);
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            if let Some(vis) = &type_alias.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&type_alias._type, &mut output);
+            quote::ToTokens::to_tokens(&type_alias.name, &mut output);
+            if let Some(generics) = &type_alias.generics {
+                unsynn::ToTokens::to_tokens(generics, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&type_alias._eq, &mut output);
+            unsynn::ToTokens::to_tokens(&type_alias.target, &mut output);
+            unsynn::ToTokens::to_tokens(&type_alias._semi, &mut output);
+
+            output
+        }
+
+        ModuleItem::Const(const_sig) => {
+            let mut output = TokenStream::new();
+
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&const_sig.attributes);
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            if let Some(vis) = &const_sig.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&const_sig._const, &mut output);
+            quote::ToTokens::to_tokens(&const_sig.name, &mut output);
+            unsynn::ToTokens::to_tokens(&const_sig._colon, &mut output);
+            unsynn::ToTokens::to_tokens(&const_sig.const_type, &mut output);
+            unsynn::ToTokens::to_tokens(&const_sig._eq, &mut output);
+            unsynn::ToTokens::to_tokens(&const_sig.value, &mut output);
+            unsynn::ToTokens::to_tokens(&const_sig._semi, &mut output);
+
+            output
+        }
+
+        ModuleItem::Static(static_sig) => {
+            let mut output = TokenStream::new();
+
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&static_sig.attributes);
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            if let Some(vis) = &static_sig.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            if let Some(mut_kw) = &static_sig.mut_kw {
+                unsynn::ToTokens::to_tokens(mut_kw, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&static_sig._static, &mut output);
+            quote::ToTokens::to_tokens(&static_sig.name, &mut output);
+            unsynn::ToTokens::to_tokens(&static_sig._colon, &mut output);
+            unsynn::ToTokens::to_tokens(&static_sig.static_type, &mut output);
+            unsynn::ToTokens::to_tokens(&static_sig._eq, &mut output);
+            unsynn::ToTokens::to_tokens(&static_sig.value, &mut output);
+            unsynn::ToTokens::to_tokens(&static_sig._semi, &mut output);
+
+            output
+        }
+
+        ModuleItem::Other(token) => {
+            let mut output = TokenStream::new();
+            unsynn::ToTokens::to_tokens(token, &mut output);
+            output
+        }
+    }
+}
+
+/// Filter out doc attributes from an attribute list
+fn strip_doc_attrs_from_attr_list(attrs: &Option<unsynn::Many<Attribute>>) -> Vec<Attribute> {
+    let Some(attr_list) = attrs else {
+        return Vec::new();
+    };
+
+    attr_list
+        .0
+        .iter()
+        .filter_map(|attr_delimited| {
+            let attr = &attr_delimited.value;
+            if is_outer_doc_attr(attr) {
+                None // Filter out doc attributes
+            } else {
+                Some(attr.clone()) // Keep non-doc attributes
+            }
+        })
+        .collect()
+}
+
+fn strip_doc_attrs_from_variants(
+    variants: &CommaDelimitedVec<syncdoc_core::parse::EnumVariant>,
+) -> TokenStream {
+    let mut output = TokenStream::new();
+
+    for (idx, variant_delimited) in variants.0.iter().enumerate() {
+        let variant = &variant_delimited.value;
+
+        // Strip variant attributes
+        let stripped_attrs = strip_doc_attrs_from_attr_list(&variant.attributes);
+        for attr in stripped_attrs {
+            quote::ToTokens::to_tokens(&attr, &mut output);
+        }
+
+        quote::ToTokens::to_tokens(&variant.name, &mut output);
+        if let Some(data) = &variant.data {
+            quote::ToTokens::to_tokens(data, &mut output);
+        }
+
+        if idx < variants.0.len() - 1 {
+            output.extend(quote! { , });
+        }
+    }
+
+    output
+}
+
+fn strip_doc_attrs_from_fields(
+    fields: &CommaDelimitedVec<syncdoc_core::parse::StructField>,
+) -> TokenStream {
+    let mut output = TokenStream::new();
+
+    for (idx, field_delimited) in fields.0.iter().enumerate() {
+        let field = &field_delimited.value;
+
+        // Strip field attributes
+        let stripped_attrs = strip_doc_attrs_from_attr_list(&field.attributes);
+        for attr in stripped_attrs {
+            quote::ToTokens::to_tokens(&attr, &mut output);
+        }
+
+        if let Some(vis) = &field.visibility {
+            quote::ToTokens::to_tokens(vis, &mut output);
+        }
+        quote::ToTokens::to_tokens(&field.name, &mut output);
+        unsynn::ToTokens::to_tokens(&field._colon, &mut output);
+        unsynn::ToTokens::to_tokens(&field.field_type, &mut output);
+
+        if idx < fields.0.len() - 1 {
+            output.extend(quote! { , });
+        }
+    }
+
+    output
+}
+
+fn extract_brace_content(brace_group: &unsynn::BraceGroup) -> TokenStream {
+    let mut ts = TokenStream::new();
+    unsynn::ToTokens::to_tokens(brace_group, &mut ts);
+    if let Some(proc_macro2::TokenTree::Group(g)) = ts.into_iter().next() {
+        g.stream()
+    } else {
+        TokenStream::new()
+    }
+}
+
+fn wrap_in_braces(content: TokenStream) -> TokenStream {
+    let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, content);
+    std::iter::once(proc_macro2::TokenTree::Group(group)).collect()
 }
 
 /// Injects `#[omnidoc(path = "...")]` attribute into an item's token stream
-///
-/// The path should be the docs root directory, not the specific file.
-/// omnidoc automatically finds the right file based on the item name.
-///
-/// Places the attribute after visibility modifiers but before other attributes.
 pub fn inject_omnidoc_attr(item: TokenStream, docs_root: &str) -> TokenStream {
-    let tokens: Vec<TokenTree> = item.into_iter().collect();
     let mut output = TokenStream::new();
-    let mut vis_end_idx = 0;
 
-    // Find the end of visibility modifiers
-    let mut i = 0;
-    while i < tokens.len() {
-        if let Some(TokenTree::Ident(ident)) = tokens.get(i) {
-            if *ident == "pub" {
-                vis_end_idx = i + 1;
+    // Parse to find where to inject (after attributes, before visibility/keywords)
+    if let Ok(content) = item
+        .clone()
+        .into_token_iter()
+        .parse::<syncdoc_core::parse::ModuleContent>()
+    {
+        if let Some(first_item) = content.items.0.first() {
+            // Get attributes from the parsed item
+            let attrs_opt = match &first_item.value {
+                ModuleItem::Function(f) => &f.attributes,
+                ModuleItem::Enum(e) => &e.attributes,
+                ModuleItem::Struct(s) => &s.attributes,
+                ModuleItem::Module(m) => &m.attributes,
+                ModuleItem::Trait(t) => &t.attributes,
+                ModuleItem::ImplBlock(i) => &i.attributes,
+                ModuleItem::TypeAlias(ta) => &ta.attributes,
+                ModuleItem::Const(c) => &c.attributes,
+                ModuleItem::Static(s) => &s.attributes,
+                _ => &None,
+            };
 
-                // Check for pub(crate), pub(super), etc.
-                if let Some(TokenTree::Group(g)) = tokens.get(i + 1) {
-                    if g.delimiter() == proc_macro2::Delimiter::Parenthesis {
-                        vis_end_idx = i + 2;
-                    }
+            // Emit existing attributes
+            if let Some(attrs) = attrs_opt {
+                for attr in &attrs.0 {
+                    quote::ToTokens::to_tokens(&attr.value, &mut output);
                 }
-                break;
             }
-        }
 
-        // If we hit an attribute or keyword, we're past visibility
-        if matches!(tokens.get(i), Some(TokenTree::Punct(p)) if p.as_char() == '#') {
-            break;
-        }
-        if let Some(TokenTree::Ident(ident)) = tokens.get(i) {
-            let ident_str = ident.to_string();
-            if matches!(
-                ident_str.as_str(),
-                "fn" | "struct"
-                    | "enum"
-                    | "trait"
-                    | "impl"
-                    | "mod"
-                    | "const"
-                    | "static"
-                    | "type"
-                    | "async"
-                    | "unsafe"
-                    | "extern"
-            ) {
-                break;
-            }
-        }
+            // Inject omnidoc attribute
+            let attr = quote! {
+                #[syncdoc::omnidoc(path = #docs_root)]
+            };
+            output.extend(attr);
 
-        i += 1;
+            // Emit the rest of the item without its attributes
+            // (this is complex - for now just re-emit the whole thing)
+            // TODO: proper reconstruction without attributes
+            output.extend(item);
+            return output;
+        }
     }
 
-    // Add tokens up to visibility end
-    output.extend(tokens[..vis_end_idx].iter().cloned());
-
-    // Add the omnidoc attribute with docs root
+    // Fallback: inject at the beginning
     let attr = quote! {
-        #[omnidoc(path = #docs_root)]
+        #[syncdoc::omnidoc(path = #docs_root)]
     };
     output.extend(attr);
-
-    // Add the rest of the tokens
-    output.extend(tokens[vis_end_idx..].iter().cloned());
-
+    output.extend(item);
     output
 }
 
 /// Rewrites a parsed file by stripping doc attrs and/or injecting omnidoc attributes
-///
-/// Returns `None` if neither strip nor annotate is requested (no rewrite needed).
-/// Returns `Some(String)` with the rewritten source code otherwise.
-///
-/// **All items get `#[omnidoc(path = docs_root)]`**, which:
-/// - For containers (modules, impls, traits, structs with fields, enums with variants):
-///   automatically documents the container and all its children
-/// - For leaf items (functions, type aliases, etc.): acts like syncdoc and documents just that item
 pub fn rewrite_file(
     parsed: &ParsedFile,
     docs_root: &str,
@@ -195,55 +505,51 @@ pub fn rewrite_file(
         return None;
     }
 
-    let mut output = TokenStream::new();
+    let mut output = if strip {
+        strip_doc_attrs_from_items(&parsed.content)
+    } else {
+        let mut ts = TokenStream::new();
+        quote::ToTokens::to_tokens(&parsed.content, &mut ts);
+        ts
+    };
 
-    for item_delimited in &parsed.content.items.0 {
-        let item = &item_delimited.value;
-        let mut item_tokens = TokenStream::new();
-        unsynn::ToTokens::to_tokens(item, &mut item_tokens);
+    if annotate {
+        // Re-parse and inject omnidoc into each item
+        if let Ok(content) = output
+            .clone()
+            .into_token_iter()
+            .parse::<syncdoc_core::parse::ModuleContent>()
+        {
+            let mut annotated = TokenStream::new();
+            for item_delimited in &content.items.0 {
+                let mut item_ts = TokenStream::new();
+                quote::ToTokens::to_tokens(&item_delimited.value, &mut item_ts);
 
-        // Apply strip if requested (recursively strips from nested items too)
-        if strip {
-            item_tokens = strip_doc_attrs_recursive(item_tokens);
-        }
+                // Only annotate named items
+                let should_annotate = matches!(
+                    &item_delimited.value,
+                    ModuleItem::Function(_)
+                        | ModuleItem::Enum(_)
+                        | ModuleItem::Struct(_)
+                        | ModuleItem::Module(_)
+                        | ModuleItem::Trait(_)
+                        | ModuleItem::ImplBlock(_)
+                        | ModuleItem::TypeAlias(_)
+                        | ModuleItem::Const(_)
+                        | ModuleItem::Static(_)
+                );
 
-        // Apply annotation if requested
-        // All items get omnidoc with the docs root path
-        if annotate {
-            // Only annotate items that have names (skip Other variants)
-            if get_item_name(item).is_some() {
-                item_tokens = inject_omnidoc_attr(item_tokens, docs_root);
+                if should_annotate {
+                    annotated.extend(inject_omnidoc_attr(item_ts, docs_root));
+                } else {
+                    annotated.extend(item_ts);
+                }
             }
+            output = annotated;
         }
-
-        output.extend(item_tokens);
     }
 
     Some(output.to_string())
-}
-
-/// Extracts the name from a module item
-fn get_item_name(item: &ModuleItem) -> Option<String> {
-    match item {
-        ModuleItem::Function(f) => Some(f.name.to_string()),
-        ModuleItem::Module(m) => Some(m.name.to_string()),
-        ModuleItem::Trait(t) => Some(t.name.to_string()),
-        ModuleItem::Enum(e) => Some(e.name.to_string()),
-        ModuleItem::Struct(s) => Some(s.name.to_string()),
-        ModuleItem::TypeAlias(ta) => Some(ta.name.to_string()),
-        ModuleItem::Const(c) => Some(c.name.to_string()),
-        ModuleItem::Static(s) => Some(s.name.to_string()),
-        ModuleItem::ImplBlock(impl_block) => {
-            // Extract type name from target_type
-            if let Some(first) = impl_block.target_type.0.first() {
-                if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
-                    return Some(ident.to_string());
-                }
-            }
-            None
-        }
-        ModuleItem::Other(_) => None,
-    }
 }
 
 #[cfg(test)]

@@ -30,6 +30,37 @@ pub fn has_doc_attrs(attrs: &Option<Many<Attribute>>) -> bool {
     extract_doc_content(attrs).is_some()
 }
 
+/// Checks if a BracketGroup contains a doc attribute
+/// This properly parses the attribute content instead of string manipulation
+pub fn is_doc_attribute_bracket(bracket: &BracketGroup) -> bool {
+    // Extract the token stream from the bracket group
+    let mut ts = TokenStream::new();
+    unsynn::ToTokens::to_tokens(bracket, &mut ts);
+
+    // Get the content inside the brackets
+    let content = if let Some(proc_macro2::TokenTree::Group(g)) = ts.into_iter().next() {
+        g.stream()
+    } else {
+        return false;
+    };
+
+    // Try to parse as tokens and check first ident
+    let tokens: Vec<proc_macro2::TokenTree> = content.into_iter().collect();
+
+    if let Some(proc_macro2::TokenTree::Ident(ident)) = tokens.first() {
+        let ident_str = ident.to_string();
+        // Only check the identifier itself
+        ident_str == "doc" || ident_str == "cfg_attr"
+    } else {
+        false
+    }
+}
+
+/// Checks if an outer attribute is a doc attribute
+pub fn is_outer_doc_attr(attr: &syncdoc_core::parse::Attribute) -> bool {
+    is_doc_attribute_bracket(&attr.content)
+}
+
 /// Extracts doc content from a single attribute
 fn extract_from_single_attr(attr: &Attribute) -> Option<String> {
     let mut tokens = TokenStream::new();

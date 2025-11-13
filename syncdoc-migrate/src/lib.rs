@@ -10,7 +10,3 @@ pub use discover::{discover_rust_files, get_or_create_docs_path, parse_file, Par
 pub use extract::{extract_doc_content, has_doc_attrs};
 pub use rewrite::{inject_omnidoc_attr, rewrite_file, strip_doc_attrs};
 pub use write::{extract_all_docs, write_extractions, DocExtraction, WriteReport};
-
-pub fn migrate() {
-    // implementation will go here
-}

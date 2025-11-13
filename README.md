@@ -128,15 +128,15 @@ syncdoc
 ```
 - 'Cut' docstrings out of src/ as well as creating in docs/
 ```sh
-syncdoc --cut # or -c
+syncdoc --cut # or `-c`
 ```
 - 'Cut and paste' by replacing doc comments with omnidoc attributes
 ```sh
-syncdoc --cut --add # or -ca
+syncdoc --cut --add # or `-c -a`
 ```
 - Preview what would happen
 ```sh
-syncdoc --cut --add --dry-run # or -can
+syncdoc --cut --add --dry-run # or `-c -a -n`
 ```
 
 ### Usage
