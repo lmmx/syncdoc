@@ -1,6 +1,6 @@
 #![doc = include_str!("../docs/lib.md")]
 
-#[syncdoc::omnidoc(path = "../docs")]
+#[syncdoc::omnidoc(path = "docs")]
 mod calc {
     pub fn fibonacci(n: u64) -> u64 {
         if n <= 1 {

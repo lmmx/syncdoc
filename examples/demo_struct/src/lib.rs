@@ -2,7 +2,7 @@
 
 use syncdoc::omnidoc;
 
-#[omnidoc(path = "../docs")]
+#[omnidoc(path = "docs")]
 #[derive(Debug)]
 pub struct Settings {
     pub name: String,

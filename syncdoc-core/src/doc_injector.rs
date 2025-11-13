@@ -313,7 +313,7 @@ mod tests {
 
     #[test]
     fn test_basic_doc_injection() {
-        let args = quote!(path = "../docs");
+        let args = quote!(path = "docs");
         let item = quote! {
             fn test_function(x: u32) -> u32 {
                 x + 1
@@ -333,7 +333,7 @@ mod tests {
 
     #[test]
     fn test_custom_name() {
-        let args = quote!(path = "../docs", name = "custom");
+        let args = quote!(path = "docs", name = "custom");
         let item = quote! {
             fn test_function() {}
         };
@@ -349,7 +349,7 @@ mod tests {
 
     #[test]
     fn test_async_function_doc() {
-        let args = quote!(path = "../docs");
+        let args = quote!(path = "docs");
         let item = quote! {
             async fn test_async() {
                 println!("async test");
@@ -368,7 +368,7 @@ mod tests {
 
     #[test]
     fn test_unsafe_function_doc() {
-        let args = quote!(path = "../docs");
+        let args = quote!(path = "docs");
         let item = quote! {
             unsafe fn test_unsafe() {
                 println!("unsafe test");
@@ -387,7 +387,7 @@ mod tests {
 
     #[test]
     fn test_pub_async_function_doc() {
-        let args = quote!(path = "../docs");
+        let args = quote!(path = "docs");
         let item = quote! {
             pub async fn test_pub_async() {
                 println!("pub async test");

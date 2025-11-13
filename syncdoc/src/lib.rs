@@ -29,7 +29,7 @@ use proc_macro2::TokenStream as TokenStream2;
 /// With a custom name:
 /// ```ignore
 /// # use syncdoc::syncdoc;
-/// #[syncdoc(path = "../docs", name = "custom_name")]
+/// #[syncdoc(path = "docs", name = "custom_name")]
 /// pub fn my_function() {
 ///     // Will look for ../docs/custom_name.md
 /// }
@@ -56,7 +56,7 @@ pub fn syncdoc(args: TokenStream, item: TokenStream) -> TokenStream {
 /// Document all functions in a module:
 /// ```ignore
 /// # use syncdoc::omnidoc;
-/// #[omnidoc(path = "../docs")]
+/// #[omnidoc(path = "docs")]
 /// mod my_module {
 ///     pub fn function_one(x: i32) {
 ///         // Docs from ../docs/my_module/function_one.md
@@ -75,7 +75,7 @@ pub fn syncdoc(args: TokenStream, item: TokenStream) -> TokenStream {
 /// # use syncdoc::omnidoc;
 /// struct MyStruct;
 ///
-/// #[omnidoc(path = "../docs")]
+/// #[omnidoc(path = "docs")]
 /// impl MyStruct {
 ///     pub fn method_one(&self, value: String) {
 ///         // Docs from ../docs/MyStruct/method_one.md

@@ -42,7 +42,7 @@ fn test_async_function() {
 
 #[test]
 fn test_path_arg_parsing() {
-    let input = quote!(path = "../docs");
+    let input = quote!(path = "docs");
     let mut iter = input.into_token_iter();
 
     match iter.parse::<SyncDocInner>() {
@@ -63,7 +63,7 @@ fn test_path_arg_parsing() {
 
 #[test]
 fn test_syncdoc_inner_parsing() {
-    let input = quote!(path = "../docs", name = "custom");
+    let input = quote!(path = "docs", name = "custom");
     let mut iter = input.into_token_iter();
 
     match iter.parse::<SyncDocInner>() {
