@@ -109,6 +109,8 @@ pub(crate) fn hello() {
 #[test]
 fn test_impl_block_methods() {
     let code = r#"
+struct MyStruct;
+
 impl MyStruct {
     fn method(&self) {
         println!("method");
@@ -139,7 +141,8 @@ trait MyTrait {
 
     unsafe fn unsafe_trait_method();
 
-    const fn const_trait_method() -> i32 {
+    // Remove const fn - not allowed in traits in stable Rust
+    fn regular_trait_method() -> i32 {
         0
     }
 }

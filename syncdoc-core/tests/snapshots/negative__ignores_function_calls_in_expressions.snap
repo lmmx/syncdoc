@@ -1,11 +1,33 @@
 ---
 source: syncdoc-core/tests/negative.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_ignores_function_calls\", code)"
 ---
-# [doc = include_str ! ("../docs/outer_function.md")]
+#![doc = include_str!("../docs/lib.md")]
+
+
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
+fn some_fn_call() -> i32 { 42 }
+fn another_fn_call(_x: i32, _y: &str) {}
+
+mod nested {
+    pub mod module {
+        pub fn fn_call() {}
+    }
+}
+
+struct Obj;
+impl Obj {
+    fn method_fn_call(&self) {}
+}
+
 fn outer_function() {
     let result = some_fn_call();
     another_fn_call(42, "hello");
     nested::module::fn_call();
+    let obj = Obj;
     obj.method_fn_call();
 }

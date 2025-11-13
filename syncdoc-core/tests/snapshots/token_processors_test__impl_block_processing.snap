@@ -4,12 +4,14 @@ expression: result
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-
+struct MyStruct;
 
 use syncdoc::omnidoc;
 
 #[omnidoc(path = "docs")]
 
-async fn hello() {
-    println!("world");
+impl MyStruct {
+    fn method(&self) {
+        println!("method");
+    }
 }

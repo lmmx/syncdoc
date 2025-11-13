@@ -1,27 +1,46 @@
 ---
 source: syncdoc-core/tests/negative.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_complex_edge_cases\", code)"
 ---
-# [doc = include_str ! ("../docs/legitimate_function.md")]
+#![doc = include_str!("../docs/lib.md")]
+
+
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
+fn some_function_call() {}
+fn another_fn_call() {}
+fn yet_another_fn_call() {}
+fn final_fn_call() {}
+
+enum Pattern {
+    Variant
+}
+
 fn legitimate_function() {
+    // fn this_is_just_a_comment
     let variable = "fn not_a_function";
     some_function_call();
+
+    let condition = true;
     if condition {
         another_fn_call();
     }
+
+    let value = Pattern::Variant;
     match value {
-        Pattern => yet_another_fn_call(),
-        _ => final_fn_call(),
+        Pattern::Variant => yet_another_fn_call(),
     }
 }
-# [doc = include_str ! ("../docs/MyStruct.md")]
+
 struct MyStruct {
-    # [doc = include_str ! ("../docs/MyStruct/field.md")]
     field: String,
 }
-# [doc = include_str ! ("../docs/CODE_SAMPLE.md")]
+
 const CODE_SAMPLE: &str = r#"
-            fn example() {
-                println!("This fn is in a string");
-            }
-        "#;
+    fn example() {
+        println!("This fn is in a string");
+    }
+"#;

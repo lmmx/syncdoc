@@ -1,13 +1,15 @@
 ---
 source: syncdoc-core/tests/basic.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_ignores_non_functions\", code)"
 ---
-# [doc = include_str ! ("../docs/x.md")]
-const x: String = "fn not_a_function";
-# [doc = include_str ! ("../docs/Foo.md")]
-struct Foo {
-    # [doc = include_str ! ("../docs/Foo/field.md")]
-    field: i32,
-}
-# [doc = include_str ! ("../docs/actual_function.md")]
+#![doc = include_str!("../docs/lib.md")]
+
+
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
+const x: &str = "fn not_a_function";
+struct Foo { field: i32 }
 fn actual_function() {}

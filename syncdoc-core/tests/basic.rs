@@ -59,7 +59,7 @@ fn generic<T: Clone>(value: T) -> T {
 #[test]
 fn test_ignores_non_functions() {
     let code = r#"
-const x: String = "fn not_a_function";
+const x: &str = "fn not_a_function";
 struct Foo { field: i32 }
 fn actual_function() {}
 "#;
@@ -116,6 +116,10 @@ impl Calculator {
 #[test]
 fn test_impl_block_with_generics() {
     let code = r#"
+struct Container<T> {
+    inner: T,
+}
+
 impl<T> Container<T>
 where
     T: Clone + std::fmt::Debug,

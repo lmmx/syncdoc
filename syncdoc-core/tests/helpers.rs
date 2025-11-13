@@ -48,20 +48,73 @@ docs-path = "docs"
     }
 
     pub fn write_lib(&self, code: &str) {
+        // First, extract any existing type definitions from the code to avoid duplicates
+        let existing_types = self.extract_existing_types(code);
+
+        // Create dummy types, excluding ones that already exist
+        let dummy_types = self.create_dummy_types_str(code, &existing_types);
+
         let full_content = format!(
-            r#"
-#![doc = include_str!("../docs/lib.md")]
+            r#"#![doc = include_str!("../docs/lib.md")]
+
+{}
 
 use syncdoc::omnidoc;
 
 #[omnidoc(path = "docs")]
 {}"#,
-            code
+            dummy_types, code
         );
         fs::write(self.root.join("src/lib.rs"), full_content).unwrap();
+    }
 
-        // After writing, add dummy type definitions
-        self.create_dummy_types(code);
+    fn extract_existing_types(&self, code: &str) -> std::collections::HashSet<String> {
+        let mut types = std::collections::HashSet::new();
+
+        for line in code.lines() {
+            let trimmed = line.trim();
+
+            // Extract struct names
+            if let Some(struct_start) = trimmed
+                .strip_prefix("struct ")
+                .or(trimmed.strip_prefix("pub struct "))
+            {
+                if let Some(name) = struct_start
+                    .split(|c: char| c.is_whitespace() || c == '{' || c == ';' || c == '<')
+                    .next()
+                {
+                    types.insert(name.trim().to_string());
+                }
+            }
+
+            // Extract trait names
+            if let Some(trait_start) = trimmed
+                .strip_prefix("trait ")
+                .or(trimmed.strip_prefix("pub trait "))
+            {
+                if let Some(name) = trait_start
+                    .split(|c: char| c.is_whitespace() || c == '{' || c == '<')
+                    .next()
+                {
+                    types.insert(name.trim().to_string());
+                }
+            }
+
+            // Extract enum names
+            if let Some(enum_start) = trimmed
+                .strip_prefix("enum ")
+                .or(trimmed.strip_prefix("pub enum "))
+            {
+                if let Some(name) = enum_start
+                    .split(|c: char| c.is_whitespace() || c == '{' || c == '<')
+                    .next()
+                {
+                    types.insert(name.trim().to_string());
+                }
+            }
+        }
+
+        types
     }
 
     pub fn write_doc(&self, relative_path: &str, content: &str) {
@@ -330,19 +383,22 @@ use syncdoc::omnidoc;
     }
 
     /// Creates dummy type definitions for impl blocks to compile
-    fn create_dummy_types(&self, code: &str) {
+    fn create_dummy_types_str(
+        &self,
+        code: &str,
+        existing_types: &std::collections::HashSet<String>,
+    ) -> String {
         let mut types_to_define = Vec::new();
 
-        // Find all impl blocks and extract the type names
         for line in code.lines() {
             let trimmed = line.trim();
             if trimmed.starts_with("impl ") || trimmed.starts_with("impl<") {
                 let impl_part = trimmed.split('{').next().unwrap_or("");
 
                 if let Some(for_pos) = impl_part.find(" for ") {
-                    // "impl Trait for Type" - need both
-                    let trait_part = &impl_part[4..for_pos].trim();
-                    let type_part = &impl_part[for_pos + 5..].trim();
+                    // "impl Trait for Type"
+                    let trait_part = impl_part[4..for_pos].trim();
+                    let type_part = impl_part[for_pos + 5..].trim();
 
                     // Extract trait name
                     let trait_name = trait_part
@@ -354,7 +410,11 @@ use syncdoc::omnidoc;
                         .next()
                         .unwrap_or("")
                         .trim();
-                    if !trait_name.is_empty() && trait_name.chars().next().unwrap().is_uppercase() {
+
+                    if !trait_name.is_empty()
+                        && trait_name.chars().next().unwrap().is_uppercase()
+                        && !existing_types.contains(trait_name)
+                    {
                         types_to_define.push(format!("trait {} {{}}", trait_name));
                     }
 
@@ -367,33 +427,30 @@ use syncdoc::omnidoc;
                         .next()
                         .unwrap_or("")
                         .trim();
-                    if !type_name.is_empty() && type_name.chars().next().unwrap().is_uppercase() {
+
+                    if !type_name.is_empty()
+                        && type_name.chars().next().unwrap().is_uppercase()
+                        && !existing_types.contains(type_name)
+                    {
                         types_to_define.push(format!("struct {};", type_name));
                     }
                 } else {
                     // "impl Type" or "impl<T> Type"
                     let parts: Vec<&str> = impl_part.split_whitespace().collect();
                     if let Some(last) = parts.last() {
-                        let type_name = last
-                            .split('<')
-                            .next()
-                            .unwrap_or(last)
-                            .split('{')
-                            .next()
-                            .unwrap_or("")
-                            .trim();
+                        let type_name = last.split('<').next().unwrap_or(last).trim();
+
                         if !type_name.is_empty()
                             && type_name
                                 .chars()
                                 .next()
                                 .map(|c| c.is_uppercase())
                                 .unwrap_or(false)
+                            && !existing_types.contains(type_name)
                         {
-                            // Check if it has generics in the original
                             if impl_part.contains('<') && !impl_part.starts_with("impl<") {
-                                // Type has generics like Container<T>
                                 types_to_define
-                                    .push(format!("struct {}<T> {{ inner: T }}", type_name));
+                                    .push(format!("struct {}<T> {{ _inner: T }}", type_name));
                             } else {
                                 types_to_define.push(format!("struct {};", type_name));
                             }
@@ -403,13 +460,6 @@ use syncdoc::omnidoc;
             }
         }
 
-        // Prepend type definitions to the library
-        if !types_to_define.is_empty() {
-            let existing_content =
-                fs::read_to_string(self.root.join("src/lib.rs")).unwrap_or_default();
-            let type_defs = types_to_define.join("\n");
-            let new_content = format!("{}\n\n{}", type_defs, existing_content);
-            fs::write(self.root.join("src/lib.rs"), new_content).unwrap();
-        }
+        types_to_define.join("\n")
     }
 }

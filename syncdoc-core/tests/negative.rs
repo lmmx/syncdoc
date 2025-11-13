@@ -21,10 +21,25 @@ fn test_with_code(name: &str, code: &str) -> String {
 #[test]
 fn test_ignores_function_calls_in_expressions() {
     let code = r#"
+fn some_fn_call() -> i32 { 42 }
+fn another_fn_call(_x: i32, _y: &str) {}
+
+mod nested {
+    pub mod module {
+        pub fn fn_call() {}
+    }
+}
+
+struct Obj;
+impl Obj {
+    fn method_fn_call(&self) {}
+}
+
 fn outer_function() {
     let result = some_fn_call();
     another_fn_call(42, "hello");
     nested::module::fn_call();
+    let obj = Obj;
     obj.method_fn_call();
 }
 "#;
@@ -80,6 +95,16 @@ fn real_function() {
 fn test_ignores_type_alias_with_fn() {
     let code = r#"
 type FnPointer = fn() -> i32;
+
+fn dummy_fn() -> i32 { 42 }
+
+fn use_fn_pointer(f: FnPointer) -> i32 {
+    f()
+}
+
+fn test_it() {
+    let _ = use_fn_pointer(dummy_fn);
+}
 "#;
 
     assert_snapshot!(test_with_code("test_ignores_type_alias_with_fn", code));
@@ -117,6 +142,12 @@ trait MyTrait {
         println!("This has a body and should be documented");
     }
 }
+
+// Implement the trait so it compiles
+struct MyImpl;
+impl MyTrait for MyImpl {
+    fn trait_method(&self) {}
+}
 "#;
 
     assert_snapshot!(test_with_code("test_trait_method_declarations", code));
@@ -135,7 +166,7 @@ struct MyStruct;
 
 impl MyTrait for MyStruct {}
 
-fn main() {
+fn test_main() {
     let my_struct = MyStruct;
     my_struct.default_method();
 }
@@ -147,18 +178,28 @@ fn main() {
 #[test]
 fn test_complex_edge_cases() {
     let code = r##"
+fn some_function_call() {}
+fn another_fn_call() {}
+fn yet_another_fn_call() {}
+fn final_fn_call() {}
+
+enum Pattern {
+    Variant
+}
+
 fn legitimate_function() {
     // fn this_is_just_a_comment
     let variable = "fn not_a_function";
     some_function_call();
 
+    let condition = true;
     if condition {
         another_fn_call();
     }
 
+    let value = Pattern::Variant;
     match value {
-        Pattern => yet_another_fn_call(),
-        _ => final_fn_call(),
+        Pattern::Variant => yet_another_fn_call(),
     }
 }
 
