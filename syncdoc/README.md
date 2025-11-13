@@ -88,7 +88,7 @@ cfg-attr = "doc"
 
 See the _Build Configuration_ section below for more details.
 
-### Migration
+### Migration (**beta**)
 
 The CLI automatically migrates code from doc comments to syncdoc `#[omnidoc]` attributes.
 
@@ -138,6 +138,13 @@ syncdoc --cut --add # or `-c -a`
 ```sh
 syncdoc --cut --add --dry-run # or `-c -a -n`
 ```
+
+#### Note to `syncdoc-migrate` beta testers
+
+It currently does **not** format your code, but should not render it non-functional either.
+After running, you should call `cargo fmt` to re-format the code and then inspect the git diff
+and `cargo check` output. Please send feedback on anything it gets wrong, ideally with a minimal
+repro following the `examples/migrate` example crate.
 
 ### Usage
 
