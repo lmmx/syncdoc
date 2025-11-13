@@ -1,3 +1,4 @@
+use crate::syncdoc_debug;
 use std::path::{Path, PathBuf};
 
 /// Find the Cargo manifest directory by walking up from a given path
@@ -16,27 +17,46 @@ pub fn find_manifest_dir(start_path: &Path) -> Option<PathBuf> {
 /// Convert a doc path to be relative to the Cargo manifest directory
 /// from the perspective of the call site file
 pub fn make_manifest_relative_path(doc_path: &str, call_site_file: &Path) -> String {
+    syncdoc_debug!("make_manifest_relative_path called:");
+    syncdoc_debug!("  doc_path: {}", doc_path);
+    syncdoc_debug!("  call_site_file: {}", call_site_file.display());
+
+    // If path already starts with ../, it's already relative - return as-is
+    if doc_path.starts_with("../") || doc_path.starts_with("..\\") {
+        syncdoc_debug!("  Path already relative, returning as-is");
+        return doc_path.to_string();
+    }
+
     // Find the manifest directory
     let manifest_dir = match find_manifest_dir(call_site_file) {
-        Some(dir) => dir,
+        Some(dir) => {
+            syncdoc_debug!("  manifest_dir: {}", dir.display());
+            dir
+        }
         None => {
             // Fallback: return path as-is if we can't find manifest
+            syncdoc_debug!("  manifest_dir: NOT FOUND (fallback)");
             return doc_path.to_string();
         }
     };
 
     // Get the directory containing the call site file
     let call_site_dir = call_site_file.parent().unwrap_or_else(|| Path::new("."));
+    syncdoc_debug!("  call_site_dir: {}", call_site_dir.display());
 
     // Compute relative path from call site to manifest dir
     let rel_to_manifest =
         path_relative_from(&manifest_dir, call_site_dir).unwrap_or_else(|| manifest_dir.clone());
+    syncdoc_debug!("  rel_to_manifest: {}", rel_to_manifest.display());
 
     // Combine with the doc path
     let full_path = rel_to_manifest.join(doc_path);
+    syncdoc_debug!("  full_path: {}", full_path.display());
 
     // Convert to string, using forward slashes for cross-platform compatibility
-    full_path.to_str().unwrap_or(doc_path).replace('\\', "/")
+    let result = full_path.to_str().unwrap_or(doc_path).replace('\\', "/");
+    syncdoc_debug!("  result: {}", result);
+    result
 }
 
 /// Computes a relative path from `base` to `path`, returning a path with `../` components
@@ -117,16 +137,27 @@ pub fn extract_module_path(source_file: &str) -> String {
 }
 
 pub fn apply_module_path(base_path: String) -> String {
+    syncdoc_debug!("apply_module_path called:");
+    syncdoc_debug!("  base_path: {}", base_path);
+
     let call_site = proc_macro2::Span::call_site();
     if let Some(source_path) = call_site.local_file() {
         let source_file = source_path.to_string_lossy().to_string();
+        syncdoc_debug!("  source_file: {}", source_file);
+
         let module_path = extract_module_path(&source_file);
+        syncdoc_debug!("  module_path: {}", module_path);
+
         if module_path.is_empty() {
+            syncdoc_debug!("  result: {} (no module path)", base_path);
             base_path
         } else {
-            format!("{}/{}", base_path, module_path)
+            let result = format!("{}/{}", base_path, module_path);
+            syncdoc_debug!("  result: {}", result);
+            result
         }
     } else {
+        syncdoc_debug!("  result: {} (no source path)", base_path);
         base_path
     }
 }

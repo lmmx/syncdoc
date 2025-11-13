@@ -1,5 +1,5 @@
 #[syncdoc::omnidoc(path = "docs")]
-mod calc {
+mod inner_calc {
     pub fn fibonacci(n: u64) -> u64 {
         if n <= 1 {
             n
@@ -16,4 +16,4 @@ mod calc {
         x + y
     }
 }
-pub use calc::*;
+pub use inner_calc::*;
