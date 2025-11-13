@@ -9,7 +9,7 @@ use syncdoc::omnidoc;
 ///
 /// Even if it is put before the attribute macro, the docstring will be inserted after.
 #[derive(Debug)]
-#[omnidoc(path = "../docs")]
+#[omnidoc(path = "docs")]
 pub struct Settings {
     pub name: String,
     pub switch: bool,

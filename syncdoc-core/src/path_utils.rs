@@ -86,3 +86,47 @@ fn path_relative_from(path: &Path, base: &Path) -> Option<PathBuf> {
         Some(comps.iter().map(|c| c.as_os_str()).collect())
     }
 }
+
+/// Extract module path from source file relative to src/
+/// e.g., src/main.rs -> "main", src/foo/mod.rs -> "foo", src/a/b/c.rs -> "a/b/c"
+pub fn extract_module_path(source_file: &str) -> String {
+    let source_path = Path::new(source_file);
+
+    if let Some(manifest_dir) = find_manifest_dir(source_path) {
+        if let Ok(rel) = source_path.strip_prefix(&manifest_dir) {
+            let rel_str = rel.to_string_lossy();
+            let without_src = rel_str
+                .strip_prefix("src/")
+                .or(rel_str.strip_prefix("src\\"))
+                .unwrap_or(&rel_str);
+
+            if without_src == "main.rs" || without_src == "lib.rs" {
+                return without_src.trim_end_matches(".rs").to_string();
+            } else if without_src.ends_with("/mod.rs") || without_src.ends_with("\\mod.rs") {
+                return without_src
+                    .trim_end_matches("/mod.rs")
+                    .trim_end_matches("\\mod.rs")
+                    .replace('\\', "/");
+            } else if without_src.ends_with(".rs") {
+                return without_src.trim_end_matches(".rs").replace('\\', "/");
+            }
+        }
+    }
+
+    String::new()
+}
+
+pub fn apply_module_path(base_path: String) -> String {
+    let call_site = proc_macro2::Span::call_site();
+    if let Some(source_path) = call_site.local_file() {
+        let source_file = source_path.to_string_lossy().to_string();
+        let module_path = extract_module_path(&source_file);
+        if module_path.is_empty() {
+            base_path
+        } else {
+            format!("{}/{}", base_path, module_path)
+        }
+    } else {
+        base_path
+    }
+}

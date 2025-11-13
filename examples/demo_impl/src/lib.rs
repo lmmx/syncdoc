@@ -1,10 +1,10 @@
 #![doc = include_str!("../docs/lib.md")]
 use syncdoc::omnidoc;
 
-#[omnidoc(path = "../docs")]
+#[omnidoc(path = "docs")]
 pub struct Calculator;
 
-#[omnidoc(path = "../docs")]
+#[omnidoc(path = "docs")]
 impl Calculator {
     pub fn fibonacci(n: u64) -> u64 {
         if n <= 1 {

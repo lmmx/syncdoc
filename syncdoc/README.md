@@ -46,10 +46,10 @@ your docs live. When migrating, it stores them by default in `docs/` under the C
 ```rust
 use syncdoc::omnidoc;
 
-#[omnidoc] // Docs from ../docs/A.md
+#[omnidoc] // Docs from docs/A.md
 mod A {
-    fn b() { ... }  // Docs from ../docs/A/b.md
-    fn c() { ... }  // Docs from ../docs/A/c.md
+    fn b() { ... }  // Docs from docs/A/b.md
+    fn c() { ... }  // Docs from docs/A/c.md
 }
 ```
 
@@ -159,8 +159,8 @@ mod my_functions {
 ```
 
 This will look for documentation in:
-- `../docs/my_functions/foo.md`
-- `../docs/my_functions/bar.md`
+- `docs/my_functions/foo.md`
+- `docs/my_functions/bar.md`
 
 > **Note**: you cannot use a proc macro on an external module,
 > see [this](https://github.com/rust-lang/rust/issues/54727) tracking issue.
@@ -196,8 +196,8 @@ impl Calculator {
 ```
 
 Documentation files:
-- `../docs/Calculator/new.md`
-- `../docs/Calculator/add.md`
+- `docs/Calculator/new.md`
+- `docs/Calculator/add.md`
 
 ### Single Function Documentation
 
@@ -209,13 +209,13 @@ use syncdoc::{omnidoc, syncdoc};
 
 #[omnidoc]
 fn func1() {
-    // -> ../docs/func1.md
+    // -> docs/func1.md
     // = omnidoc(path) to root docs dir + submodule + fn name + .md
 }
 
-#[syncdoc(path = "../docs/new_func_name.md")]
+#[syncdoc(path = "docs/new_func_name.md")]
 fn func2() {
-    // -> ../docs/new_func_name.md
+    // -> docs/new_func_name.md
     // = syncdoc(path) to single documentation file
 }
 ```
@@ -242,13 +242,13 @@ mod types {
 ```
 
 Documentation files:
-- `../docs/types/Config.md` - struct documentation
-- `../docs/types/Config/port.md` - field documentation
-- `../docs/types/Config/host.md` - field documentation
-- `../docs/types/Status.md` - enum documentation
-- `../docs/types/Status/Active.md` - variant documentation
-- `../docs/types/Status/Inactive.md` - variant documentation
-- `../docs/types/Status/Error.md` - variant documentation
+- `docs/types/Config.md` - struct documentation
+- `docs/types/Config/port.md` - field documentation
+- `docs/types/Config/host.md` - field documentation
+- `docs/types/Status.md` - enum documentation
+- `docs/types/Status/Active.md` - variant documentation
+- `docs/types/Status/Inactive.md` - variant documentation
+- `docs/types/Status/Error.md` - variant documentation
 
 ## How It Works
 

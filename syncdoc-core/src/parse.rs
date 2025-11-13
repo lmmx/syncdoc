@@ -74,7 +74,7 @@ unsynn! {
 
     /// Single syncdoc argument
     pub enum SyncDocArg {
-        /// path = "../docs"
+        /// path = "docs"
         Path(PathArg),
         /// name = "custom"
         Name(NameArg),
@@ -82,7 +82,7 @@ unsynn! {
         CfgAttr(CfgAttrArg),
     }
 
-    /// Path argument: path = "../docs"
+    /// Path argument: path = "docs"
     pub struct PathArg {
         pub _path: KPath,
         pub _eq: Eq,

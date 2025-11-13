@@ -3,6 +3,7 @@ use quote::quote;
 use unsynn::*;
 
 use crate::parse::{SyncDocArg, SyncDocInner};
+use crate::path_utils::apply_module_path;
 use crate::token_processors::TokenProcessor;
 
 pub fn inject_all_docs_impl(
@@ -31,9 +32,12 @@ fn parse_path_from_args(
         let call_site = proc_macro2::Span::call_site();
         if let Some(source_path) = call_site.local_file() {
             let source_file = source_path.to_string_lossy().to_string();
-            let path = crate::config::get_docs_path(&source_file)
+            let base_path = crate::config::get_docs_path(&source_file)
                 .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
             let cfg_attr = crate::config::get_cfg_attr().ok().flatten();
+
+            let path = apply_module_path(base_path);
+
             return Ok((path, cfg_attr));
         } else {
             return Err("omnidoc requires a path argument".to_string());
@@ -61,14 +65,15 @@ fn parse_path_from_args(
             }
 
             let path = if let Some(p) = path {
-                p
+                apply_module_path(p)
             } else {
                 // Try config
                 let call_site = proc_macro2::Span::call_site();
                 if let Some(source_path) = call_site.local_file() {
                     let source_file = source_path.to_string_lossy().to_string();
-                    crate::config::get_docs_path(&source_file)
-                        .map_err(|e| format!("Failed to get docs path from config: {}", e))?
+                    let base_path = crate::config::get_docs_path(&source_file)
+                        .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
+                    apply_module_path(base_path)
                 } else {
                     return Err("path argument not found".to_string());
                 }

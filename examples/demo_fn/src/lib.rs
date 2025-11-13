@@ -2,7 +2,7 @@
 
 use syncdoc::omnidoc;
 
-#[omnidoc(path = "../docs")]
+#[omnidoc(path = "docs")]
 pub fn hello(who: &str) -> String {
     format!("Hello {}", who)
 }
