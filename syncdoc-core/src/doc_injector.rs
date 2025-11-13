@@ -2,6 +2,7 @@
 
 use proc_macro2::TokenStream;
 use quote::quote;
+use std::path::Path;
 use unsynn::*;
 
 use crate::parse::{FnSig, SyncDocArg, SyncDocInner};
@@ -96,7 +97,7 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<SyncDocArgs
                         .to_string_lossy()
                         .to_string();
 
-                    let base_path = crate::config::get_docs_path(&source_file)
+                    let base_path = crate::config::get_docs_path(Path::new(&source_file))
                         .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
 
                     // Extract module path and prepend to base_path

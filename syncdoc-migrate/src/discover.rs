@@ -118,7 +118,7 @@ pub fn parse_file(path: &Path) -> std::result::Result<ParsedFile, ParseError> {
 /// the default configuration and return "docs".
 pub fn get_or_create_docs_path(source_file: &Path) -> std::result::Result<String, ConfigError> {
     // Try to get existing docs-path
-    match syncdoc_core::config::get_docs_path(source_file.to_str().unwrap()) {
+    match syncdoc_core::config::get_docs_path(source_file) {
         Ok(path) => Ok(path),
         Err(_) => {
             // Need to add default docs-path to Cargo.toml

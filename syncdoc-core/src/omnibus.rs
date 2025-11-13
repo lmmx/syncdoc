@@ -1,7 +1,9 @@
 use proc_macro2::TokenStream;
 use quote::quote;
+use std::path::Path;
 use unsynn::*;
 
+use crate::config::{get_cfg_attr, get_docs_path};
 use crate::parse::{SyncDocArg, SyncDocInner};
 use crate::path_utils::apply_module_path;
 use crate::token_processors::TokenProcessor;
@@ -32,9 +34,9 @@ fn parse_path_from_args(
         let call_site = proc_macro2::Span::call_site();
         if let Some(source_path) = call_site.local_file() {
             let source_file = source_path.to_string_lossy().to_string();
-            let base_path = crate::config::get_docs_path(&source_file)
+            let base_path = get_docs_path(Path::new(&source_file))
                 .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
-            let cfg_attr = crate::config::get_cfg_attr().ok().flatten();
+            let cfg_attr = get_cfg_attr().ok().flatten();
 
             let path = apply_module_path(base_path);
 
@@ -71,7 +73,7 @@ fn parse_path_from_args(
                 let call_site = proc_macro2::Span::call_site();
                 if let Some(source_path) = call_site.local_file() {
                     let source_file = source_path.to_string_lossy().to_string();
-                    let base_path = crate::config::get_docs_path(&source_file)
+                    let base_path = get_docs_path(Path::new(&source_file))
                         .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
                     apply_module_path(base_path)
                 } else {
@@ -81,7 +83,7 @@ fn parse_path_from_args(
 
             // If cfg_attr still None, try config
             if cfg_attr.is_none() {
-                cfg_attr = crate::config::get_cfg_attr().ok().flatten();
+                cfg_attr = get_cfg_attr().ok().flatten();
             }
 
             Ok((path, cfg_attr))

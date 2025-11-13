@@ -1,12 +1,12 @@
 use crate::path_utils::find_manifest_dir;
 use ropey::Rope;
 use std::fs;
-use std::path::PathBuf;
+use std::path::Path;
 use textum::{Boundary, BoundaryMode, Snippet, Target};
 
 /// Get a specified attribute from the current crate's Cargo.toml, relative to the source file
 fn get_attribute_from_cargo_toml(
-    cargo_toml_path: &str,
+    cargo_toml_path: &Path,
     attribute: &str,
 ) -> Result<Option<String>, Box<dyn std::error::Error>> {
     let content = fs::read_to_string(cargo_toml_path)?;
@@ -58,7 +58,7 @@ pub fn get_cfg_attr() -> Result<Option<String>, Box<dyn std::error::Error>> {
 }
 
 /// Get the docs-path from the current crate's Cargo.toml
-pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Error>> {
+pub fn get_docs_path(source_file: &Path) -> Result<String, Box<dyn std::error::Error>> {
     let source_path = Path::new(source_file);
     let manifest_dir = find_manifest_dir(source_path)
         .ok_or("Could not find Cargo.toml (not in a Cargo project)")?;
@@ -77,7 +77,7 @@ mod docs_path_tests {
     use tempfile::NamedTempFile;
 
     fn get_docs_path_from_file(
-        cargo_toml_path: &str,
+        cargo_toml_path: &Path,
     ) -> Result<String, Box<dyn std::error::Error>> {
         let docs_path = get_attribute_from_cargo_toml(cargo_toml_path, "docs-path")?
             .ok_or("docs-path not found")?;
@@ -100,7 +100,7 @@ serde = "1.0"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
+        let result = get_docs_path_from_file(temp.path()).unwrap();
         assert_eq!(result, "docs");
     }
 
@@ -117,7 +117,7 @@ docs-path = "documentation"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
+        let result = get_docs_path_from_file(temp.path()).unwrap();
         assert_eq!(result, "documentation");
     }
 
@@ -131,7 +131,7 @@ docs-path = "documentation"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
+        let result = get_docs_path_from_file(temp.path()).unwrap();
         assert_eq!(result, "my-docs");
     }
 
@@ -145,7 +145,7 @@ docs-path = docs
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
+        let result = get_docs_path_from_file(temp.path()).unwrap();
         assert_eq!(result, "docs");
     }
 
@@ -159,7 +159,7 @@ name = "myproject"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path_from_file(temp.path().to_str().unwrap());
+        let result = get_docs_path_from_file(temp.path());
         assert!(result.is_err());
     }
 
@@ -173,7 +173,7 @@ other-field = "value"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path_from_file(temp.path().to_str().unwrap());
+        let result = get_docs_path_from_file(temp.path());
         assert!(result.is_err());
         assert!(result
             .unwrap_err()
@@ -195,7 +195,7 @@ output-format = "markdown"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
+        let result = get_docs_path_from_file(temp.path()).unwrap();
         assert_eq!(result, "api-docs");
     }
 }
@@ -206,7 +206,9 @@ mod cfg_attr_tests {
     use std::io::Write;
     use tempfile::NamedTempFile;
 
-    fn get_cfg_attr_from_file(cargo_toml_path: &str) -> Result<String, Box<dyn std::error::Error>> {
+    fn get_cfg_attr_from_file(
+        cargo_toml_path: &Path,
+    ) -> Result<String, Box<dyn std::error::Error>> {
         let cfg_attr = get_attribute_from_cargo_toml(cargo_toml_path, "cfg-attr")?
             .ok_or("cfg-attr not found")?;
         Ok(cfg_attr)
@@ -224,7 +226,7 @@ name = "myproject"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_cfg_attr_from_file(temp.path().to_str().unwrap());
+        let result = get_cfg_attr_from_file(temp.path());
         assert!(result.is_err());
         assert!(result
             .unwrap_err()
@@ -245,7 +247,7 @@ cfg-attr = "doc"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_cfg_attr_from_file(temp.path().to_str().unwrap()).unwrap();
+        let result = get_cfg_attr_from_file(temp.path()).unwrap();
         assert_eq!(result, "doc");
     }
 
@@ -262,7 +264,7 @@ cfg-attr = "a-custom-attr"
         write!(temp, "{}", content).unwrap();
         temp.flush().unwrap();
 
-        let result = get_cfg_attr_from_file(temp.path().to_str().unwrap()).unwrap();
+        let result = get_cfg_attr_from_file(temp.path()).unwrap();
         assert_eq!(result, "a-custom-attr");
     }
 }
