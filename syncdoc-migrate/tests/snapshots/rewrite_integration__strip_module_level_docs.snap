@@ -1,0 +1,6 @@
+---
+source: syncdoc-migrate/tests/rewrite_integration.rs
+expression: "test_rewrite(source, true, false)"
+---
+#![doc = " This is a module with documentation"]
+pub fn test() {}

@@ -157,3 +157,35 @@ fn test_rewrite_none_when_no_ops() {
 
     assert!(result.is_none());
 }
+
+#[test]
+fn test_strip_inner_doc_attributes() {
+    let input = quote! {
+        //! Module level documentation
+
+        pub enum MyEnum {
+            Variant1,
+        }
+    };
+
+    let output = strip_doc_attrs(input);
+    let output_str = output.to_string();
+
+    // Should strip inner doc comments
+    assert!(!output_str.contains("!"));
+    assert!(!output_str.contains("Module level"));
+}
+
+#[test]
+fn test_strip_mixed_inner_outer_docs() {
+    let input = quote! {
+        //! Inner doc
+        /// Outer doc
+        pub fn test() {}
+    };
+
+    let output = strip_doc_attrs(input);
+    // Should strip both types
+    assert!(!output.to_string().contains("Inner"));
+    assert!(!output.to_string().contains("Outer"));
+}
