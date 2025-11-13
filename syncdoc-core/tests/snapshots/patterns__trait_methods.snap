@@ -1,16 +1,25 @@
 ---
 source: syncdoc-core/tests/patterns.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_trait_methods_pattern\", code)"
 ---
+#![doc = include_str!("../docs/lib.md")]
+
+
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
 trait MyTrait {
     fn required_method(&self);
-    # [doc = include_str ! ("../docs/MyTrait/async_trait_method.md")]
+
     async fn async_trait_method(&self) -> String {
         "default".to_string()
     }
+
     unsafe fn unsafe_trait_method();
-    # [doc = include_str ! ("../docs/MyTrait/const_trait_method.md")]
-    const fn const_trait_method() -> i32 {
+
+    fn regular_trait_method() -> i32 {
         0
     }
 }

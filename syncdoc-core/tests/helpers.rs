@@ -83,7 +83,13 @@ use syncdoc::omnidoc;
                     .split(|c: char| c.is_whitespace() || c == '{' || c == ';' || c == '<')
                     .next()
                 {
-                    types.insert(name.trim().to_string());
+                    let clean_name = name.trim().to_string();
+                    types.insert(clean_name.clone());
+
+                    // Also check if it's a generic definition
+                    if struct_start.contains('<') && struct_start.contains('>') {
+                        types.insert(format!("{}<T>", clean_name));
+                    }
                 }
             }
 
@@ -232,6 +238,7 @@ use syncdoc::omnidoc;
         // Special handling for impl blocks and modules (more complex parsing)
         self.handle_impl_blocks(code);
         self.handle_modules(code);
+        self.handle_traits(code);
     }
 
     fn handle_impl_blocks(&self, code: &str) {
@@ -448,9 +455,12 @@ use syncdoc::omnidoc;
                                 .unwrap_or(false)
                             && !existing_types.contains(type_name)
                         {
-                            if impl_part.contains('<') && !impl_part.starts_with("impl<") {
-                                types_to_define
-                                    .push(format!("struct {}<T> {{ _inner: T }}", type_name));
+                            // Check if the original impl has generics on the type
+                            if impl_part.contains(&format!("{}<", type_name)) {
+                                types_to_define.push(format!(
+                                    "struct {}<T> {{ _inner: std::marker::PhantomData<T> }}",
+                                    type_name
+                                ));
                             } else {
                                 types_to_define.push(format!("struct {};", type_name));
                             }
@@ -461,5 +471,74 @@ use syncdoc::omnidoc;
         }
 
         types_to_define.join("\n")
+    }
+
+    fn handle_traits(&self, code: &str) {
+        let mut in_trait = false;
+        let mut trait_name = String::new();
+        let mut brace_depth = 0;
+
+        for line in code.lines() {
+            let trimmed = line.trim();
+
+            if (trimmed.starts_with("trait ") || trimmed.starts_with("pub trait ")) && !in_trait {
+                in_trait = true;
+                brace_depth = 0;
+
+                let trait_start = trimmed
+                    .strip_prefix("pub trait ")
+                    .or_else(|| trimmed.strip_prefix("trait "))
+                    .unwrap();
+
+                if let Some(name) = trait_start
+                    .split(|c: char| c.is_whitespace() || c == '{' || c == '<')
+                    .next()
+                {
+                    trait_name = name.trim().to_string();
+                    if !trait_name.is_empty() {
+                        fs::create_dir_all(self.root.join("docs/lib").join(&trait_name)).ok();
+                        eprintln!("Creating doc for trait: {}", trait_name);
+                        self.write_doc(
+                            &format!("lib/{}.md", trait_name),
+                            &format!("Documentation for {}", trait_name),
+                        );
+                    }
+                }
+            }
+
+            if in_trait {
+                brace_depth += trimmed.matches('{').count();
+                brace_depth -= trimmed.matches('}').count();
+
+                // Look for methods with bodies (default implementations)
+                if let Some(fn_pos) = trimmed.find("fn ") {
+                    let after_fn = &trimmed[fn_pos + 3..];
+                    if let Some(name_end) = after_fn.find(|c: char| c == '(' || c == '<') {
+                        let clean_name = after_fn[..name_end].trim();
+                        // Check if this method has a body (contains '{' after the signature)
+                        let rest_of_line = &trimmed[fn_pos..];
+                        if !clean_name.is_empty()
+                            && !trait_name.is_empty()
+                            && !clean_name.contains(' ')
+                            && rest_of_line.contains('{')
+                        {
+                            eprintln!(
+                                "Creating doc for trait method: {}::{}",
+                                trait_name, clean_name
+                            );
+                            self.write_doc(
+                                &format!("lib/{}/{}.md", trait_name, clean_name),
+                                &format!("Documentation for {}::{}", trait_name, clean_name),
+                            );
+                        }
+                    }
+                }
+
+                if brace_depth == 0 && trimmed.ends_with('}') {
+                    in_trait = false;
+                    trait_name.clear();
+                }
+            }
+        }
     }
 }

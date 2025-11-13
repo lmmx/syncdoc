@@ -1,18 +1,26 @@
 ---
 source: syncdoc-core/tests/negative.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_trait_with_default_method\", code)"
 ---
+#![doc = include_str!("../docs/lib.md")]
+
+
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
 trait MyTrait {
-    # [doc = include_str ! ("../docs/MyTrait/default_method.md")]
     fn default_method(&self) {
         println!("This has a body and should be documented");
     }
 }
-# [doc = include_str ! ("../docs/MyStruct.md")]
+
 struct MyStruct;
+
 impl MyTrait for MyStruct {}
-# [doc = include_str ! ("../docs/main.md")]
-fn main() {
+
+fn test_main() {
     let my_struct = MyStruct;
     my_struct.default_method();
 }

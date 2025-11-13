@@ -141,7 +141,6 @@ trait MyTrait {
 
     unsafe fn unsafe_trait_method();
 
-    // Remove const fn - not allowed in traits in stable Rust
     fn regular_trait_method() -> i32 {
         0
     }
