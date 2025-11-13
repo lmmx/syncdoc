@@ -2,6 +2,7 @@ use ropey::Rope;
 use std::fs;
 use std::path::{Path, PathBuf};
 use textum::{Boundary, BoundaryMode, Snippet, Target};
+use crate::syncdoc_debug;
 
 /// Get a specified attribute from the current crate's Cargo.toml, relative to the source file
 fn get_attribute_from_cargo_toml(
@@ -58,13 +59,19 @@ pub fn get_cfg_attr() -> Result<Option<String>, Box<dyn std::error::Error>> {
 
 /// Get the docs-path from the current crate's Cargo.toml, relative to the source file
 pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Error>> {
+    syncdoc_debug!("get_docs_path called:");
+    syncdoc_debug!("  source_file: {}", source_file);
+
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")?;
+    syncdoc_debug!("  CARGO_MANIFEST_DIR: {}", manifest_dir);
 
     let cargo_toml_path = PathBuf::from(&manifest_dir).join("Cargo.toml");
     let docs_path = get_attribute_from_cargo_toml(cargo_toml_path.to_str().unwrap(), "docs-path")?
         .ok_or("docs-path not found")?;
+    syncdoc_debug!("  docs_path from toml: {}", docs_path);
 
     let manifest_path = Path::new(&manifest_dir).canonicalize()?;
+    syncdoc_debug!("  manifest_path (canonical): {}", manifest_path.display());
 
     // Get the source file's directory
     let source_path = Path::new(source_file);
@@ -72,6 +79,7 @@ pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Er
         .parent()
         .ok_or("Source file has no parent directory")?
         .canonicalize()?;
+    syncdoc_debug!("  source_dir (canonical): {}", source_dir.display());
 
     // Security check: ensure source_dir is within manifest_dir
     if !source_dir.starts_with(&manifest_path) {
@@ -82,8 +90,11 @@ pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Er
     let relative_path = source_dir
         .strip_prefix(&manifest_path)
         .map_err(|_| "Failed to strip prefix")?;
+    syncdoc_debug!("  relative_path (stripped): {}", relative_path.display());
 
     let depth = relative_path.components().count();
+    syncdoc_debug!("  depth: {}", depth);
+
     let mut result = PathBuf::new();
 
     for _ in 0..depth {
@@ -91,7 +102,9 @@ pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Er
     }
 
     result.push(&docs_path);
-    Ok(result.to_string_lossy().to_string())
+    let result_str = result.to_string_lossy().to_string();
+    syncdoc_debug!("  final result: {}", result_str);
+    Ok(result_str)
 }
 
 #[cfg(test)]
