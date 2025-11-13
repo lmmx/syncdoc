@@ -52,7 +52,7 @@ fn test_path_arg_parsing() {
             assert_eq!(args.0.len(), 1, "Should have 1 argument");
 
             if let SyncDocArg::Path(path_arg) = &args.0[0].value {
-                assert_eq!(path_arg.value.as_str(), "../docs");
+                assert_eq!(path_arg.value.as_str(), "docs");
             } else {
                 panic!("Expected Path argument");
             }
@@ -78,7 +78,7 @@ fn test_syncdoc_inner_parsing() {
             for arg in &args.0 {
                 match &arg.value {
                     SyncDocArg::Path(path_arg) => {
-                        assert_eq!(path_arg.value.as_str(), "../docs");
+                        assert_eq!(path_arg.value.as_str(), "docs");
                         found_path = true;
                     }
                     SyncDocArg::Name(name_arg) => {
