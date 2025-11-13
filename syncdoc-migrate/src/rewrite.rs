@@ -13,7 +13,11 @@ use unsynn::*;
 /// and returns the modified token stream.
 pub fn strip_doc_attrs(item: TokenStream) -> TokenStream {
     // Try to parse as module content
-    if let Ok(content) = item.clone().into_token_iter().parse::<syncdoc_core::parse::ModuleContent>() {
+    if let Ok(content) = item
+        .clone()
+        .into_token_iter()
+        .parse::<syncdoc_core::parse::ModuleContent>()
+    {
         strip_doc_attrs_from_items(&content)
     } else {
         // If parsing fails, return original

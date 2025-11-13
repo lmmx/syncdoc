@@ -20,8 +20,8 @@ Extensive documentation is great for users, but inline docstrings make code hard
 /// that spans many lines and makes
 /// the actual code hard to see...
 /// [more lines]
-struct A {
-    /// Another long doc comment
+mod A {
+    /// And another long doc comment
     /// [many more lines]
     fn b() { ... }
 
@@ -47,7 +47,7 @@ your docs live. When migrating, it stores them by default in `docs/` under the C
 use syncdoc::omnidoc;
 
 #[omnidoc] // Docs from ../docs/A.md
-struct A {
+mod A {
     fn b() { ... }  // Docs from ../docs/A/b.md
     fn c() { ... }  // Docs from ../docs/A/c.md
 }
@@ -128,15 +128,15 @@ syncdoc
 ```
 - 'Cut' docstrings out of src/ as well as creating in docs/
 ```sh
-syncdoc --cut # or -c
+syncdoc --cut # or `-c`
 ```
 - 'Cut and paste' by replacing doc comments with omnidoc attributes
 ```sh
-syncdoc --cut --add # or -ca
+syncdoc --cut --add # or `-c -a`
 ```
 - Preview what would happen
 ```sh
-syncdoc --cut --add --dry-run # or -can
+syncdoc --cut --add --dry-run # or `-c -a -n`
 ```
 
 ### Usage
@@ -146,7 +146,7 @@ Apply the `#[omnidoc]` attribute to any struct, function, enum, impl block, or i
 ```rust
 use syncdoc::omnidoc;
 
-#[omnidoc(path = "../docs")]
+#[omnidoc]
 mod my_functions {
     fn foo(x: i32) -> i32 {
         x * 2
@@ -183,7 +183,7 @@ use syncdoc::omnidoc;
 
 struct Calculator;
 
-#[omnidoc(path = "../docs")]
+#[omnidoc]
 impl Calculator {
     pub fn new() -> Self {
         Self
@@ -207,7 +207,7 @@ comes down to whether or not you want to specify the exact path (typically you d
 ```rust
 use syncdoc::{omnidoc, syncdoc};
 
-#[omnidoc(path = "../docs")]
+#[omnidoc]
 fn func1() {
     // -> ../docs/func1.md
     // = omnidoc(path) to root docs dir + submodule + fn name + .md
@@ -226,7 +226,7 @@ syncdoc automatically documents struct fields and enum variants:
 ```rust
 use syncdoc::omnidoc;
 
-#[omnidoc(path = "../docs")]
+#[omnidoc]
 mod types {
     struct Config {
         port: u16,

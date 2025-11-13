@@ -141,7 +141,7 @@ unsynn! {
         pub content: BracketGroup,
     }
 
-	/// Inner attribute like #![forbid(unsafe_code)]
+    /// Inner attribute like #![forbid(unsafe_code)]
     pub struct InnerAttribute {
         /// Hash symbol
         pub _hash: Pound,
