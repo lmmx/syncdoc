@@ -1,8 +1,8 @@
+use crate::syncdoc_debug;
 use ropey::Rope;
 use std::fs;
 use std::path::{Path, PathBuf};
 use textum::{Boundary, BoundaryMode, Snippet, Target};
-use crate::syncdoc_debug;
 
 /// Get a specified attribute from the current crate's Cargo.toml, relative to the source file
 fn get_attribute_from_cargo_toml(

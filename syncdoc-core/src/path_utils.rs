@@ -1,5 +1,5 @@
-use std::path::{Path, PathBuf};
 use crate::syncdoc_debug;
+use std::path::{Path, PathBuf};
 
 /// Find the Cargo manifest directory by walking up from a given path
 pub fn find_manifest_dir(start_path: &Path) -> Option<PathBuf> {
@@ -20,6 +20,12 @@ pub fn make_manifest_relative_path(doc_path: &str, call_site_file: &Path) -> Str
     syncdoc_debug!("make_manifest_relative_path called:");
     syncdoc_debug!("  doc_path: {}", doc_path);
     syncdoc_debug!("  call_site_file: {}", call_site_file.display());
+
+    // If path already starts with ../, it's already relative - return as-is
+    if doc_path.starts_with("../") || doc_path.starts_with("..\\") {
+        syncdoc_debug!("  Path already relative, returning as-is");
+        return doc_path.to_string();
+    }
 
     // Find the manifest directory
     let manifest_dir = match find_manifest_dir(call_site_file) {
