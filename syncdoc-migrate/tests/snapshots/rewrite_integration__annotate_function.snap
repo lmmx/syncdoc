@@ -2,4 +2,7 @@
 source: syncdoc-migrate/tests/rewrite_integration.rs
 expression: "test_rewrite(source, false, true)"
 ---
-pub # [omnidoc (path = "docs")] fn hello () { println ! ("world") ; }
+#[syncdoc::omnidoc(path = "docs")]
+pub fn hello() {
+    println!("world");
+}

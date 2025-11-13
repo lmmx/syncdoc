@@ -2,4 +2,7 @@
 source: syncdoc-migrate/tests/rewrite_integration.rs
 expression: "test_rewrite(source, false, true)"
 ---
-pub # [omnidoc (path = "docs")] mod submodule { pub fn inner_func () { } }
+#[syncdoc::omnidoc(path = "docs")]
+pub mod submodule {
+    pub fn inner_func() {}
+}

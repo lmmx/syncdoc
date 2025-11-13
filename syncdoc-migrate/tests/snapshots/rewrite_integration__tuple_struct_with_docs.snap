@@ -2,4 +2,7 @@
 source: syncdoc-migrate/tests/rewrite_integration.rs
 expression: "test_rewrite(source, true, false)"
 ---
-pub struct MyTuple(pub i32, String);
+pub struct MyTuple(
+    #[doc = " First field"] pub i32,
+    #[doc = " Second field"] String,
+);

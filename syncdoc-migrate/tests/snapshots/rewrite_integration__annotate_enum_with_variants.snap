@@ -2,4 +2,8 @@
 source: syncdoc-migrate/tests/rewrite_integration.rs
 expression: "test_rewrite(source, false, true)"
 ---
-pub # [omnidoc (path = "docs")] enum MyEnum { VariantA , VariantB (i32) , }
+#[syncdoc::omnidoc(path = "docs")]
+pub enum MyEnum {
+    VariantA,
+    VariantB(i32),
+}

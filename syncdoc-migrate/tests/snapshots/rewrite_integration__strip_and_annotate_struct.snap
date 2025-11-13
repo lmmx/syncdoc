@@ -2,4 +2,7 @@
 source: syncdoc-migrate/tests/rewrite_integration.rs
 expression: "test_rewrite(source, true, true)"
 ---
-pub # [omnidoc (path = "docs")] struct MyStruct { pub field : i32 , }
+#[syncdoc::omnidoc(path = "docs")]
+pub struct MyStruct {
+    pub field: i32,
+}
