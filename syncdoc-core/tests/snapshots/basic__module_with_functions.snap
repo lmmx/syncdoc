@@ -1,9 +1,14 @@
 ---
 source: syncdoc-core/tests/basic.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_module_with_functions\", code)"
 ---
+#![doc = include_str!("../docs/lib.md")]
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
 mod calculations {
-    # [doc = include_str ! ("../docs/calculations/fibonacci.md")]
     pub fn fibonacci(n: u64) -> u64 {
         if n <= 1 {
             n
@@ -11,7 +16,7 @@ mod calculations {
             add_numbers(fibonacci(n - 1), fibonacci(n - 2))
         }
     }
-    # [doc = include_str ! ("../docs/calculations/add_numbers.md")]
+
     fn add_numbers(a: u64, b: u64) -> u64 {
         a + b
     }

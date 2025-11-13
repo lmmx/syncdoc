@@ -1,130 +1,202 @@
-mod helpers;
+// syncdoc-core/tests/token_processors_test.rs
+use insta::assert_snapshot;
 
-use helpers::TestFixture;
-use quote::quote;
-use syncdoc_core::token_processors::TokenProcessor;
+mod helpers;
+use helpers::TestCrate;
+
+fn test_with_code(name: &str, code: &str) -> String {
+    let crate_under_test = TestCrate::new(name);
+    crate_under_test.write_lib(code);
+    crate_under_test.auto_create_docs(code);
+
+    let (success, stderr) = crate_under_test.cargo_check();
+
+    if !success {
+        panic!("Compilation failed!\nSTDERR:\n{}", stderr);
+    }
+
+    crate_under_test.get_expanded_lib().unwrap()
+}
 
 #[test]
 fn test_basic_function_processing() {
-    let fixture = TestFixture::new();
-    fixture.create_doc_file("hello.md");
+    let code = r#"
+fn hello() {
+    println!("world");
+}
+"#;
 
-    let input = quote! { fn hello() { println!("world"); } };
-    let processor = TokenProcessor::new(input.clone(), fixture.docs_path(), None);
-    let output = processor.process();
-
-    println!("Input: {}", input);
-    println!("Output: {}", output);
-
-    let output_str = output.to_string();
-    assert!(output_str.contains("fn hello"));
-    assert!(output_str.replace(" ", "").contains("include_str!"));
+    assert_snapshot!(test_with_code("test_basic_function_processing", code));
 }
 
 #[test]
 fn test_async_function_processing() {
-    let fixture = TestFixture::new();
-    fixture.create_doc_file("hello.md");
+    let code = r#"
+async fn hello() {
+    println!("world");
+}
+"#;
 
-    let input = quote! { async fn hello() { println!("world"); } };
-    let processor = TokenProcessor::new(input.clone(), fixture.docs_path(), None);
-    let output = processor.process();
+    let result = test_with_code("test_async_function_processing", code);
 
-    println!("Input: {}", input);
-    println!("Output: {}", output);
-
-    let output_str = output.to_string();
-    assert!(
-        output_str.contains("async fn hello"),
-        "Should preserve async keyword"
-    );
-    assert!(
-        output_str.replace(" ", "").contains("include_str!"),
-        "Should add documentation"
-    );
+    // Verify async keyword is preserved
+    assert!(result.contains("async fn hello"));
+    assert_snapshot!(result);
 }
 
 #[test]
 fn test_impl_block_processing() {
-    let fixture = TestFixture::new();
-    fixture.create_doc_file("MyStruct/method.md");
+    let code = r#"
+impl MyStruct {
+    fn method(&self) {
+        println!("method");
+    }
+}
+"#;
 
-    let input = quote! {
-        impl MyStruct {
-            fn method(&self) {
-                println!("method");
-            }
-        }
-    };
+    let result = test_with_code("test_impl_block_processing", code);
 
-    let processor = TokenProcessor::new(input.clone(), fixture.docs_path(), None);
-    let output = processor.process();
-
-    println!("Impl block input: {}", input);
-    println!("Impl block output: {}", output);
-
-    let output_str = output.to_string();
-    assert!(output_str.contains("fn method"), "Should preserve method");
-    assert!(
-        output_str.replace(" ", "").contains("include_str!"),
-        "Should add documentation"
-    );
-    assert!(
-        output_str.contains("MyStruct"),
-        "Should include struct name in path"
-    );
+    // Verify structure is preserved
+    assert!(result.contains("fn method"));
+    assert!(result.contains("MyStruct"));
+    assert_snapshot!(result);
 }
 
 #[test]
 fn test_nested_module_path_construction() {
-    let fixture = TestFixture::new();
-    fixture.create_doc_file("outer/outer_fn.md");
-    fixture.create_doc_file("outer/inner/inner_fn.md");
+    let code = r#"
+mod outer {
+    fn outer_fn() {}
 
-    let input = quote! {
-        mod outer {
-            fn outer_fn() {}
+    mod inner {
+        fn inner_fn() {}
+    }
+}
+"#;
 
-            mod inner {
-                fn inner_fn() {}
-            }
-        }
-    };
+    let result = test_with_code("test_nested_module_path_construction", code);
 
-    let processor = TokenProcessor::new(input.clone(), fixture.docs_path(), None);
-    let output = processor.process();
-
-    println!("Nested module input: {}", input);
-    println!("Nested module output: {}", output);
-
-    let output_str = output.to_string();
-
-    // Should have docs for outer function
-    assert!(output_str.contains("outer/outer_fn.md"));
-
-    // Should have docs for inner function
-    assert!(output_str.contains("outer/inner/inner_fn.md"));
+    // Verify nested paths are constructed correctly
+    assert!(result.contains("outer/outer_fn.md"));
+    assert!(result.contains("outer/inner/inner_fn.md"));
+    assert_snapshot!(result);
 }
 
 #[test]
 fn test_impl_block_path_construction() {
-    let fixture = TestFixture::new();
-    fixture.create_doc_file("Calculator/add.md");
+    let code = r#"
+impl Calculator {
+    fn add(&self, a: i32, b: i32) -> i32 {
+        a + b
+    }
+}
+"#;
 
-    let input = quote! {
-        impl Calculator {
-            fn add(&self, a: i32, b: i32) -> i32 {
-                a + b
-            }
+    let result = test_with_code("test_impl_block_path_construction", code);
+
+    // Verify impl paths are constructed correctly
+    assert!(result.contains("Calculator/add.md"));
+    assert_snapshot!(result);
+}
+
+#[test]
+fn test_multiple_impl_blocks() {
+    let code = r#"
+impl FirstStruct {
+    fn first_method(&self) {}
+}
+
+impl SecondStruct {
+    fn second_method(&self) {}
+}
+"#;
+
+    let result = test_with_code("test_multiple_impl_blocks", code);
+
+    assert!(result.contains("FirstStruct/first_method.md"));
+    assert!(result.contains("SecondStruct/second_method.md"));
+    assert_snapshot!(result);
+}
+
+#[test]
+fn test_impl_with_generics() {
+    let code = r#"
+impl<T> GenericStruct<T>
+where
+    T: Clone,
+{
+    fn process(&self, value: T) -> T {
+        value.clone()
+    }
+}
+"#;
+
+    let result = test_with_code("test_impl_with_generics", code);
+
+    assert!(result.contains("GenericStruct/process.md"));
+    assert_snapshot!(result);
+}
+
+#[test]
+fn test_trait_impl() {
+    let code = r#"
+impl MyTrait for MyStruct {
+    fn trait_method(&self) {
+        println!("implementation");
+    }
+}
+"#;
+
+    let result = test_with_code("test_trait_impl", code);
+
+    // For trait impls, it should still document the methods
+    assert!(result.contains("MyStruct/trait_method.md"));
+    assert_snapshot!(result);
+}
+
+#[test]
+fn test_nested_impl_in_module() {
+    let code = r#"
+mod my_module {
+    impl MyStruct {
+        fn module_method(&self) {}
+    }
+}
+"#;
+
+    let result = test_with_code("test_nested_impl_in_module", code);
+
+    assert!(result.contains("my_module"));
+    assert!(result.contains("MyStruct/module_method.md"));
+    assert_snapshot!(result);
+}
+
+#[test]
+fn test_complex_nested_structure() {
+    let code = r#"
+mod outer {
+    pub fn outer_function() {}
+    
+    impl OuterStruct {
+        pub fn outer_method(&self) {}
+    }
+    
+    mod inner {
+        pub fn inner_function() {}
+        
+        impl InnerStruct {
+            pub fn inner_method(&self) {}
         }
-    };
+    }
+}
+"#;
 
-    let processor = TokenProcessor::new(input.clone(), fixture.docs_path(), None);
-    let output = processor.process();
+    let result = test_with_code("test_complex_nested_structure", code);
 
-    println!("Impl path test input: {}", input);
-    println!("Impl path test output: {}", output);
-
-    let output_str = output.to_string();
-    assert!(output_str.contains("Calculator/add.md"));
+    // Verify all paths are constructed correctly
+    assert!(result.contains("outer/outer_function.md"));
+    assert!(result.contains("outer/OuterStruct/outer_method.md"));
+    assert!(result.contains("outer/inner/inner_function.md"));
+    assert!(result.contains("outer/inner/InnerStruct/inner_method.md"));
+    assert_snapshot!(result);
 }

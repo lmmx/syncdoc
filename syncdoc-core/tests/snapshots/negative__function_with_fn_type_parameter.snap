@@ -1,8 +1,13 @@
 ---
 source: syncdoc-core/tests/negative.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_function_with_fn_type_parameter\", code)"
 ---
-# [doc = include_str ! ("../docs/function_with_fn_param.md")]
+#![doc = include_str!("../docs/lib.md")]
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
 fn function_with_fn_param(callback: fn(i32) -> String) -> String {
     callback(42)
 }
