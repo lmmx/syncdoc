@@ -96,8 +96,16 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<SyncDocArgs
                         .to_string_lossy()
                         .to_string();
 
-                    args.base_path = crate::config::get_docs_path(&source_file)
+                    let base_path = crate::config::get_docs_path(&source_file)
                         .map_err(|e| format!("Failed to get docs path from config: {}", e))?;
+
+                    // Extract module path and prepend to base_path
+                    let module_path = crate::path_utils::extract_module_path(&source_file);
+                    args.base_path = if module_path.is_empty() {
+                        base_path
+                    } else {
+                        format!("{}/{}", base_path, module_path)
+                    };
                 }
 
                 // We don't error on unconfigured cfg_attr, it's optional
@@ -236,6 +244,11 @@ fn generate_documented_function(args: SyncDocArgs, func: SimpleFunction) -> Toke
         format!("{}/{}.md", args.base_path, doc_file_name)
     };
 
+    // Make path relative to call site (doc_path already includes module path from omnibus.rs)
+    let call_site = proc_macro2::Span::call_site();
+    let local_file = call_site.local_file().expect("Could not find local file");
+    let rel_doc_path = make_manifest_relative_path(&doc_path, &local_file);
+
     // Generate tokens for all the modifiers
     let vis_tokens = vis.unwrap_or_default();
     let const_tokens = const_kw.unwrap_or_default();
@@ -249,9 +262,9 @@ fn generate_documented_function(args: SyncDocArgs, func: SimpleFunction) -> Toke
     // Generate the documented function
     let doc_attr = if let Some(cfg_value) = args.cfg_attr {
         let cfg_ident = proc_macro2::Ident::new(&cfg_value, proc_macro2::Span::call_site());
-        quote! { #[cfg_attr(#cfg_ident, doc = include_str!(#doc_path))] }
+        quote! { #[cfg_attr(#cfg_ident, doc = include_str!(#rel_doc_path))] }
     } else {
-        quote! { #[doc = include_str!(#doc_path)] }
+        quote! { #[doc = include_str!(#rel_doc_path)] }
     };
 
     quote! {

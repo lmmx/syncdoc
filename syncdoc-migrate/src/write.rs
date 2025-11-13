@@ -37,7 +37,15 @@ pub struct WriteReport {
 /// comment that should be written to a markdown file.
 pub fn extract_all_docs(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtraction> {
     let mut extractions = Vec::new();
-    let context = Vec::new();
+
+    // Extract module path from the source file
+    let module_path = syncdoc_core::path_utils::extract_module_path(&parsed.path.to_string_lossy());
+
+    // Start context with module path if not empty
+    let mut context = Vec::new();
+    if !module_path.is_empty() {
+        context.push(module_path);
+    }
 
     for item_delimited in &parsed.content.items.0 {
         let item = &item_delimited.value;
