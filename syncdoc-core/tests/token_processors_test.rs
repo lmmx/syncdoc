@@ -1,10 +1,16 @@
-use super::*;
+mod helpers;
+
+use helpers::TestFixture;
 use quote::quote;
+use syncdoc_core::token_processors::TokenProcessor;
 
 #[test]
 fn test_basic_function_processing() {
+    let fixture = TestFixture::new();
+    fixture.create_doc_file("hello.md");
+
     let input = quote! { fn hello() { println!("world"); } };
-    let processor = TokenProcessor::new(input.clone(), "../docs".to_string(), None);
+    let processor = TokenProcessor::new(input.clone(), fixture.docs_path(), None);
     let output = processor.process();
 
     println!("Input: {}", input);
@@ -17,8 +23,11 @@ fn test_basic_function_processing() {
 
 #[test]
 fn test_async_function_processing() {
+    let fixture = TestFixture::new();
+    fixture.create_doc_file("hello.md");
+
     let input = quote! { async fn hello() { println!("world"); } };
-    let processor = TokenProcessor::new(input.clone(), "../docs".to_string(), None);
+    let processor = TokenProcessor::new(input.clone(), fixture.docs_path(), None);
     let output = processor.process();
 
     println!("Input: {}", input);
@@ -37,6 +46,9 @@ fn test_async_function_processing() {
 
 #[test]
 fn test_impl_block_processing() {
+    let fixture = TestFixture::new();
+    fixture.create_doc_file("MyStruct/method.md");
+
     let input = quote! {
         impl MyStruct {
             fn method(&self) {
@@ -45,7 +57,7 @@ fn test_impl_block_processing() {
         }
     };
 
-    let processor = TokenProcessor::new(input.clone(), "../docs".to_string(), None);
+    let processor = TokenProcessor::new(input.clone(), fixture.docs_path(), None);
     let output = processor.process();
 
     println!("Impl block input: {}", input);
@@ -65,6 +77,10 @@ fn test_impl_block_processing() {
 
 #[test]
 fn test_nested_module_path_construction() {
+    let fixture = TestFixture::new();
+    fixture.create_doc_file("outer/outer_fn.md");
+    fixture.create_doc_file("outer/inner/inner_fn.md");
+
     let input = quote! {
         mod outer {
             fn outer_fn() {}
@@ -75,7 +91,7 @@ fn test_nested_module_path_construction() {
         }
     };
 
-    let processor = TokenProcessor::new(input.clone(), "../docs".to_string(), None);
+    let processor = TokenProcessor::new(input.clone(), fixture.docs_path(), None);
     let output = processor.process();
 
     println!("Nested module input: {}", input);
@@ -84,14 +100,17 @@ fn test_nested_module_path_construction() {
     let output_str = output.to_string();
 
     // Should have docs for outer function
-    assert!(output_str.contains("../docs/outer/outer_fn.md"));
+    assert!(output_str.contains("outer/outer_fn.md"));
 
     // Should have docs for inner function
-    assert!(output_str.contains("../docs/outer/inner/inner_fn.md"));
+    assert!(output_str.contains("outer/inner/inner_fn.md"));
 }
 
 #[test]
 fn test_impl_block_path_construction() {
+    let fixture = TestFixture::new();
+    fixture.create_doc_file("Calculator/add.md");
+
     let input = quote! {
         impl Calculator {
             fn add(&self, a: i32, b: i32) -> i32 {
@@ -100,12 +119,12 @@ fn test_impl_block_path_construction() {
         }
     };
 
-    let processor = TokenProcessor::new(input.clone(), "../docs".to_string(), None);
+    let processor = TokenProcessor::new(input.clone(), fixture.docs_path(), None);
     let output = processor.process();
 
     println!("Impl path test input: {}", input);
     println!("Impl path test output: {}", output);
 
     let output_str = output.to_string();
-    assert!(output_str.contains("../docs/Calculator/add.md"));
+    assert!(output_str.contains("Calculator/add.md"));
 }

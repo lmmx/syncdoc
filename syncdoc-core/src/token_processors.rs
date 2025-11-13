@@ -4,7 +4,7 @@ use unsynn::*;
 
 use crate::parse::{ImplBlockSig, ModuleContent, ModuleItem, ModuleSig, TraitSig};
 
-pub(crate) struct TokenProcessor {
+pub struct TokenProcessor {
     input: TokenStream,
     base_path: String,
     cfg_attr: Option<String>,
@@ -12,7 +12,7 @@ pub(crate) struct TokenProcessor {
 }
 
 impl TokenProcessor {
-    pub(crate) fn new(input: TokenStream, base_path: String, cfg_attr: Option<String>) -> Self {
+    pub fn new(input: TokenStream, base_path: String, cfg_attr: Option<String>) -> Self {
         Self {
             input,
             base_path,
@@ -21,7 +21,7 @@ impl TokenProcessor {
         }
     }
 
-    pub(crate) fn process(self) -> TokenStream {
+    pub fn process(self) -> TokenStream {
         match self
             .input
             .clone()
@@ -549,6 +549,3 @@ fn extract_type_name(
     }
     "Unknown".to_string()
 }
-
-#[cfg(test)]
-mod tests;
