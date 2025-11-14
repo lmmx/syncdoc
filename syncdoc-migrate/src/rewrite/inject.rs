@@ -22,3 +22,6 @@ pub fn inject_module_doc_attr(docs_root: &str) -> TokenStream {
         #![doc = syncdoc::module_doc!(path = #docs_root)]
     }
 }
+
+#[cfg(test)]
+mod inject_tests;

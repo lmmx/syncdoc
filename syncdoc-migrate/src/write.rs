@@ -23,6 +23,20 @@ pub struct DocExtraction {
     pub source_location: String,
 }
 
+impl DocExtraction {
+    /// Creates a new DocExtraction and ensures content ends with a newline
+    pub fn new(markdown_path: PathBuf, mut content: String, source_location: String) -> Self {
+        if !content.ends_with('\n') {
+            content.push('\n');
+        }
+        Self {
+            markdown_path,
+            content,
+            source_location,
+        }
+    }
+}
+
 /// Report of write operation results
 #[derive(Debug, Default)]
 pub struct WriteReport {
@@ -57,11 +71,11 @@ pub fn extract_all_docs(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtracti
             format!("{}/{}.md", docs_root, module_path)
         };
 
-        extractions.push(DocExtraction {
-            markdown_path: PathBuf::from(path),
-            content: inner_doc,
-            source_location: format!("{}:1", parsed.path.display()),
-        });
+        extractions.push(DocExtraction::new(
+            PathBuf::from(path),
+            inner_doc,
+            format!("{}:1", parsed.path.display()),
+        ));
     }
 
     // Start context with module path if not empty
@@ -101,11 +115,7 @@ fn extract_item_docs(
                     source_file.display(),
                     func_sig.name.span().start().line
                 );
-                extractions.push(DocExtraction {
-                    markdown_path: PathBuf::from(path),
-                    content,
-                    source_location: location,
-                });
+                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
             }
         }
 
@@ -152,11 +162,7 @@ fn extract_item_docs(
                     source_file.display(),
                     type_alias.name.span().start().line
                 );
-                extractions.push(DocExtraction {
-                    markdown_path: PathBuf::from(path),
-                    content,
-                    source_location: location,
-                });
+                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
             }
         }
 
@@ -168,11 +174,7 @@ fn extract_item_docs(
                     source_file.display(),
                     const_sig.name.span().start().line
                 );
-                extractions.push(DocExtraction {
-                    markdown_path: PathBuf::from(path),
-                    content,
-                    source_location: location,
-                });
+                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
             }
         }
 
@@ -184,11 +186,7 @@ fn extract_item_docs(
                     source_file.display(),
                     static_sig.name.span().start().line
                 );
-                extractions.push(DocExtraction {
-                    markdown_path: PathBuf::from(path),
-                    content,
-                    source_location: location,
-                });
+                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
             }
         }
 
@@ -255,11 +253,7 @@ fn extract_module_docs(
             source_file.display(),
             module.name.span().start().line
         );
-        extractions.push(DocExtraction {
-            markdown_path: PathBuf::from(path),
-            content,
-            source_location: location,
-        });
+        extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
     }
 
     // Update context with module name
@@ -299,11 +293,7 @@ fn extract_trait_docs(
             source_file.display(),
             trait_def.name.span().start().line
         );
-        extractions.push(DocExtraction {
-            markdown_path: PathBuf::from(path),
-            content,
-            source_location: location,
-        });
+        extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
     }
 
     // Update context with trait name
@@ -344,11 +334,7 @@ fn extract_enum_docs(
             source_file.display(),
             enum_sig.name.span().start().line
         );
-        extractions.push(DocExtraction {
-            markdown_path: PathBuf::from(path),
-            content,
-            source_location: location,
-        });
+        extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
     }
 
     // Extract variant documentation
@@ -365,15 +351,15 @@ fn extract_enum_docs(
                     &context,
                     &format!("{}/{}", enum_name, variant.name),
                 );
-                extractions.push(DocExtraction {
-                    markdown_path: PathBuf::from(path),
+                extractions.push(DocExtraction::new(
+                    PathBuf::from(path),
                     content,
-                    source_location: format!(
+                    format!(
                         "{}:{}",
                         source_file.display(),
                         variant.name.span().start().line
                     ),
-                });
+                ));
             }
         }
     }
@@ -399,11 +385,7 @@ fn extract_struct_docs(
             source_file.display(),
             struct_sig.name.span().start().line
         );
-        extractions.push(DocExtraction {
-            markdown_path: PathBuf::from(path),
-            content,
-            source_location: location,
-        });
+        extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
     }
 
     // Extract field documentation (only for named fields)
@@ -422,15 +404,15 @@ fn extract_struct_docs(
                         &context,
                         &format!("{}/{}", struct_name, field.name),
                     );
-                    extractions.push(DocExtraction {
-                        markdown_path: PathBuf::from(path),
+                    extractions.push(DocExtraction::new(
+                        PathBuf::from(path),
                         content,
-                        source_location: format!(
+                        format!(
                             "{}:{}",
                             source_file.display(),
                             field.name.span().start().line
                         ),
-                    });
+                    ));
                 }
             }
         }

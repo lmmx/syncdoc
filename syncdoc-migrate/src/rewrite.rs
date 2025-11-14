@@ -1,14 +1,17 @@
 // syncdoc-migrate/src/rewrite.rs
 
 mod inject;
+mod reformat;
 mod strip;
 
-pub use inject::inject_omnidoc_attr;
+pub use inject::{inject_module_doc_attr, inject_omnidoc_attr};
 pub use strip::strip_doc_attrs;
 use unsynn::*;
 
 use crate::discover::ParsedFile;
 use proc_macro2::TokenStream;
+use reformat::rewrite_preserving_format;
+use strip::strip_doc_attrs_from_items;
 use syncdoc_core::parse::ModuleItem;
 
 pub fn rewrite_file(
@@ -22,7 +25,7 @@ pub fn rewrite_file(
     }
 
     let mut output = if strip {
-        strip::strip_doc_attrs_from_items(&parsed.content)
+        strip_doc_attrs_from_items(&parsed.content)
     } else {
         let mut ts = TokenStream::new();
         quote::ToTokens::to_tokens(&parsed.content, &mut ts);
@@ -40,7 +43,7 @@ pub fn rewrite_file(
 
             // Inject module_doc! for inner docs if any existed
             if content.inner_attrs.is_some() || parsed.content.inner_attrs.is_some() {
-                annotated.extend(inject::inject_module_doc_attr(docs_root));
+                annotated.extend(inject_module_doc_attr(docs_root));
             }
 
             // Then handle regular items
@@ -62,7 +65,7 @@ pub fn rewrite_file(
                 );
 
                 if should_annotate {
-                    annotated.extend(inject::inject_omnidoc_attr(item_ts, docs_root));
+                    annotated.extend(inject_omnidoc_attr(item_ts, docs_root));
                 } else {
                     annotated.extend(item_ts);
                 }
@@ -71,12 +74,11 @@ pub fn rewrite_file(
         }
     }
 
-    Some(output.to_string())
+    let transformed = output.to_string();
+
+    // Apply format-preserving rewrite
+    rewrite_preserving_format(&parsed.original_source, &transformed).ok()
 }
 
 #[cfg(test)]
-mod inject_tests;
-#[cfg(test)]
 mod rewrite_tests;
-#[cfg(test)]
-mod strip_tests;

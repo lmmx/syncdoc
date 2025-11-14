@@ -91,13 +91,13 @@ fn test_extract_enum_variant_paths() {
         .iter()
         .find(|e| e.markdown_path == PathBuf::from("docs/MyEnum.md"))
         .expect("Should find enum extraction");
-    assert_eq!(enum_extraction.content, "An enum");
+    assert_eq!(enum_extraction.content, "An enum\n");
 
     let variant1 = extractions
         .iter()
         .find(|e| e.markdown_path == PathBuf::from("docs/MyEnum/Variant1.md"))
         .expect("Should find Variant1");
-    assert_eq!(variant1.content, "First variant");
+    assert_eq!(variant1.content, "First variant\n");
 }
 
 #[test]

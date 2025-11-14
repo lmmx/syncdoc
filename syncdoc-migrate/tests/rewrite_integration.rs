@@ -398,6 +398,7 @@ pub enum TimeOfDay {
 
     // Verify it compiles (would need rustfmt check)
     let code = stripped.unwrap();
+    eprintln!("{}", code);
     assert!(TokenStream::from_str(&code).is_ok());
 }
 
