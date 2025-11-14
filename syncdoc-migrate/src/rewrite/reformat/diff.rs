@@ -50,6 +50,43 @@ pub fn compute_line_diff(before: &str, after: &str) -> Vec<DiffHunk> {
     hunks
 }
 
+/// Checks if a hunk is related to documentation changes
+fn is_doc_related_hunk(hunk: &DiffHunk, original_lines: &[&str], after_lines: &[&str]) -> bool {
+    // Check lines being removed
+    for i in 0..hunk.before_count {
+        let idx = hunk.before_start + i;
+        if idx < original_lines.len() {
+            let line = original_lines[idx].trim();
+            if line.starts_with("///")
+                || line.starts_with("//!")
+                || line.replace(" ", "").contains("#[doc")
+                || line.replace(" ", "").contains("#![doc")
+            {
+                return true;
+            }
+        }
+    }
+
+    // Check lines being added
+    let after_end = hunk.after_start + hunk.after_count;
+    for i in hunk.after_start..after_end {
+        if i < after_lines.len() {
+            let line = after_lines[i].trim();
+            if line.starts_with("///")
+                || line.starts_with("//!")
+                || line.replace(" ", "").contains("#[doc")
+                || line.replace(" ", "").contains("#![doc")
+                || line.replace(" ", "").contains("#[syncdoc::")
+                || line.replace(" ", "").contains("#[omnidoc")
+            {
+                return true;
+            }
+        }
+    }
+
+    false
+}
+
 /// Applies diff hunks to original source
 pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> String {
     let original_lines: Vec<&str> = original.lines().collect();
@@ -59,6 +96,25 @@ pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> 
     let mut orig_idx = 0;
 
     for (_hunk_num, hunk) in hunks.iter().enumerate() {
+        // ONLY apply doc-related hunks
+        if !is_doc_related_hunk(hunk, &original_lines, &after_lines) {
+            #[cfg(debug_assertions)]
+            eprintln!(
+                "Skipping non-doc hunk at lines {}..{}",
+                hunk.before_start,
+                hunk.before_start + hunk.before_count
+            );
+
+            // Skip this hunk - copy original lines unchanged
+            while orig_idx < hunk.before_start + hunk.before_count {
+                if orig_idx < original_lines.len() {
+                    result.push(original_lines[orig_idx]);
+                }
+                orig_idx += 1;
+            }
+            continue;
+        }
+
         // Copy unchanged lines from original up to hunk start
         while orig_idx < hunk.before_start {
             if orig_idx < original_lines.len() {
