@@ -1,11 +1,20 @@
 ---
 source: syncdoc-core/tests/negative.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_ignores_fn_in_comments\", code)"
 ---
-# [doc = include_str ! ("../docs/actual_function.md")]
+#![doc = include_str!("../docs/lib.md")]
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
+// fn this_is_commented_out() {}
+/* fn this_is_also_commented() {} */
+
 fn actual_function() {
+    // fn another_comment_function() {}
     println!("Hello");
 }
-#[doc = r" Documentation comment with fn example() {}"]
-# [doc = include_str ! ("../docs/documented_function.md")]
+
+/// Documentation comment with fn example() {}
 fn documented_function() {}

@@ -1,8 +1,13 @@
 ---
 source: syncdoc-core/tests/negative.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_function_returning_fn_type\", code)"
 ---
-# [doc = include_str ! ("../docs/returns_fn.md")]
+#![doc = include_str!("../docs/lib.md")]
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
 fn returns_fn() -> fn() -> i32 {
     || 42
 }

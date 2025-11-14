@@ -1,0 +1,20 @@
+---
+source: syncdoc-core/tests/token_processors_test.rs
+expression: result
+---
+#![doc = include_str!("../docs/lib.md")]
+
+pub struct FirstStruct;
+pub struct SecondStruct;
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
+impl FirstStruct {
+    fn first_method(&self) {}
+}
+
+impl SecondStruct {
+    fn second_method(&self) {}
+}

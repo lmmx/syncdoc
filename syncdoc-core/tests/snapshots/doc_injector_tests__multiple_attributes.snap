@@ -1,0 +1,14 @@
+---
+source: syncdoc-core/tests/doc_injector_tests.rs
+expression: "test_with_code(\"test_multiple_attributes\", code)"
+---
+#![doc = include_str!("../docs/lib.md")]
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+#[allow(dead_code)]
+#[inline]
+fn attributed_function() {
+    println!("Has attributes");
+}

@@ -1,8 +1,13 @@
 ---
 source: syncdoc-core/tests/patterns.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_basic_function_pattern\", code)"
 ---
-# [doc = include_str ! ("../docs/hello.md")]
+#![doc = include_str!("../docs/lib.md")]
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
 fn hello() {
     println!("world");
 }

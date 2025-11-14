@@ -1,0 +1,17 @@
+---
+source: syncdoc-core/tests/token_processors_test.rs
+expression: result
+---
+#![doc = include_str!("../docs/lib.md")]
+
+pub struct Calculator;
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
+impl Calculator {
+    fn add(&self, a: i32, b: i32) -> i32 {
+        a + b
+    }
+}

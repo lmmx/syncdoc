@@ -1,29 +1,31 @@
 ---
 source: syncdoc-core/tests/patterns.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_mixed_content_with_functions\", code)"
 ---
+#![doc = include_str!("../docs/lib.md")]
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
 use std::collections::HashMap;
-# [doc = include_str ! ("../docs/SOME_CONST.md")]
+
 const SOME_CONST: i32 = 42;
-# [doc = include_str ! ("../docs/MyStruct.md")]
+
 struct MyStruct {
-    # [doc = include_str ! ("../docs/MyStruct/field.md")]
     field: String,
 }
-# [doc = include_str ! ("../docs/actual_function.md")]
+
 async fn actual_function() {
     println!("This should be documented");
 }
-# [doc = include_str ! ("../docs/MyEnum.md")]
+
 enum MyEnum {
-    # [doc = include_str ! ("../docs/MyEnum/Variant1.md")]
     Variant1,
-    # [doc = include_str ! ("../docs/MyEnum/Variant2.md")]
     Variant2(i32),
 }
-# [doc = include_str ! ("../docs/another_function.md")]
-pub unsafe fn another_function() -> Result<(), Error> {
+
+pub unsafe fn another_function() -> Result<(), String> {
     Ok(())
 }
-# [doc = include_str ! ("../docs/MyType.md")]
+
 type MyType = HashMap<String, i32>;

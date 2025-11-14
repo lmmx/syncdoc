@@ -1,0 +1,13 @@
+---
+source: syncdoc-core/tests/doc_injector_tests.rs
+expression: "test_with_code(\"test_pub_async_function_doc\", code)"
+---
+#![doc = include_str!("../docs/lib.md")]
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
+pub async fn test_pub_async() {
+    println!("pub async test");
+}

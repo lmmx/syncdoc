@@ -1,6 +1,6 @@
 ---
-source: syncdoc-core/tests/basic.rs
-expression: "test_with_code(\"test_single_function\", code)"
+source: syncdoc-core/tests/token_processors_test.rs
+expression: "test_with_code(\"test_basic_function_processing\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 

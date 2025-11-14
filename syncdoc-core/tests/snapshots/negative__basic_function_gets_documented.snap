@@ -1,8 +1,13 @@
 ---
 source: syncdoc-core/tests/negative.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_basic_function_gets_documented\", code)"
 ---
-# [doc = include_str ! ("../docs/real_function.md")]
+#![doc = include_str!("../docs/lib.md")]
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
 fn real_function() {
     println!("Real function");
 }

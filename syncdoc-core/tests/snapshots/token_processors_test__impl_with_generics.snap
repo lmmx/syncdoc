@@ -1,0 +1,22 @@
+---
+source: syncdoc-core/tests/token_processors_test.rs
+expression: result
+---
+#![doc = include_str!("../docs/lib.md")]
+
+pub struct GenericStruct<T> {
+    _inner: std::marker::PhantomData<T>,
+}
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
+impl<T> GenericStruct<T>
+where
+    T: Clone,
+{
+    fn process(&self, value: T) -> T {
+        value.clone()
+    }
+}

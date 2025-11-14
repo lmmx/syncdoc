@@ -1,0 +1,20 @@
+---
+source: syncdoc-core/tests/token_processors_test.rs
+expression: result
+---
+#![doc = include_str!("../docs/lib.md")]
+
+pub struct MyStruct;
+pub trait MyTrait {
+    fn trait_method(&self);
+}
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
+impl MyTrait for MyStruct {
+    fn trait_method(&self) {
+        println!("implementation");
+    }
+}

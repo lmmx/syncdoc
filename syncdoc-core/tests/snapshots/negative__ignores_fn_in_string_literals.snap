@@ -1,12 +1,17 @@
 ---
 source: syncdoc-core/tests/negative.rs
-expression: "apply_doc_injection(input, \"../docs\")"
+expression: "test_with_code(\"test_ignores_fn_in_string_literals\", code)"
 ---
-# [doc = include_str ! ("../docs/real_function.md")]
+#![doc = include_str!("../docs/lib.md")]
+
+use syncdoc::omnidoc;
+
+#[omnidoc(path = "docs")]
+
 fn real_function() {
     let msg = "This fn is not a function";
-    let code = r#"fn fake_function() { return "not real"; }"#;
+    let code_str = r#"fn fake_function() { return "not real"; }"#;
     println!("fn appears in this string too");
 }
-# [doc = include_str ! ("../docs/TEMPLATE.md")]
+
 const TEMPLATE: &str = "fn template_function() {}";

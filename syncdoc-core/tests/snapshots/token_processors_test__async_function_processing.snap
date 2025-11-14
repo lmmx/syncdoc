@@ -1,6 +1,6 @@
 ---
-source: syncdoc-core/tests/basic.rs
-expression: "test_with_code(\"test_single_function\", code)"
+source: syncdoc-core/tests/token_processors_test.rs
+expression: result
 ---
 #![doc = include_str!("../docs/lib.md")]
 
@@ -8,6 +8,6 @@ use syncdoc::omnidoc;
 
 #[omnidoc(path = "docs")]
 
-fn hello() {
+async fn hello() {
     println!("world");
 }
