@@ -1,0 +1,73 @@
+// syncdoc-core/tests/helpers/rust.pest
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ "//" ~ (!"\n" ~ ANY)* | "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+
+// Keywords
+pub_kw = { "pub" ~ ("(" ~ ("crate" | "super" | "self") ~ ")")? }
+fn_kw = { "fn" }
+struct_kw = { "struct" }
+enum_kw = { "enum" }
+const_kw = { "const" }
+type_kw = { "type" }
+impl_kw = { "impl" }
+trait_kw = { "trait" }
+mod_kw = { "mod" }
+for_kw = { "for" }
+extern_kw = { "extern" ~ WHITESPACE* ~ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+
+// Identifiers
+ident = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+// Generics - simplified to just detect presence
+generics = { "<" ~ (!">" ~ ANY)+ ~ ">" }
+
+// Function definition - must handle various patterns
+function = {
+    pub_kw? ~
+    (extern_kw | "async" | "unsafe" | "const")* ~
+    fn_kw ~
+    ident
+}
+
+// Struct definition
+struct_def = { pub_kw? ~ struct_kw ~ ident }
+
+// Enum definition
+enum_def = { pub_kw? ~ enum_kw ~ ident }
+
+// Const definition
+const_def = { pub_kw? ~ const_kw ~ ident ~ ":" }
+
+// Type alias definition
+type_def = { pub_kw? ~ type_kw ~ ident }
+
+// Trait definition
+trait_def = { pub_kw? ~ trait_kw ~ ident }
+
+// Impl block - capture trait impl vs type impl
+impl_block = { impl_kw ~ generics? ~ WHITESPACE* ~ (trait_impl | type_impl) }
+trait_impl = { ident ~ WHITESPACE* ~ for_kw ~ WHITESPACE* ~ ident }
+type_impl = { ident }
+
+// Module definition
+module_def = { pub_kw? ~ mod_kw ~ ident ~ WHITESPACE* ~ "{" }
+
+// Struct field
+field = { pub_kw? ~ ident ~ WHITESPACE* ~ ":" }
+
+// Items
+item = _{
+    module_def
+    | impl_block
+    | function
+    | struct_def
+    | enum_def
+    | const_def
+    | type_def
+    | trait_def
+    | field
+}
+
+// Main parser - match any line
+line = { SOI ~ item? ~ ANY* ~ EOI }

@@ -1,94 +1,65 @@
-use once_cell::sync::Lazy;
-use regex::Regex;
+// syncdoc-core/tests/helpers/formatting.rs
+
+use super::parser::{parse_rust_code, ItemKind};
 use std::collections::{HashMap, HashSet};
 use std::process::Command;
 
-static IMPL_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"impl(?:<[^>]+>)?\s+(?:(\w+)\s+for\s+)?(\w+)").unwrap());
-
 pub fn create_dummy_types_str(code: &str, existing_types: &HashSet<String>) -> String {
+    let items = parse_rust_code(code);
     let mut types_to_define = Vec::new();
     let mut trait_methods: HashMap<String, Vec<String>> = HashMap::new();
 
-    for cap in IMPL_RE.captures_iter(code) {
-        let trait_name = cap.get(1).map(|m| m.as_str());
-        let type_name = cap.get(2).map(|m| m.as_str()).unwrap_or("");
-
-        // Handle trait name
-        if let Some(trait_name) = trait_name {
-            if !trait_name.is_empty()
-                && trait_name.chars().next().unwrap().is_uppercase()
-                && !existing_types.contains(trait_name)
-            {
-                trait_methods
-                    .entry(trait_name.to_string())
-                    .or_insert_with(Vec::new);
-            }
-        }
-
-        // Handle type name
-        if !type_name.is_empty()
-            && type_name.chars().next().unwrap().is_uppercase()
-            && !existing_types.contains(type_name)
-        {
-            // Check if generic (look at the original match context)
-            let match_start = cap.get(0).unwrap().start();
-            if let Some(line) = code[match_start..].lines().next() {
-                let has_generics = line.contains('<') && line.contains('>');
-                let def = if has_generics {
-                    format!(
-                        "pub struct {}<T> {{ _inner: std::marker::PhantomData<T> }}",
-                        type_name
-                    )
-                } else {
-                    format!("pub struct {};", type_name)
-                };
-                types_to_define.push(def);
-            }
-        }
-    }
-
-    // Scan for methods inside trait impls
-    let lines: Vec<&str> = code.lines().collect();
-    let mut in_trait_impl = false;
-    let mut current_trait = String::new();
-    let mut depth = 0;
-
-    for line in &lines {
-        let trimmed = line.trim();
-
-        if trimmed.starts_with("impl ") && trimmed.contains(" for ") {
-            if let Some(caps) = IMPL_RE.captures(trimmed) {
-                if let Some(trait_name) = caps.get(1) {
-                    current_trait = trait_name.as_str().to_string();
-                    in_trait_impl = true;
-                    depth = 0;
+    for item in items {
+        match item.kind {
+            ItemKind::ImplBlock {
+                trait_name: Some(trait_name),
+                type_name,
+            } => {
+                if !existing_types.contains(&trait_name) {
+                    trait_methods.entry(trait_name).or_insert_with(Vec::new);
                 }
-            }
-        }
-
-        if in_trait_impl {
-            depth += trimmed.matches('{').count();
-            depth -= trimmed.matches('}').count();
-
-            // Extract method signatures
-            if trimmed.contains("fn ") && !current_trait.is_empty() {
-                if let Some(body_start) = trimmed.find('{') {
-                    let sig = trimmed[..body_start].trim().to_string() + ";";
-                    if let Some(methods) = trait_methods.get_mut(&current_trait) {
-                        methods.push(sig);
+                if !existing_types.contains(&type_name)
+                    && type_name.chars().next().unwrap().is_uppercase()
+                {
+                    let def = if item.has_generics {
+                        format!(
+                            "pub struct {}<T> {{ _inner: std::marker::PhantomData<T> }}",
+                            type_name
+                        )
+                    } else {
+                        format!("pub struct {};", type_name)
+                    };
+                    if !types_to_define.contains(&def) {
+                        types_to_define.push(def);
                     }
                 }
             }
-
-            if depth == 0 {
-                in_trait_impl = false;
-                current_trait.clear();
+            ItemKind::ImplBlock {
+                trait_name: None,
+                type_name,
+            } => {
+                if !existing_types.contains(&type_name)
+                    && type_name.chars().next().unwrap().is_uppercase()
+                {
+                    let def = if item.has_generics {
+                        format!(
+                            "pub struct {}<T> {{ _inner: std::marker::PhantomData<T> }}",
+                            type_name
+                        )
+                    } else {
+                        format!("pub struct {};", type_name)
+                    };
+                    if !types_to_define.contains(&def) {
+                        types_to_define.push(def);
+                    }
+                }
             }
+            _ => {}
         }
     }
 
-    // Generate trait definitions
+    extract_trait_methods(code, &mut trait_methods);
+
     for (trait_name, methods) in trait_methods {
         if methods.is_empty() {
             types_to_define.push(format!("pub trait {} {{}}", trait_name));
@@ -104,6 +75,50 @@ pub fn create_dummy_types_str(code: &str, existing_types: &HashSet<String>) -> S
     types_to_define.join("\n")
 }
 
+fn extract_trait_methods(code: &str, trait_methods: &mut HashMap<String, Vec<String>>) {
+    let mut in_trait_impl = false;
+    let mut current_trait = String::new();
+    let mut depth = 0;
+
+    for line in code.lines() {
+        let trimmed = line.trim();
+
+        if trimmed.starts_with("impl ") && trimmed.contains(" for ") {
+            let items = parse_rust_code(line);
+            for item in items {
+                if let ItemKind::ImplBlock {
+                    trait_name: Some(trait_name),
+                    ..
+                } = item.kind
+                {
+                    current_trait = trait_name;
+                    in_trait_impl = true;
+                    depth = 0;
+                }
+            }
+        }
+
+        if in_trait_impl {
+            depth += trimmed.matches('{').count();
+            depth -= trimmed.matches('}').count();
+
+            if trimmed.contains("fn ") && !current_trait.is_empty() {
+                if let Some(body_start) = trimmed.find('{') {
+                    let sig = trimmed[..body_start].trim().to_string() + ";";
+                    if let Some(methods) = trait_methods.get_mut(&current_trait) {
+                        methods.push(sig);
+                    }
+                }
+            }
+
+            if depth == 0 {
+                in_trait_impl = false;
+                current_trait.clear();
+            }
+        }
+    }
+}
+
 pub fn inject_types_into_modules(code: &str, existing_types: &HashSet<String>) -> String {
     inject_types_recursive(code, existing_types)
 }
@@ -113,51 +128,19 @@ fn inject_types_recursive(code: &str, existing_types: &HashSet<String>) -> Strin
     let lines: Vec<&str> = code.lines().collect();
     let mut i = 0;
 
-    static MOD_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?mod\s+\w+\s*\{").unwrap());
-
     while i < lines.len() {
         let line = lines[i];
-        let trimmed = line.trim();
+        let items = parse_rust_code(line);
 
-        // Check if this line starts a module
-        if MOD_RE.is_match(trimmed) {
-            let module_start = i;
-            let mut depth = 1;
-            let mut j = i + 1;
+        let is_module = items
+            .iter()
+            .any(|item| matches!(item.kind, ItemKind::Module));
 
-            while j < lines.len() && depth > 0 {
-                let module_line = lines[j];
-                depth += module_line.matches('{').count();
-                depth -= module_line.matches('}').count();
-                j += 1;
-            }
+        if is_module {
+            let (module_end, module_content, types_needed) =
+                extract_module(i, &lines, existing_types);
 
-            let module_end = j - 1;
-            let module_content_lines = &lines[(module_start + 1)..module_end];
-            let module_content = module_content_lines.join("\n");
-
-            // Find types needed
-            let mut types_needed = Vec::new();
-            for content_line in module_content_lines {
-                if let Some(caps) = IMPL_RE.captures(content_line.trim()) {
-                    let type_name = caps
-                        .get(1)
-                        .or(caps.get(2))
-                        .map(|m| m.as_str())
-                        .unwrap_or("");
-
-                    if !type_name.is_empty()
-                        && !existing_types.contains(type_name)
-                        && !types_needed.contains(&type_name.to_string())
-                    {
-                        types_needed.push(type_name.to_string());
-                    }
-                }
-            }
-
-            let processed_content = inject_types_recursive(&module_content, existing_types);
-
-            result.push_str(lines[module_start]);
+            result.push_str(lines[i]);
             result.push('\n');
 
             if !types_needed.is_empty() {
@@ -167,15 +150,15 @@ fn inject_types_recursive(code: &str, existing_types: &HashSet<String>) -> Strin
                 result.push('\n');
             }
 
-            result.push_str(&processed_content);
-            if !processed_content.is_empty() && !processed_content.ends_with('\n') {
+            result.push_str(&module_content);
+            if !module_content.is_empty() && !module_content.ends_with('\n') {
                 result.push('\n');
             }
 
             result.push_str(lines[module_end]);
             result.push('\n');
 
-            i = j;
+            i = module_end + 1;
         } else {
             result.push_str(line);
             result.push('\n');
@@ -184,6 +167,49 @@ fn inject_types_recursive(code: &str, existing_types: &HashSet<String>) -> Strin
     }
 
     result
+}
+
+fn extract_module(
+    start: usize,
+    lines: &[&str],
+    existing_types: &HashSet<String>,
+) -> (usize, String, Vec<String>) {
+    let mut depth = 1;
+    let mut j = start + 1;
+
+    while j < lines.len() && depth > 0 {
+        depth += lines[j].matches('{').count();
+        depth -= lines[j].matches('}').count();
+        j += 1;
+    }
+
+    let module_end = j - 1;
+    let module_content_lines = &lines[(start + 1)..module_end];
+    let module_content = module_content_lines.join("\n");
+
+    let mut types_needed = Vec::new();
+    for content_line in module_content_lines {
+        let items = parse_rust_code(content_line);
+        for item in items {
+            if let ItemKind::ImplBlock {
+                trait_name,
+                type_name,
+            } = item.kind
+            {
+                for name in [trait_name, Some(type_name)]
+                    .iter()
+                    .filter_map(|n| n.as_ref())
+                {
+                    if !existing_types.contains(name) && !types_needed.contains(name) {
+                        types_needed.push(name.clone());
+                    }
+                }
+            }
+        }
+    }
+
+    let processed_content = inject_types_recursive(&module_content, existing_types);
+    (module_end, processed_content, types_needed)
 }
 
 pub fn format_with_rustfmt(code: &str) -> Option<String> {

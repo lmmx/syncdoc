@@ -1,8 +1,11 @@
 #![cfg(test)]
+#![cfg(test)]
 #[path = "helpers/docs.rs"]
 pub mod docs;
 #[path = "helpers/formatting.rs"]
 pub mod formatting;
+#[path = "helpers/parser.rs"]
+pub mod parser;
 #[path = "helpers/parsing.rs"]
 pub mod parsing;
 
