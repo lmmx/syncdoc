@@ -2,7 +2,7 @@
 
 use insta::assert_snapshot;
 use proc_macro2::TokenStream;
-use rust_format::{Formatter, RustFmt};
+// use rust_format::{Formatter, RustFmt};
 use std::fs;
 use std::str::FromStr;
 use syncdoc_migrate::{parse_file, rewrite::rewrite_file};
@@ -15,15 +15,15 @@ fn setup_test_file(source: &str) -> (TempDir, std::path::PathBuf) {
     (temp_dir, file_path)
 }
 
-fn format_code(code: &str) -> String {
-    if let Ok(tokens) = TokenStream::from_str(code) {
-        RustFmt::default()
-            .format_tokens(tokens)
-            .unwrap_or_else(|_| code.to_string())
-    } else {
-        code.to_string()
-    }
-}
+// fn format_code(code: &str) -> String {
+//     if let Ok(tokens) = TokenStream::from_str(code) {
+//         RustFmt::default()
+//             .format_tokens(tokens)
+//             .unwrap_or_else(|_| code.to_string())
+//     } else {
+//         code.to_string()
+//     }
+// }
 
 fn test_rewrite(source: &str, strip: bool, annotate: bool) -> String {
     let temp_dir = TempDir::new().unwrap();
@@ -34,7 +34,7 @@ fn test_rewrite(source: &str, strip: bool, annotate: bool) -> String {
     let result = rewrite_file(&parsed, "docs", strip, annotate);
 
     match result {
-        Some(code) => format_code(&code),
+        Some(code) => code, // Return raw code with comments preserved
         None => "NO_REWRITE_NEEDED".to_string(),
     }
 }
@@ -483,6 +483,6 @@ pub fn test() {
     // Doc comments replaced/removed
     assert!(!result.contains("//! Module doc"));
     assert!(!result.contains("/// Function doc"));
-    assert!(result.contains("module_doc!"));
+    assert!(result.contains("module_doc !"));
     assert!(result.contains("omnidoc"));
 }

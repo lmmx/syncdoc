@@ -90,6 +90,25 @@ pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> 
             }
         }
 
+        // PRESERVE REGULAR COMMENT-ONLY LINES that would be deleted
+        // But NOT doc comments (/// or //!)
+        for i in 0..hunk.before_count {
+            let idx = hunk.before_start + i;
+            if idx < original_lines.len() {
+                let line = original_lines[idx];
+                let trimmed = line.trim_start();
+
+                // Check if this is a REGULAR comment line (not doc comment)
+                // Must start with // but NOT /// or //!
+                if trimmed.starts_with("//")
+                    && !trimmed.starts_with("///")
+                    && !trimmed.starts_with("//!")
+                {
+                    result.push(line);
+                }
+            }
+        }
+
         // Skip removed lines in original
         orig_idx += hunk.before_count;
 

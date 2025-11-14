@@ -61,3 +61,101 @@ fn test_apply_diff_multiple_hunks() {
     assert!(result.contains("c"));
     assert!(result.contains("e"));
 }
+
+#[test]
+fn test_apply_diff_preserves_regular_comment_lines() {
+    let original = "// Regular comment\nline2\nline3\n";
+    let after = "line2\nMODIFIED\n";
+
+    let hunks = vec![DiffHunk {
+        before_start: 0,
+        before_count: 3,
+        after_start: 0,
+        after_count: 2,
+    }];
+
+    let result = apply_diff(original, &hunks, after);
+
+    // Should preserve regular comment
+    assert!(result.contains("// Regular comment"));
+    assert!(result.contains("line2"));
+    assert!(result.contains("MODIFIED"));
+}
+
+#[test]
+fn test_apply_diff_does_not_preserve_doc_comments() {
+    let original = "/// Doc comment\nline2\n";
+    let after = "fn foo() {}\n";
+
+    let hunks = vec![DiffHunk {
+        before_start: 0,
+        before_count: 2,
+        after_start: 0,
+        after_count: 1,
+    }];
+
+    let result = apply_diff(original, &hunks, after);
+
+    // Doc comments should NOT be preserved (intentionally removed)
+    assert!(!result.contains("/// Doc comment"));
+    assert!(result.contains("fn foo()"));
+}
+
+#[test]
+fn test_apply_diff_does_not_preserve_module_doc_comments() {
+    let original = "//! Module doc\nfn foo() {}\n";
+    let after = "#![doc = syncdoc::module_doc!()]\nfn foo() {}\n";
+
+    let hunks = vec![DiffHunk {
+        before_start: 0,
+        before_count: 2,
+        after_start: 0,
+        after_count: 2,
+    }];
+
+    let result = apply_diff(original, &hunks, after);
+
+    // Module doc comments should NOT be preserved (replaced with macro)
+    assert!(!result.contains("//! Module doc"));
+    assert!(result.contains("module_doc!"));
+}
+
+#[test]
+fn test_apply_diff_preserves_indented_regular_comments() {
+    let original = "fn foo() {\n    // TODO: implement this\n    let x = 1;\n}\n";
+    let after = "fn foo() {\n    let y = 2;\n}\n";
+
+    let hunks = vec![DiffHunk {
+        before_start: 1,
+        before_count: 2,
+        after_start: 1,
+        after_count: 1,
+    }];
+
+    let result = apply_diff(original, &hunks, after);
+
+    // Regular comments should be preserved
+    assert!(result.contains("// TODO: implement this"));
+}
+
+#[test]
+fn test_apply_diff_mixed_comments() {
+    let original = "// Regular\n/// Doc\n//! Inner doc\n// Another regular\ncode();\n";
+    let after = "code();\n";
+
+    let hunks = vec![DiffHunk {
+        before_start: 0,
+        before_count: 5,
+        after_start: 0,
+        after_count: 1,
+    }];
+
+    let result = apply_diff(original, &hunks, after);
+
+    // Only regular comments preserved
+    assert!(result.contains("// Regular"));
+    assert!(result.contains("// Another regular"));
+    // Doc comments removed
+    assert!(!result.contains("/// Doc"));
+    assert!(!result.contains("//! Inner doc"));
+}
