@@ -74,7 +74,7 @@ impl TestCrate {
 
     pub fn cargo_check(&self) -> (bool, String) {
         let output = Command::new("cargo")
-            .args(&["check", "--quiet"])
+            .args(["check", "--quiet"])
             .current_dir(&self.root)
             .output()
             .expect("Failed to run cargo check");

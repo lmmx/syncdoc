@@ -1,4 +1,4 @@
-#![doc = " A main.rs module with a main function that prints good morning"]
+# ! [doc = syncdoc :: module_doc ! (path = "docs")]
 use cli_demo_basic_migrated::TimeOfDay;
 #[syncdoc::omnidoc(path = "docs")]
 fn main() {

@@ -1,4 +1,4 @@
-#![doc = " A lib.rs module containing one public enum."]
+# ! [doc = syncdoc :: module_doc ! (path = "docs")]
 #[syncdoc::omnidoc(path = "docs")]
 pub enum TimeOfDay {
     Day,

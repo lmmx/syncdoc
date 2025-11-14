@@ -41,6 +41,29 @@ pub fn extract_all_docs(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtracti
     // Extract module path from the source file
     let module_path = syncdoc_core::path_utils::extract_module_path(&parsed.path.to_string_lossy());
 
+    // Extract module-level (inner) documentation
+    if let Some(inner_doc) = crate::extract::extract_inner_doc_content(&parsed.content.inner_attrs)
+    {
+        // For lib.rs -> docs/lib.md, for main.rs -> docs/main.md, etc.
+        let file_stem = parsed
+            .path
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("module");
+
+        let path = if module_path.is_empty() {
+            format!("{}/{}.md", docs_root, file_stem)
+        } else {
+            format!("{}/{}.md", docs_root, module_path)
+        };
+
+        extractions.push(DocExtraction {
+            markdown_path: PathBuf::from(path),
+            content: inner_doc,
+            source_location: format!("{}:1", parsed.path.display()),
+        });
+    }
+
     // Start context with module path if not empty
     let mut context = Vec::new();
     if !module_path.is_empty() {

@@ -142,6 +142,7 @@ unsynn! {
     }
 
     /// Inner attribute like #![forbid(unsafe_code)]
+    #[derive(Clone)]
     pub struct InnerAttribute {
         /// Hash symbol
         pub _hash: Pound,
@@ -464,6 +465,8 @@ unsynn! {
 
     /// A complete module/file content
     pub struct ModuleContent {
+        /// Inner attributes at the top of the module (#![...])
+        pub inner_attrs: Option<Many<InnerAttribute>>,
         /// All items in the module
         pub items: Many<ModuleItem>,
     }
@@ -835,6 +838,12 @@ impl quote::ToTokens for TraitSig {
 
 impl quote::ToTokens for ModuleContent {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        // Output inner attributes first
+        if let Some(inner_attrs) = &self.inner_attrs {
+            for attr_delimited in &inner_attrs.0 {
+                quote::ToTokens::to_tokens(&attr_delimited.value, tokens);
+            }
+        }
         unsynn::ToTokens::to_tokens(&self.items, tokens);
     }
 }
