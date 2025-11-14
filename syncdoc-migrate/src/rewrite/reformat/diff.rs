@@ -22,9 +22,9 @@ pub fn compute_line_diff(before: &str, after: &str) -> Vec<DiffHunk> {
         .hunks()
         .map(|h| DiffHunk {
             before_start: h.before.start as usize,
-            before_count: h.before.len() as usize,
+            before_count: h.before.len(),
             after_start: h.after.start as usize,
-            after_count: h.after.len() as usize,
+            after_count: h.after.len(),
         })
         .collect();
 
@@ -66,9 +66,9 @@ pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> 
     let mut result = Vec::new();
     let mut orig_idx = 0;
 
-    for (hunk_num, hunk) in hunks.iter().enumerate() {
+    for (_hunk_num, hunk) in hunks.iter().enumerate() {
         #[cfg(debug_assertions)]
-        eprintln!("Processing hunk {}: orig_idx={}", hunk_num, orig_idx);
+        eprintln!("Processing hunk {}: orig_idx={}", _hunk_num, orig_idx);
 
         // Copy unchanged lines from original up to hunk start
         while orig_idx < hunk.before_start {

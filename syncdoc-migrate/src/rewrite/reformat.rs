@@ -24,7 +24,7 @@ pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<St
     eprintln!("After bookending: {}", transformed.len());
 
     // 2. Format both strings with rustfmt
-    let formatted_original = rustfmt(&original)?;
+    let formatted_original = rustfmt(original)?;
     let formatted_transformed = rustfmt(&transformed)?;
 
     #[cfg(debug_assertions)]
