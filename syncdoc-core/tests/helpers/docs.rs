@@ -1,26 +1,8 @@
+use super::regex::{
+    CONST_RE, ENUM_RE, FIELD_RE, FN_RE, IMPL_RE, MOD_RE, STRUCT_RE, TRAIT_RE, TYPE_RE,
+};
 use crate::TestCrate;
-use once_cell::sync::Lazy;
-use regex::Regex;
 use std::fs;
-
-static FN_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\bfn\s+(\w+)\s*[<(]").unwrap());
-
-static STRUCT_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?struct\s+(\w+)").unwrap());
-
-static ENUM_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?enum\s+(\w+)").unwrap());
-
-static CONST_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?const\s+(\w+)\s*:").unwrap());
-
-static TYPE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?type\s+(\w+)").unwrap());
-
-static IMPL_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"impl(?:<[^>]+>)?\s+(?:(\w+)\s+for\s+)?(\w+)").unwrap());
-
-static TRAIT_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?trait\s+(\w+)").unwrap());
-
-static MOD_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?mod\s+(\w+)\s*\{").unwrap());
-
-static FIELD_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^\s*(?:pub\s+)?(\w+)\s*:").unwrap());
 
 pub fn auto_create_docs(test_crate: &TestCrate, code: &str) {
     test_crate.write_doc("lib.md", "Test library");
