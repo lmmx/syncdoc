@@ -430,3 +430,59 @@ fn test_strip_enum_variant_docs_preserves_variants() {
     assert!(!code.contains("Day variant"));
     assert!(!code.contains("Night variant"));
 }
+
+#[test]
+fn test_preserve_regular_comments_during_strip() {
+    let source = r#"
+// This is a regular comment that should stay
+/// This is a doc comment that should be removed
+
+pub fn hello() {
+    // Inner comment should stay
+    println!("world");
+}
+
+// Another regular comment
+"#;
+
+    let result = test_rewrite(source, true, false);
+
+    eprintln!("{}", result);
+
+    // Regular comments should be preserved
+    assert!(result.contains("// This is a regular comment that should stay"));
+    assert!(result.contains("// Inner comment should stay"));
+    assert!(result.contains("// Another regular comment"));
+
+    // Doc comments should be removed
+    assert!(!result.contains("/// This is a doc comment"));
+}
+
+#[test]
+fn test_preserve_regular_comments_not_doc_comments() {
+    let source = r#"
+//! Module doc - should be replaced
+
+// Regular comment - should stay
+
+/// Function doc - should be removed
+pub fn test() {
+    // TODO: fix this - should stay
+    println!("hi");
+}
+"#;
+
+    let result = test_rewrite(source, true, true);
+
+    eprintln!("{}", result);
+
+    // Regular comments preserved
+    assert!(result.contains("// Regular comment - should stay"));
+    assert!(result.contains("// TODO: fix this - should stay"));
+
+    // Doc comments replaced/removed
+    assert!(!result.contains("//! Module doc"));
+    assert!(!result.contains("/// Function doc"));
+    assert!(result.contains("module_doc!"));
+    assert!(result.contains("omnidoc"));
+}
