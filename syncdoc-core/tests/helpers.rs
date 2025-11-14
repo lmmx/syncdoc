@@ -3,8 +3,6 @@
 pub mod docs;
 #[path = "helpers/formatting.rs"]
 pub mod formatting;
-#[path = "helpers/parsing.rs"]
-pub mod parsing;
 #[path = "helpers/regex.rs"]
 pub mod regex;
 
@@ -22,15 +20,15 @@ impl TestCrate {
     pub fn new(name: &str) -> Self {
         let temp_dir = TempDir::new().unwrap();
         let root = temp_dir.path().to_path_buf();
-
         let workspace_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .parent()
             .expect("Should have parent")
             .to_path_buf();
 
-        let cargo_toml = format!(
-            r#"
-[package]
+        fs::write(
+            root.join("Cargo.toml"),
+            format!(
+                r#"[package]
 name = "{}"
 version = "0.1.0"
 edition = "2021"
@@ -41,11 +39,11 @@ syncdoc = {{ path = "{}" }}
 [package.metadata.syncdoc]
 docs-path = "docs"
 "#,
-            name,
-            workspace_root.join("syncdoc").display()
-        );
-
-        fs::write(root.join("Cargo.toml"), cargo_toml).unwrap();
+                name,
+                workspace_root.join("syncdoc").display()
+            ),
+        )
+        .unwrap();
         fs::create_dir(root.join("src")).unwrap();
         fs::create_dir_all(root.join("docs/lib")).unwrap();
 
@@ -56,22 +54,24 @@ docs-path = "docs"
     }
 
     pub fn write_lib(&self, code: &str) {
-        let existing_types = parsing::extract_existing_types(code);
-        let dummy_types = formatting::create_dummy_types_str(code, &existing_types);
+        let (dummy_types, existing_types) = formatting::create_dummy_types_str(code);
         let code_with_types = formatting::inject_types_into_modules(code, &existing_types);
 
-        let full_content = format!(
-            r#"#![doc = include_str!("../docs/lib.md")]
+        fs::write(
+            self.root.join("src/lib.rs"),
+            format!(
+                r#"#![doc = include_str!("../docs/lib.md")]
 
-    {}
+{}
 
-    use syncdoc::omnidoc;
+use syncdoc::omnidoc;
 
-    #[omnidoc(path = "docs")]
-    {}"#,
-            dummy_types, code_with_types
-        );
-        fs::write(self.root.join("src/lib.rs"), full_content).unwrap();
+#[omnidoc(path = "docs")]
+{}"#,
+                dummy_types, code_with_types
+            ),
+        )
+        .unwrap();
     }
 
     pub fn write_doc(&self, relative_path: &str, content: &str) {
@@ -93,15 +93,14 @@ docs-path = "docs"
             .output()
             .expect("Failed to run cargo check");
 
-        let success = output.status.success();
-        let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-
-        (success, stderr)
+        (
+            output.status.success(),
+            String::from_utf8_lossy(&output.stderr).to_string(),
+        )
     }
 
     pub fn get_expanded_lib(&self) -> Option<String> {
-        let lib_path = self.root.join("src/lib.rs");
-        let content = fs::read_to_string(&lib_path).ok()?;
+        let content = fs::read_to_string(self.root.join("src/lib.rs")).ok()?;
         formatting::format_with_rustfmt(&content)
     }
 

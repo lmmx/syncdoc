@@ -1,17 +1,34 @@
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
-use super::regex::IMPL_RE;
+use super::regex::{ENUM_RE, IMPL_RE, MOD_RE, STRUCT_RE, TRAIT_RE};
 
-pub fn create_dummy_types_str(code: &str, existing_types: &HashSet<String>) -> String {
+pub fn create_dummy_types_str(code: &str) -> (String, HashSet<String>) {
+    let mut existing_types = HashSet::new();
     let mut types_to_define = Vec::new();
     let mut trait_methods: HashMap<String, Vec<String>> = HashMap::new();
 
+    // Extract existing types
+    for regex in [&*STRUCT_RE, &*ENUM_RE, &*TRAIT_RE] {
+        for cap in regex.captures_iter(code) {
+            if let Some(name) = cap.get(1).map(|m| m.as_str()) {
+                existing_types.insert(name.to_string());
+                if regex.as_str() == STRUCT_RE.as_str() {
+                    if let Some(line) = code[cap.get(0).unwrap().start()..].lines().next() {
+                        if line.contains('<') && line.contains('>') {
+                            existing_types.insert(format!("{}<T>", name));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Process impl blocks
     for cap in IMPL_RE.captures_iter(code) {
         let trait_name = cap.get(1).map(|m| m.as_str());
         let type_name = cap.get(2).map(|m| m.as_str()).unwrap_or("");
 
-        // Handle trait name
         if let Some(trait_name) = trait_name {
             if !trait_name.is_empty()
                 && trait_name.chars().next().unwrap().is_uppercase()
@@ -23,41 +40,37 @@ pub fn create_dummy_types_str(code: &str, existing_types: &HashSet<String>) -> S
             }
         }
 
-        // Handle type name
         if !type_name.is_empty()
             && type_name.chars().next().unwrap().is_uppercase()
             && !existing_types.contains(type_name)
         {
-            // Check if generic (look at the original match context)
             let match_start = cap.get(0).unwrap().start();
             if let Some(line) = code[match_start..].lines().next() {
                 let has_generics = line.contains('<') && line.contains('>');
-                let def = if has_generics {
+                types_to_define.push(if has_generics {
                     format!(
                         "pub struct {}<T> {{ _inner: std::marker::PhantomData<T> }}",
                         type_name
                     )
                 } else {
                     format!("pub struct {};", type_name)
-                };
-                types_to_define.push(def);
+                });
             }
         }
     }
 
-    // Scan for methods inside trait impls
-    let lines: Vec<&str> = code.lines().collect();
+    // Extract trait methods
     let mut in_trait_impl = false;
     let mut current_trait = String::new();
     let mut depth = 0;
 
-    for line in &lines {
+    for line in code.lines() {
         let trimmed = line.trim();
 
         if trimmed.starts_with("impl ") && trimmed.contains(" for ") {
             if let Some(caps) = IMPL_RE.captures(trimmed) {
-                if let Some(trait_name) = caps.get(1) {
-                    current_trait = trait_name.as_str().to_string();
+                if let Some(trait_name) = caps.get(1).map(|m| m.as_str()) {
+                    current_trait = trait_name.to_string();
                     in_trait_impl = true;
                     depth = 0;
                 }
@@ -68,7 +81,6 @@ pub fn create_dummy_types_str(code: &str, existing_types: &HashSet<String>) -> S
             depth += trimmed.matches('{').count();
             depth -= trimmed.matches('}').count();
 
-            // Extract method signatures
             if trimmed.contains("fn ") && !current_trait.is_empty() {
                 if let Some(body_start) = trimmed.find('{') {
                     let sig = trimmed[..body_start].trim().to_string() + ";";
@@ -85,56 +97,44 @@ pub fn create_dummy_types_str(code: &str, existing_types: &HashSet<String>) -> S
         }
     }
 
-    // Generate trait definitions
     for (trait_name, methods) in trait_methods {
-        if methods.is_empty() {
-            types_to_define.push(format!("pub trait {} {{}}", trait_name));
+        types_to_define.push(if methods.is_empty() {
+            format!("pub trait {} {{}}", trait_name)
         } else {
-            let methods_str = methods.iter().join("\n    ");
-            types_to_define.push(format!(
+            format!(
                 "pub trait {} {{\n    {}\n}}",
-                trait_name, methods_str
-            ));
-        }
+                trait_name,
+                methods.join("\n    ")
+            )
+        });
     }
 
-    types_to_define.iter().join("\n")
+    (types_to_define.join("\n"), existing_types)
 }
 
 pub fn inject_types_into_modules(code: &str, existing_types: &HashSet<String>) -> String {
-    inject_types_recursive(code, existing_types)
-}
-
-fn inject_types_recursive(code: &str, existing_types: &HashSet<String>) -> String {
     let mut result = String::new();
     let lines: Vec<&str> = code.lines().collect();
     let mut i = 0;
 
-    use super::regex::MOD_RE;
-
     while i < lines.len() {
         let line = lines[i];
-        let trimmed = line.trim();
 
-        // Check if this line starts a module
-        if MOD_RE.is_match(trimmed) {
+        if MOD_RE.is_match(line.trim()) {
             let module_start = i;
             let mut depth = 1;
             let mut j = i + 1;
 
             while j < lines.len() && depth > 0 {
-                let module_line = lines[j];
-                depth += module_line.matches('{').count();
-                depth -= module_line.matches('}').count();
+                depth += lines[j].matches('{').count();
+                depth -= lines[j].matches('}').count();
                 j += 1;
             }
 
             let module_end = j - 1;
-            let module_content_lines = &lines[(module_start + 1)..module_end];
-            let module_content = module_content_lines.join("\n");
+            let module_content = lines[(module_start + 1)..module_end].join("\n");
 
-            // Find types needed
-            let types_needed: Vec<String> = module_content_lines
+            let types_needed: Vec<String> = lines[(module_start + 1)..module_end]
                 .iter()
                 .filter_map(|content_line| {
                     IMPL_RE.captures(content_line.trim()).and_then(|caps| {
@@ -150,7 +150,7 @@ fn inject_types_recursive(code: &str, existing_types: &HashSet<String>) -> Strin
                 .unique()
                 .collect();
 
-            let processed_content = inject_types_recursive(&module_content, existing_types);
+            let processed_content = inject_types_into_modules(&module_content, existing_types);
 
             result.push_str(lines[module_start]);
             result.push('\n');
@@ -183,7 +183,6 @@ fn inject_types_recursive(code: &str, existing_types: &HashSet<String>) -> Strin
 
 pub fn format_with_rustfmt(code: &str) -> Option<String> {
     use duct::cmd;
-
     cmd!("rustfmt", "--edition", "2021")
         .stdin_bytes(code)
         .read()

@@ -1,343 +1,230 @@
-use super::regex::{
-    CONST_RE, ENUM_RE, FIELD_RE, FN_RE, IMPL_RE, MOD_RE, STRUCT_RE, TRAIT_RE, TYPE_RE,
-};
+use super::regex::*;
 use crate::TestCrate;
+use regex::Regex;
 use std::fs;
 
 pub fn auto_create_docs(test_crate: &TestCrate, code: &str) {
     test_crate.write_doc("lib.md", "Test library");
 
-    // Functions
-    for cap in FN_RE.captures_iter(code) {
-        if let Some(name) = cap.get(1) {
-            let clean_name = name.as_str();
-            if !clean_name.is_empty() {
-                eprintln!("Creating doc for function: {}", clean_name);
-                test_crate.write_doc(
-                    &format!("lib/{}.md", clean_name),
-                    &format!("Documentation for {}", clean_name),
-                );
-            }
-        }
+    let items = [
+        (&*FN_RE, "function"),
+        (&*STRUCT_RE, "struct"),
+        (&*ENUM_RE, "enum"),
+        (&*CONST_RE, "const"),
+        (&*TYPE_RE, "type alias"),
+    ];
+
+    for (regex, kind) in items {
+        create_top_level_docs(test_crate, code, regex, kind);
     }
 
-    // Structs
-    for cap in STRUCT_RE.captures_iter(code) {
-        if let Some(name) = cap.get(1) {
-            let clean_name = name.as_str();
-            eprintln!("Creating doc for struct: {}", clean_name);
+    handle_braced_blocks(
+        test_crate,
+        code,
+        &STRUCT_RE,
+        &FIELD_RE,
+        false,
+        |test_crate, parent, item| {
+            eprintln!("Creating doc for field: {}::{}", parent, item);
             test_crate.write_doc(
-                &format!("lib/{}.md", clean_name),
-                &format!("Documentation for {}", clean_name),
+                &format!("lib/{}/{}.md", parent, item),
+                "Documentation for field",
             );
-        }
-    }
+        },
+    );
 
-    // Enums
-    for cap in ENUM_RE.captures_iter(code) {
-        if let Some(name) = cap.get(1) {
-            let clean_name = name.as_str();
-            eprintln!("Creating doc for enum: {}", clean_name);
+    handle_braced_blocks(
+        test_crate,
+        code,
+        &TRAIT_RE,
+        &FN_RE,
+        true,
+        |test_crate, parent, item| {
+            eprintln!("Creating doc for trait method: {}::{}", parent, item);
             test_crate.write_doc(
-                &format!("lib/{}.md", clean_name),
-                &format!("Documentation for {}", clean_name),
+                &format!("lib/{}/{}.md", parent, item),
+                &format!("Documentation for {}::{}", parent, item),
             );
-        }
-    }
+        },
+    );
 
-    // Consts
-    for cap in CONST_RE.captures_iter(code) {
-        if let Some(name) = cap.get(1) {
-            let clean_name = name.as_str();
-            eprintln!("Creating doc for const: {}", clean_name);
-            test_crate.write_doc(
-                &format!("lib/{}.md", clean_name),
-                &format!("Documentation for {}", clean_name),
-            );
-        }
-    }
-
-    // Type aliases
-    for cap in TYPE_RE.captures_iter(code) {
-        if let Some(name) = cap.get(1) {
-            let clean_name = name.as_str();
-            eprintln!("Creating doc for type alias: {}", clean_name);
-            test_crate.write_doc(
-                &format!("lib/{}.md", clean_name),
-                &format!("Documentation for {}", clean_name),
-            );
-        }
-    }
-
-    handle_impl_blocks(test_crate, code);
-    handle_modules(test_crate, code);
-    handle_traits(test_crate, code);
-    parse_struct_fields(test_crate, code);
+    handle_impl_and_modules(test_crate, code, Vec::new());
 }
 
-fn parse_struct_fields(test_crate: &TestCrate, code: &str) {
-    let mut in_struct = false;
-    let mut struct_name = String::new();
+fn create_top_level_docs(test_crate: &TestCrate, code: &str, regex: &Regex, kind: &str) {
+    for cap in regex.captures_iter(code) {
+        if let Some(name) = cap.get(1).map(|m| m.as_str()).filter(|s| !s.is_empty()) {
+            eprintln!("Creating doc for {}: {}", kind, name);
+            test_crate.write_doc(
+                &format!("lib/{}.md", name),
+                &format!("Documentation for {}", name),
+            );
+        }
+    }
+}
+
+fn handle_braced_blocks<F>(
+    test_crate: &TestCrate,
+    code: &str,
+    start_regex: &Regex,
+    item_regex: &Regex,
+    require_body: bool,
+    mut handler: F,
+) where
+    F: FnMut(&TestCrate, &str, &str),
+{
+    let mut in_block = false;
+    let mut parent_name = String::new();
     let mut brace_depth = 0;
 
     for line in code.lines() {
         let trimmed = line.trim();
 
-        if !in_struct {
-            if let Some(cap) = STRUCT_RE.captures(trimmed) {
-                if trimmed.contains('{') {
-                    if let Some(name) = cap.get(1) {
-                        struct_name = name.as_str().to_string();
-                        in_struct = true;
-                        brace_depth = 0;
-                    }
-                }
+        if !in_block && start_regex.is_match(trimmed) && trimmed.contains('{') {
+            if let Some(name) = start_regex
+                .captures(trimmed)
+                .and_then(|cap| cap.get(1))
+                .map(|m| m.as_str())
+            {
+                parent_name = name.to_string();
+                in_block = true;
+                brace_depth = 0;
             }
         }
 
-        if in_struct {
+        if in_block {
             brace_depth += trimmed.matches('{').count();
             brace_depth -= trimmed.matches('}').count();
 
-            if let Some(cap) = FIELD_RE.captures(trimmed) {
-                if !trimmed.starts_with("//") {
-                    if let Some(field) = cap.get(1) {
-                        let field_name = field.as_str();
-                        eprintln!("Creating doc for field: {}::{}", struct_name, field_name);
-                        test_crate.write_doc(
-                            &format!("lib/{}/{}.md", struct_name, field_name),
-                            "Documentation for field",
-                        );
-                    }
+            if !trimmed.starts_with("//") {
+                if let Some(item) = item_regex
+                    .captures(trimmed)
+                    .and_then(|cap| cap.get(1))
+                    .map(|m| m.as_str())
+                    .filter(|s| !s.is_empty() && (!require_body || trimmed.contains('{')))
+                {
+                    handler(test_crate, &parent_name, item);
                 }
             }
 
             if brace_depth == 0 {
-                in_struct = false;
-                struct_name.clear();
+                in_block = false;
+                parent_name.clear();
             }
         }
     }
 }
 
-fn handle_impl_blocks(test_crate: &TestCrate, code: &str) {
-    handle_impl_blocks_with_context(test_crate, code, Vec::new());
-}
+fn handle_impl_and_modules(test_crate: &TestCrate, code: &str, module_path: Vec<String>) {
+    let mut i = 0;
+    let lines: Vec<&str> = code.lines().collect();
 
-fn handle_impl_blocks_with_context(test_crate: &TestCrate, code: &str, module_path: Vec<String>) {
-    let mut in_impl = false;
-    let mut impl_name = String::new();
-    let mut impl_trait = Option::<String>::None;
-    let mut brace_depth = 0;
+    while i < lines.len() {
+        let trimmed = lines[i].trim();
 
-    for line in code.lines() {
-        let trimmed = line.trim();
+        if let Some(cap) = MOD_RE.captures(trimmed) {
+            if let Some(name) = cap.get(1).map(|m| m.as_str()) {
+                let (end_idx, content) = extract_block_content(&lines, i);
 
-        if !in_impl {
-            if let Some(cap) = IMPL_RE.captures(trimmed) {
-                in_impl = true;
-                brace_depth = 0;
-
-                // cap.get(1) is trait name (in "impl Trait for Type")
-                // cap.get(2) is type name
-                impl_trait = cap.get(1).map(|m| m.as_str().to_string());
-                impl_name = cap.get(2).map(|m| m.as_str()).unwrap_or("").to_string();
-
-                if !impl_name.is_empty() {
-                    let mut dir_path = test_crate.root().join("docs/lib");
-                    for module in &module_path {
-                        dir_path = dir_path.join(module);
-                    }
-
-                    if let Some(ref trait_name) = impl_trait {
-                        dir_path = dir_path.join(&impl_name).join(trait_name);
-                    } else {
-                        dir_path = dir_path.join(&impl_name);
-                    }
-
-                    fs::create_dir_all(&dir_path).ok();
-                }
-            }
-        }
-
-        if in_impl {
-            brace_depth += trimmed.matches('{').count();
-            brace_depth -= trimmed.matches('}').count();
-
-            // Look for function definitions
-            if let Some(cap) = FN_RE.captures(trimmed) {
-                if let Some(name) = cap.get(1) {
-                    let clean_name = name.as_str();
-                    if !clean_name.is_empty() && !impl_name.is_empty() {
-                        let mut path_parts = vec!["lib".to_string()];
-                        path_parts.extend(module_path.clone());
-
-                        if let Some(ref trait_name) = impl_trait {
-                            eprintln!(
-                                "Creating doc for trait impl method: {}::{}::{}",
-                                impl_name, trait_name, clean_name
-                            );
-                            path_parts
-                                .push(format!("{}/{}/{}.md", impl_name, trait_name, clean_name));
-                        } else {
-                            eprintln!("Creating doc for method: {}::{}", impl_name, clean_name);
-                            path_parts.push(format!("{}/{}.md", impl_name, clean_name));
-                        }
-
-                        test_crate.write_doc(&path_parts.join("/"), "Documentation for method");
-                    }
-                }
-            }
-
-            if brace_depth == 0 && trimmed.ends_with('}') {
-                in_impl = false;
-                impl_name.clear();
-                impl_trait = None;
-            }
-        }
-    }
-}
-
-fn handle_modules(test_crate: &TestCrate, code: &str) {
-    handle_modules_recursive(test_crate, code, Vec::new());
-}
-
-fn handle_modules_recursive(test_crate: &TestCrate, code: &str, parent_modules: Vec<String>) {
-    let mut in_mod = false;
-    let mut mod_name = String::new();
-    let mut depth = 0;
-    let mut mod_content = String::new();
-    let mut mod_start_line = 0;
-
-    for (line_no, line) in code.lines().enumerate() {
-        let trimmed = line.trim();
-
-        if !in_mod {
-            if let Some(cap) = MOD_RE.captures(trimmed) {
-                if let Some(name) = cap.get(1) {
-                    mod_name = name.as_str().to_string();
-                    in_mod = true;
-                    depth = 0;
-                    mod_start_line = line_no;
-                    mod_content.clear();
-
-                    // Create module directory
-                    let mut path_parts = vec!["lib".to_string()];
-                    path_parts.extend(parent_modules.clone());
-                    path_parts.push(mod_name.clone());
-
-                    let dir_path = test_crate.root().join("docs").join(path_parts.join("/"));
-                    fs::create_dir_all(&dir_path).ok();
-
-                    eprintln!("Creating doc for module: {}", path_parts.join("::"));
-                    test_crate.write_doc(
-                        &format!("{}.md", path_parts.join("/")),
-                        "Documentation for module",
-                    );
-                }
-            }
-        }
-
-        if in_mod {
-            depth += trimmed.matches('{').count();
-
-            if line_no > mod_start_line {
-                mod_content.push_str(line);
-                mod_content.push('\n');
-            }
-
-            depth -= trimmed.matches('}').count();
-
-            if depth == 0 {
-                let mut new_path = parent_modules.clone();
-                new_path.push(mod_name.clone());
-
-                create_docs_for_module_items(test_crate, &mod_content, &new_path);
-                handle_modules_recursive(test_crate, &mod_content, new_path.clone());
-                handle_impl_blocks_with_context(test_crate, &mod_content, new_path);
-
-                in_mod = false;
-                mod_name.clear();
-                mod_content.clear();
-            }
-        }
-    }
-}
-
-fn create_docs_for_module_items(test_crate: &TestCrate, code: &str, module_path: &[String]) {
-    // Functions in modules
-    for cap in FN_RE.captures_iter(code) {
-        if let Some(name) = cap.get(1) {
-            let clean_name = name.as_str();
-            if !clean_name.is_empty() {
                 let mut path_parts = vec!["lib".to_string()];
-                path_parts.extend(module_path.iter().cloned());
-                path_parts.push(format!("{}.md", clean_name));
+                path_parts.extend(module_path.clone());
+                path_parts.push(name.to_string());
 
-                eprintln!("Creating doc for function: {}", clean_name);
+                fs::create_dir_all(test_crate.root().join("docs").join(path_parts.join("/"))).ok();
+                eprintln!("Creating doc for module: {}", path_parts.join("::"));
                 test_crate.write_doc(
-                    &path_parts.join("/"),
-                    &format!("Documentation for {}", clean_name),
+                    &format!("{}.md", path_parts.join("/")),
+                    "Documentation for module",
                 );
+
+                let mut new_path = module_path.clone();
+                new_path.push(name.to_string());
+
+                // Process functions in module
+                for line in content.lines() {
+                    if let Some(fn_cap) = FN_RE.captures(line.trim()) {
+                        if let Some(fn_name) =
+                            fn_cap.get(1).map(|m| m.as_str()).filter(|s| !s.is_empty())
+                        {
+                            let mut fn_path_parts = vec!["lib".to_string()];
+                            fn_path_parts.extend(new_path.clone());
+                            fn_path_parts.push(format!("{}.md", fn_name));
+                            eprintln!("Creating doc for function: {}", fn_name);
+                            test_crate.write_doc(
+                                &fn_path_parts.join("/"),
+                                &format!("Documentation for {}", fn_name),
+                            );
+                        }
+                    }
+                }
+
+                handle_impl_and_modules(test_crate, &content, new_path);
+                i = end_idx;
+                continue;
+            }
+        } else if let Some(cap) = IMPL_RE.captures(trimmed) {
+            let impl_trait = cap.get(1).map(|m| m.as_str().to_string());
+            if let Some(type_name) = cap.get(2).map(|m| m.as_str()).filter(|s| !s.is_empty()) {
+                let (end_idx, content) = extract_block_content(&lines, i);
+
+                let mut dir_path = test_crate.root().join("docs/lib");
+                for module in &module_path {
+                    dir_path = dir_path.join(module);
+                }
+                if let Some(ref trait_name) = impl_trait {
+                    dir_path = dir_path.join(type_name).join(trait_name);
+                } else {
+                    dir_path = dir_path.join(type_name);
+                }
+                fs::create_dir_all(&dir_path).unwrap();
+
+                // Process methods
+                for line in content.lines() {
+                    if let Some(fn_cap) = FN_RE.captures(line.trim()) {
+                        if let Some(fn_name) =
+                            fn_cap.get(1).map(|m| m.as_str()).filter(|s| !s.is_empty())
+                        {
+                            let mut path_parts = vec!["lib".to_string()];
+                            path_parts.extend(module_path.clone());
+                            if let Some(ref trait_name) = impl_trait {
+                                eprintln!(
+                                    "Creating doc for trait impl method: {}::{}::{}",
+                                    type_name, trait_name, fn_name
+                                );
+                                path_parts
+                                    .push(format!("{}/{}/{}.md", type_name, trait_name, fn_name));
+                            } else {
+                                eprintln!("Creating doc for method: {}::{}", type_name, fn_name);
+                                path_parts.push(format!("{}/{}.md", type_name, fn_name));
+                            }
+                            test_crate.write_doc(&path_parts.join("/"), "Documentation for method");
+                        }
+                    }
+                }
+
+                i = end_idx;
+                continue;
             }
         }
+
+        i += 1;
     }
 }
 
-fn handle_traits(test_crate: &TestCrate, code: &str) {
-    let mut in_trait = false;
-    let mut trait_name = String::new();
-    let mut brace_depth = 0;
+fn extract_block_content(lines: &[&str], start_idx: usize) -> (usize, String) {
+    let mut depth = 1;
+    let mut content = String::new();
+    let mut i = start_idx + 1;
 
-    for line in code.lines() {
-        let trimmed = line.trim();
-
-        if !in_trait {
-            if let Some(cap) = TRAIT_RE.captures(trimmed) {
-                in_trait = true;
-                brace_depth = 0;
-
-                if let Some(name) = cap.get(1) {
-                    trait_name = name.as_str().to_string();
-                    if !trait_name.is_empty() {
-                        fs::create_dir_all(test_crate.root().join("docs/lib").join(&trait_name))
-                            .ok();
-                        eprintln!("Creating doc for trait: {}", trait_name);
-                        test_crate.write_doc(
-                            &format!("lib/{}.md", trait_name),
-                            &format!("Documentation for {}", trait_name),
-                        );
-                    }
-                }
-            }
+    while i < lines.len() && depth > 0 {
+        depth += lines[i].matches('{').count();
+        depth -= lines[i].matches('}').count();
+        if depth > 0 {
+            content.push_str(lines[i]);
+            content.push('\n');
         }
-
-        if in_trait {
-            brace_depth += trimmed.matches('{').count();
-            brace_depth -= trimmed.matches('}').count();
-
-            // Look for methods with bodies (default implementations)
-            if let Some(cap) = FN_RE.captures(trimmed) {
-                if let Some(name) = cap.get(1) {
-                    let clean_name = name.as_str();
-                    // Check if this function has a body (default implementation)
-                    if !clean_name.is_empty() && !trait_name.is_empty() && trimmed.contains('{') {
-                        eprintln!(
-                            "Creating doc for trait method: {}::{}",
-                            trait_name, clean_name
-                        );
-                        test_crate.write_doc(
-                            &format!("lib/{}/{}.md", trait_name, clean_name),
-                            &format!("Documentation for {}::{}", trait_name, clean_name),
-                        );
-                    }
-                }
-            }
-
-            if brace_depth == 0 && trimmed.ends_with('}') {
-                in_trait = false;
-                trait_name.clear();
-            }
-        }
+        i += 1;
     }
+
+    (i, content)
 }
