@@ -1,10 +1,7 @@
 use itertools::Itertools;
-use regex::Regex;
 use std::collections::{HashMap, HashSet};
-use std::sync::LazyLock;
 
-static IMPL_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"impl(?:<[^>]+>)?\s+(?:(\w+)\s+for\s+)?(\w+)").unwrap());
+use super::regex::IMPL_RE;
 
 pub fn create_dummy_types_str(code: &str, existing_types: &HashSet<String>) -> String {
     let mut types_to_define = Vec::new();
@@ -113,8 +110,7 @@ fn inject_types_recursive(code: &str, existing_types: &HashSet<String>) -> Strin
     let lines: Vec<&str> = code.lines().collect();
     let mut i = 0;
 
-    static MOD_RE: LazyLock<Regex> =
-        LazyLock::new(|| Regex::new(r"(?:pub\s+)?mod\s+\w+\s*\{").unwrap());
+    use super::regex::MOD_RE;
 
     while i < lines.len() {
         let line = lines[i];

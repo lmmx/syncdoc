@@ -5,6 +5,8 @@ pub mod docs;
 pub mod formatting;
 #[path = "helpers/parsing.rs"]
 pub mod parsing;
+#[path = "helpers/regex.rs"]
+pub mod regex;
 
 use std::fs;
 use std::path::PathBuf;
