@@ -10,6 +10,8 @@ use unsynn::*;
 
 use crate::discover::ParsedFile;
 use proc_macro2::TokenStream;
+use reformat::rewrite_preserving_format;
+use strip::strip_doc_attrs_from_items;
 use syncdoc_core::parse::ModuleItem;
 
 pub fn rewrite_file(
@@ -23,7 +25,7 @@ pub fn rewrite_file(
     }
 
     let mut output = if strip {
-        strip::strip_doc_attrs_from_items(&parsed.content)
+        strip_doc_attrs_from_items(&parsed.content)
     } else {
         let mut ts = TokenStream::new();
         quote::ToTokens::to_tokens(&parsed.content, &mut ts);
@@ -75,7 +77,7 @@ pub fn rewrite_file(
     let transformed = output.to_string();
 
     // Apply format-preserving rewrite
-    reformat::rewrite_preserving_format(&parsed.original_source, &transformed).ok()
+    rewrite_preserving_format(&parsed.original_source, &transformed).ok()
 }
 
 #[cfg(test)]

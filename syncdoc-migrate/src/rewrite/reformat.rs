@@ -49,7 +49,12 @@ pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<St
 
     // 4. Apply diff to FORMATTED original (not raw original)
     // This ensures line numbers match
-    let result = apply_diff(&formatted_original, &diff_hunks, &formatted_transformed);
+    let mut result = apply_diff(&formatted_original, &diff_hunks, &formatted_transformed);
+
+    // Ensure EOF newline
+    if !result.ends_with('\n') {
+        result.push('\n');
+    }
 
     #[cfg(debug_assertions)]
     {
