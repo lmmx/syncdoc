@@ -8,7 +8,6 @@ pub mod calculations {
         a + b
     }
 }
-#[derive(Debug)]
 #[syncdoc::omnidoc(path = "docs")]
 #[derive(Debug)]
 pub struct Calculator {

@@ -441,54 +441,12 @@ fn wrap_in_braces(content: TokenStream) -> TokenStream {
 
 /// Injects `#[omnidoc(path = "...")]` attribute into an item's token stream
 pub fn inject_omnidoc_attr(item: TokenStream, docs_root: &str) -> TokenStream {
-    let mut output = TokenStream::new();
-
-    // Parse to find where to inject (after attributes, before visibility/keywords)
-    if let Ok(content) = item
-        .clone()
-        .into_token_iter()
-        .parse::<syncdoc_core::parse::ModuleContent>()
-    {
-        if let Some(first_item) = content.items.0.first() {
-            // Get attributes from the parsed item
-            let attrs_opt = match &first_item.value {
-                ModuleItem::Function(f) => &f.attributes,
-                ModuleItem::Enum(e) => &e.attributes,
-                ModuleItem::Struct(s) => &s.attributes,
-                ModuleItem::Module(m) => &m.attributes,
-                ModuleItem::Trait(t) => &t.attributes,
-                ModuleItem::ImplBlock(i) => &i.attributes,
-                ModuleItem::TypeAlias(ta) => &ta.attributes,
-                ModuleItem::Const(c) => &c.attributes,
-                ModuleItem::Static(s) => &s.attributes,
-                _ => &None,
-            };
-
-            // Emit existing attributes
-            if let Some(attrs) = attrs_opt {
-                for attr in &attrs.0 {
-                    quote::ToTokens::to_tokens(&attr.value, &mut output);
-                }
-            }
-
-            // Inject omnidoc attribute
-            let attr = quote! {
-                #[syncdoc::omnidoc(path = #docs_root)]
-            };
-            output.extend(attr);
-
-            // Emit the rest of the item without its attributes
-            // (this is complex - for now just re-emit the whole thing)
-            // TODO: proper reconstruction without attributes
-            output.extend(item);
-            return output;
-        }
-    }
-
-    // Fallback: inject at the beginning
     let attr = quote! {
         #[syncdoc::omnidoc(path = #docs_root)]
     };
+
+    // Simply prepend the attribute before the entire item
+    let mut output = TokenStream::new();
     output.extend(attr);
     output.extend(item);
     output
@@ -553,4 +511,8 @@ pub fn rewrite_file(
 }
 
 #[cfg(test)]
-mod tests;
+mod inject_tests;
+#[cfg(test)]
+mod rewrite_tests;
+#[cfg(test)]
+mod strip_tests;
