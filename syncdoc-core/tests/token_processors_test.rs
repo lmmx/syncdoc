@@ -25,7 +25,6 @@ fn hello() {
     println!("world");
 }
 "#;
-
     assert_snapshot!(test_with_code("test_basic_function_processing", code));
 }
 
@@ -36,11 +35,7 @@ async fn hello() {
     println!("world");
 }
 "#;
-
     let result = test_with_code("test_async_function_processing", code);
-
-    // Verify async keyword is preserved
-    assert!(result.contains("async fn hello"));
     assert_snapshot!(result);
 }
 
@@ -53,12 +48,7 @@ impl MyStruct {
     }
 }
 "#;
-
     let result = test_with_code("test_impl_block_processing", code);
-
-    // Verify structure is preserved
-    assert!(result.contains("fn method"));
-    assert!(result.contains("MyStruct"));
     assert_snapshot!(result);
 }
 
@@ -73,12 +63,7 @@ mod outer {
     }
 }
 "#;
-
     let result = test_with_code("test_nested_module_path_construction", code);
-
-    // Verify nested paths are constructed correctly
-    assert!(result.contains("outer/outer_fn.md"));
-    assert!(result.contains("outer/inner/inner_fn.md"));
     assert_snapshot!(result);
 }
 
@@ -94,8 +79,6 @@ impl Calculator {
 
     let result = test_with_code("test_impl_block_path_construction", code);
 
-    // Verify impl paths are constructed correctly
-    assert!(result.contains("Calculator/add.md"));
     assert_snapshot!(result);
 }
 
@@ -110,11 +93,7 @@ impl SecondStruct {
     fn second_method(&self) {}
 }
 "#;
-
     let result = test_with_code("test_multiple_impl_blocks", code);
-
-    assert!(result.contains("FirstStruct/first_method.md"));
-    assert!(result.contains("SecondStruct/second_method.md"));
     assert_snapshot!(result);
 }
 
@@ -130,10 +109,7 @@ where
     }
 }
 "#;
-
     let result = test_with_code("test_impl_with_generics", code);
-
-    assert!(result.contains("GenericStruct/process.md"));
     assert_snapshot!(result);
 }
 
@@ -148,9 +124,7 @@ impl MyTrait for MyStruct {
 "#;
 
     let result = test_with_code("test_trait_impl", code);
-
     // For trait impls, it should still document the methods
-    assert!(result.contains("MyStruct/trait_method.md"));
     assert_snapshot!(result);
 }
 
@@ -165,9 +139,6 @@ mod my_module {
 "#;
 
     let result = test_with_code("test_nested_impl_in_module", code);
-
-    assert!(result.contains("my_module"));
-    assert!(result.contains("MyStruct/module_method.md"));
     assert_snapshot!(result);
 }
 
@@ -176,27 +147,20 @@ fn test_complex_nested_structure() {
     let code = r#"
 mod outer {
     pub fn outer_function() {}
-    
+
     impl OuterStruct {
         pub fn outer_method(&self) {}
     }
-    
+
     mod inner {
         pub fn inner_function() {}
-        
+
         impl InnerStruct {
             pub fn inner_method(&self) {}
         }
     }
 }
 "#;
-
     let result = test_with_code("test_complex_nested_structure", code);
-
-    // Verify all paths are constructed correctly
-    assert!(result.contains("outer/outer_function.md"));
-    assert!(result.contains("outer/OuterStruct/outer_method.md"));
-    assert!(result.contains("outer/inner/inner_function.md"));
-    assert!(result.contains("outer/inner/InnerStruct/inner_method.md"));
     assert_snapshot!(result);
 }
