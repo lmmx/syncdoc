@@ -1,54 +1,42 @@
+use once_cell::sync::Lazy;
+use regex::Regex;
 use std::collections::HashSet;
+
+static STRUCT_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?struct\s+(\w+)").unwrap());
+
+static TRAIT_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?trait\s+(\w+)").unwrap());
+
+static ENUM_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?enum\s+(\w+)").unwrap());
 
 pub fn extract_existing_types(code: &str) -> HashSet<String> {
     let mut types = HashSet::new();
 
-    for line in code.lines() {
-        let trimmed = line.trim();
+    // Extract struct names
+    for cap in STRUCT_RE.captures_iter(code) {
+        if let Some(name) = cap.get(1) {
+            let clean_name = name.as_str().to_string();
+            types.insert(clean_name.clone());
 
-        // Extract struct names
-        if let Some(struct_start) = trimmed
-            .strip_prefix("struct ")
-            .or(trimmed.strip_prefix("pub struct "))
-        {
-            if let Some(name) = struct_start
-                .split(|c: char| c.is_whitespace() || c == '{' || c == ';' || c == '<')
-                .next()
-            {
-                let clean_name = name.trim().to_string();
-                types.insert(clean_name.clone());
-
-                // Also check if it's a generic definition
-                if struct_start.contains('<') && struct_start.contains('>') {
+            // Check if it's a generic definition (look ahead in the line)
+            if let Some(line) = code[cap.get(0).unwrap().start()..].lines().next() {
+                if line.contains('<') && line.contains('>') {
                     types.insert(format!("{}<T>", clean_name));
                 }
             }
         }
+    }
 
-        // Extract trait names
-        if let Some(trait_start) = trimmed
-            .strip_prefix("trait ")
-            .or(trimmed.strip_prefix("pub trait "))
-        {
-            if let Some(name) = trait_start
-                .split(|c: char| c.is_whitespace() || c == '{' || c == '<')
-                .next()
-            {
-                types.insert(name.trim().to_string());
-            }
+    // Extract trait names
+    for cap in TRAIT_RE.captures_iter(code) {
+        if let Some(name) = cap.get(1) {
+            types.insert(name.as_str().to_string());
         }
+    }
 
-        // Extract enum names
-        if let Some(enum_start) = trimmed
-            .strip_prefix("enum ")
-            .or(trimmed.strip_prefix("pub enum "))
-        {
-            if let Some(name) = enum_start
-                .split(|c: char| c.is_whitespace() || c == '{' || c == '<')
-                .next()
-            {
-                types.insert(name.trim().to_string());
-            }
+    // Extract enum names
+    for cap in ENUM_RE.captures_iter(code) {
+        if let Some(name) = cap.get(1) {
+            types.insert(name.as_str().to_string());
         }
     }
 
