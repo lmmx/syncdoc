@@ -3,6 +3,10 @@
 mod bookend;
 mod diff;
 
+use bookend::reformat_bookended_lines;
+use diff::{apply_diff, compute_line_diff};
+use duct::cmd;
+
 /// Rewrites code while preserving original formatting where possible
 ///
 /// This function applies transformations (strip/annotate) and then uses
@@ -18,7 +22,7 @@ pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<St
     }
 
     // 1. Reformat bookended lines in transformed code
-    let transformed = bookend::reformat_bookended_lines(transformed);
+    let transformed = reformat_bookended_lines(transformed);
 
     #[cfg(debug_assertions)]
     eprintln!("After bookending: {}", transformed.len());
@@ -41,11 +45,11 @@ pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<St
     }
 
     // 3. Compute line-level diff
-    let diff_hunks = diff::compute_line_diff(&formatted_original, &formatted_transformed);
+    let diff_hunks = compute_line_diff(&formatted_original, &formatted_transformed);
 
     // 4. Apply diff to FORMATTED original (not raw original)
     // This ensures line numbers match
-    let result = diff::apply_diff(&formatted_original, &diff_hunks, &formatted_transformed);
+    let result = apply_diff(&formatted_original, &diff_hunks, &formatted_transformed);
 
     #[cfg(debug_assertions)]
     {
@@ -59,8 +63,6 @@ pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<St
 
 /// Formats Rust code using rustfmt
 fn rustfmt(code: &str) -> Result<String, String> {
-    use duct::cmd;
-
     cmd!("rustfmt", "--emit=stdout")
         .stdin_bytes(code.as_bytes())
         .stdout_capture()
