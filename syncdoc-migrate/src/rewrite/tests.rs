@@ -3,7 +3,6 @@
 use super::*;
 use quote::quote;
 use syncdoc_core::parse::ModuleContent;
-use unsynn::*;
 
 #[test]
 fn test_strip_preserves_non_doc() {
