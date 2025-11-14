@@ -1,6 +1,7 @@
 // syncdoc-migrate/src/rewrite.rs
 
 mod inject;
+mod reformat;
 mod strip;
 
 pub use inject::{inject_module_doc_attr, inject_omnidoc_attr};
@@ -71,7 +72,10 @@ pub fn rewrite_file(
         }
     }
 
-    Some(output.to_string())
+    let transformed = output.to_string();
+
+    // Apply format-preserving rewrite
+    reformat::rewrite_preserving_format(&parsed.original_source, &transformed).ok()
 }
 
 #[cfg(test)]
