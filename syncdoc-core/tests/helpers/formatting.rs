@@ -34,9 +34,7 @@ pub fn create_dummy_types_str(code: &str) -> (String, HashSet<String>) {
                 && trait_name.chars().next().unwrap().is_uppercase()
                 && !existing_types.contains(trait_name)
             {
-                trait_methods
-                    .entry(trait_name.to_string())
-                    .or_insert_with(Vec::new);
+                trait_methods.entry(trait_name.to_string()).or_default();
             }
         }
 
@@ -89,7 +87,7 @@ pub fn create_dummy_types_str(code: &str) -> (String, HashSet<String>) {
                     let sig = trimmed[..body_start].trim().to_string() + ";";
                     trait_methods
                         .entry(current_trait.clone())
-                        .or_insert_with(Vec::new)
+                        .or_default()
                         .push(sig);
                 }
             }
