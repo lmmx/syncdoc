@@ -108,17 +108,17 @@ pub fn omnidoc(args: TokenStream, input: TokenStream) -> TokenStream {
 /// # Usage
 ///
 /// ```ignore
-/// #![doc = syncdoc::module_doc!()]
+/// #![doc = syncdoc::module_doc!(path = "docs")]
 ///
 /// pub struct MyStruct;
 /// ```
 ///
 /// This will resolve to something like:
 /// ```ignore
-/// #![doc = include_str!("../../docs/my_module.md")]
+/// #![doc = include_str!("../docs/my_module.md")]
 /// ```
 ///
-/// But without requiring you to manually calculate the `../../` prefix or
+/// But without requiring you to manually calculate the `../` prefix or
 /// track your module hierarchy.
 ///
 /// # Configuration
@@ -129,8 +129,9 @@ pub fn omnidoc(args: TokenStream, input: TokenStream) -> TokenStream {
 /// docs-path = "docs"
 /// ```
 #[proc_macro]
-pub fn module_doc(_input: TokenStream) -> TokenStream {
-    match syncdoc_core::module_doc_impl() {
+pub fn module_doc(input: TokenStream) -> TokenStream {
+    let input2: TokenStream2 = input.into();
+    match syncdoc_core::module_doc_impl(input2) {
         Ok(tokens) => tokens.into(),
         Err(error_tokens) => error_tokens.into(),
     }

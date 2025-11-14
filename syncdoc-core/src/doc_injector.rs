@@ -42,7 +42,7 @@ pub fn syncdoc_impl(
 ///
 /// Generates an include_str!() call with the automatically resolved path
 /// to the module's markdown documentation file.
-pub fn module_doc_impl() -> core::result::Result<TokenStream, TokenStream> {
+pub fn module_doc_impl(args: TokenStream) -> core::result::Result<TokenStream, TokenStream> {
     let call_site = proc_macro2::Span::call_site();
     let source_file = call_site
         .local_file()
@@ -53,16 +53,34 @@ pub fn module_doc_impl() -> core::result::Result<TokenStream, TokenStream> {
         .to_string_lossy()
         .to_string();
 
-    // Get the base docs path from config
-    let base_path = crate::config::get_docs_path(&source_file).map_err(|e| {
-        let error = format!("Failed to get docs path from config: {}", e);
-        quote! { compile_error!(#error) }
-    })?;
+    // Parse the arguments to get base_path if provided
+    let base_path = if args.is_empty() {
+        // No args provided, get from config
+        crate::config::get_docs_path(&source_file).map_err(|e| {
+            let error = format!("Failed to get docs path from config: {}", e);
+            quote! { compile_error!(#error) }
+        })?
+    } else {
+        // Parse args to extract path
+        let mut args_iter = args.into_token_iter();
+        match parse_syncdoc_args(&mut args_iter) {
+            Ok(parsed_args) => parsed_args.base_path,
+            Err(e) => {
+                let error = format!("Failed to parse module_doc args: {}", e);
+                return Err(quote! { compile_error!(#error) });
+            }
+        }
+    };
 
     // Extract module path and construct full doc path
     let module_path = crate::path_utils::extract_module_path(&source_file);
     let doc_path = if module_path.is_empty() {
-        format!("{}.md", base_path)
+        // For lib.rs or main.rs, use the file stem
+        let file_stem = std::path::Path::new(&source_file)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("module");
+        format!("{}/{}.md", base_path, file_stem)
     } else {
         format!("{}/{}.md", base_path, module_path)
     };
