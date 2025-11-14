@@ -442,7 +442,6 @@ name = "syncdoc-core"
 version = "0.1.5"
 dependencies = [
  "insta",
- "once_cell",
  "proc-macro2",
  "quote",
  "regex",

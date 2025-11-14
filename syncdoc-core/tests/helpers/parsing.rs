@@ -1,12 +1,14 @@
-use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::HashSet;
+use std::sync::LazyLock;
 
-static STRUCT_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?struct\s+(\w+)").unwrap());
+static STRUCT_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?:pub\s+)?struct\s+(\w+)").unwrap());
 
-static TRAIT_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?trait\s+(\w+)").unwrap());
+static TRAIT_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?:pub\s+)?trait\s+(\w+)").unwrap());
 
-static ENUM_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?enum\s+(\w+)").unwrap());
+static ENUM_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?:pub\s+)?enum\s+(\w+)").unwrap());
 
 pub fn extract_existing_types(code: &str) -> HashSet<String> {
     let mut types = HashSet::new();

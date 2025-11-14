@@ -1,26 +1,31 @@
 use crate::TestCrate;
-use once_cell::sync::Lazy;
 use regex::Regex;
 use std::fs;
+use std::sync::LazyLock;
 
-static FN_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\bfn\s+(\w+)\s*[<(]").unwrap());
+static FN_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\bfn\s+(\w+)\s*[<(]").unwrap());
 
-static STRUCT_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?struct\s+(\w+)").unwrap());
+static STRUCT_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?:pub\s+)?struct\s+(\w+)").unwrap());
 
-static ENUM_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?enum\s+(\w+)").unwrap());
+static ENUM_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?:pub\s+)?enum\s+(\w+)").unwrap());
 
-static CONST_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?const\s+(\w+)\s*:").unwrap());
+static CONST_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?:pub\s+)?const\s+(\w+)\s*:").unwrap());
 
-static TYPE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?type\s+(\w+)").unwrap());
+static TYPE_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?:pub\s+)?type\s+(\w+)").unwrap());
 
-static IMPL_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"impl(?:<[^>]+>)?\s+(?:(\w+)\s+for\s+)?(\w+)").unwrap());
+static IMPL_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"impl(?:<[^>]+>)?\s+(?:(\w+)\s+for\s+)?(\w+)").unwrap());
 
-static TRAIT_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?trait\s+(\w+)").unwrap());
+static TRAIT_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?:pub\s+)?trait\s+(\w+)").unwrap());
 
-static MOD_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?:pub\s+)?mod\s+(\w+)\s*\{").unwrap());
+static MOD_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?:pub\s+)?mod\s+(\w+)\s*\{").unwrap());
 
-static FIELD_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^\s*(?:pub\s+)?(\w+)\s*:").unwrap());
+static FIELD_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*(?:pub\s+)?(\w+)\s*:").unwrap());
 
 pub fn auto_create_docs(test_crate: &TestCrate, code: &str) {
     test_crate.write_doc("lib.md", "Test library");

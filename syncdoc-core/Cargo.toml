@@ -23,7 +23,6 @@ unsynn.workspace = true
 
 [dev-dependencies]
 insta.workspace = true
-once_cell = "1.21.3"
 regex = "1.12.2"
 rust-format.workspace = true
 tempfile.workspace = true
