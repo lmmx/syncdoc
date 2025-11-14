@@ -5,6 +5,7 @@ expression: "test_rewrite(source, false, true)"
 #[syncdoc::omnidoc(path = "docs")]
 pub trait MyTrait {
     fn required_method(&self);
+
     fn default_method(&self) {
         println!("default");
     }
