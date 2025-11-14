@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream;
-use syncdoc_core::parse::Attribute;
+use syncdoc_core::parse::{Attribute, InnerAttribute};
 use unsynn::*;
 
 /// Extracts documentation content from a list of attributes
@@ -14,6 +14,25 @@ pub fn extract_doc_content(attrs: &Option<Many<Attribute>>) -> Option<String> {
     for attr_delimited in &attrs.0 {
         // Extract the actual Attribute from the Delimited wrapper
         if let Some(doc_content) = extract_from_single_attr(&attr_delimited.value) {
+            doc_strings.push(doc_content);
+        }
+    }
+
+    if doc_strings.is_empty() {
+        None
+    } else {
+        Some(doc_strings.join("\n").trim().to_string())
+    }
+}
+
+/// Extracts documentation content from inner attributes (#![doc = "..."])
+pub fn extract_inner_doc_content(attrs: &Option<Many<InnerAttribute>>) -> Option<String> {
+    let attrs = attrs.as_ref()?;
+
+    let mut doc_strings = Vec::new();
+
+    for attr_delimited in &attrs.0 {
+        if let Some(doc_content) = extract_from_inner_attr(&attr_delimited.value) {
             doc_strings.push(doc_content);
         }
     }
@@ -56,9 +75,42 @@ pub fn is_doc_attribute_bracket(bracket: &BracketGroup) -> bool {
     }
 }
 
-/// Checks if an outer attribute is a doc attribute
-pub fn is_outer_doc_attr(attr: &syncdoc_core::parse::Attribute) -> bool {
+/// Checks if an inner attribute is a doc attribute
+pub fn is_inner_doc_attr(attr: &InnerAttribute) -> bool {
     is_doc_attribute_bracket(&attr.content)
+}
+
+/// Checks if an outer attribute is a doc attribute
+pub fn is_outer_doc_attr(attr: &Attribute) -> bool {
+    is_doc_attribute_bracket(&attr.content)
+}
+
+/// Extracts doc content from a single inner attribute
+fn extract_from_inner_attr(attr: &InnerAttribute) -> Option<String> {
+    let mut tokens = TokenStream::new();
+    unsynn::ToTokens::to_tokens(attr, &mut tokens);
+
+    let token_str = tokens.to_string();
+
+    // Check if this is a doc attribute (inner attrs start with #![)
+    if !token_str.starts_with("# ! [") {
+        return None;
+    }
+
+    // Look for doc = "..." pattern (reuse same logic)
+    if let Some(doc_start) = token_str.find("doc") {
+        let after_doc = &token_str[doc_start..];
+
+        if let Some(eq_pos) = after_doc.find('=') {
+            let after_eq = &after_doc[eq_pos + 1..].trim_start();
+
+            if let Some(content) = extract_string_literal(after_eq) {
+                return Some(content);
+            }
+        }
+    }
+
+    None
 }
 
 /// Extracts doc content from a single attribute

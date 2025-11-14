@@ -11,7 +11,6 @@ use crate::discover::ParsedFile;
 use proc_macro2::TokenStream;
 use syncdoc_core::parse::ModuleItem;
 
-/// Rewrites a parsed file by stripping doc attrs and/or injecting omnidoc attributes
 pub fn rewrite_file(
     parsed: &ParsedFile,
     docs_root: &str,
@@ -31,18 +30,24 @@ pub fn rewrite_file(
     };
 
     if annotate {
-        // Re-parse and inject omnidoc into each item
+        // Re-parse to inject annotations
         if let Ok(content) = output
             .clone()
             .into_token_iter()
             .parse::<syncdoc_core::parse::ModuleContent>()
         {
             let mut annotated = TokenStream::new();
+
+            // Inject module_doc! for inner docs if any existed
+            if content.inner_attrs.is_some() || parsed.content.inner_attrs.is_some() {
+                annotated.extend(inject::inject_module_doc_attr(docs_root));
+            }
+
+            // Then handle regular items
             for item_delimited in &content.items.0 {
                 let mut item_ts = TokenStream::new();
                 quote::ToTokens::to_tokens(&item_delimited.value, &mut item_ts);
 
-                // Only annotate named items
                 let should_annotate = matches!(
                     &item_delimited.value,
                     ModuleItem::Function(_)

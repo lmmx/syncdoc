@@ -1,10 +1,29 @@
 // syncdoc-migrate/src/rewrite/strip.rs
 
-use crate::extract::is_outer_doc_attr;
+use crate::extract::{is_inner_doc_attr, is_outer_doc_attr};
 use proc_macro2::TokenStream;
 use quote::quote;
-use syncdoc_core::parse::{Attribute, ModuleItem};
+use syncdoc_core::parse::{Attribute, InnerAttribute, ModuleItem};
 use unsynn::*;
+
+/// Strips inner doc attributes from module content
+pub fn strip_inner_doc_attrs(inner_attrs: &Option<Many<InnerAttribute>>) -> Vec<InnerAttribute> {
+    let Some(attr_list) = inner_attrs else {
+        return Vec::new();
+    };
+
+    attr_list
+        .0
+        .iter()
+        .filter_map(|attr_delimited| {
+            if is_inner_doc_attr(&attr_delimited.value) {
+                None
+            } else {
+                Some(attr_delimited.value.clone())
+            }
+        })
+        .collect()
+}
 
 /// Strips all doc attributes from a token stream while preserving other attributes
 ///
@@ -24,11 +43,17 @@ pub fn strip_doc_attrs(item: TokenStream) -> TokenStream {
     }
 }
 
-/// Strips all outer doc attributes from parsed items
-/// NEVER strips inner attributes (#![...]) as they document the containing module
+/// Updated version that handles both outer and inner attributes
 pub fn strip_doc_attrs_from_items(content: &syncdoc_core::parse::ModuleContent) -> TokenStream {
     let mut output = TokenStream::new();
 
+    // Handle inner attributes (module-level docs)
+    let stripped_inner = strip_inner_doc_attrs(&content.inner_attrs);
+    for attr in stripped_inner {
+        quote::ToTokens::to_tokens(&attr, &mut output);
+    }
+
+    // Handle items (outer attributes)
     for item_delimited in &content.items.0 {
         let item = &item_delimited.value;
         let processed = strip_doc_attrs_from_item(item);

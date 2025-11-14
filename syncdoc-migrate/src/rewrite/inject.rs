@@ -15,3 +15,10 @@ pub fn inject_omnidoc_attr(item: TokenStream, docs_root: &str) -> TokenStream {
     output.extend(item);
     output
 }
+
+/// Injects `#![doc = syncdoc::module_doc!()]` for module-level documentation
+pub fn inject_module_doc_attr(docs_root: &str) -> TokenStream {
+    quote! {
+        #![doc = syncdoc::module_doc!(path = #docs_root)]
+    }
+}
