@@ -28,17 +28,9 @@ impl TestCrate {
         fs::write(
             root.join("Cargo.toml"),
             format!(
-                r#"[package]
-name = "{}"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-syncdoc = {{ path = "{}" }}
-
-[package.metadata.syncdoc]
-docs-path = "docs"
-"#,
+                "[package]\nname = \"{}\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n\
+                [dependencies]\nsyncdoc = {{ path = \"{}\" }}\n\n\
+                [package.metadata.syncdoc]\ndocs-path = \"docs\"\n",
                 name,
                 workspace_root.join("syncdoc").display()
             ),
@@ -60,14 +52,8 @@ docs-path = "docs"
         fs::write(
             self.root.join("src/lib.rs"),
             format!(
-                r#"#![doc = include_str!("../docs/lib.md")]
-
-{}
-
-use syncdoc::omnidoc;
-
-#[omnidoc(path = "docs")]
-{}"#,
+                "#![doc = include_str!(\"../docs/lib.md\")]\n\n{}\n\nuse syncdoc::omnidoc;\n\n\
+                #[omnidoc(path = \"docs\")]\n{}",
                 dummy_types, code_with_types
             ),
         )

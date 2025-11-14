@@ -24,7 +24,7 @@ pub fn create_dummy_types_str(code: &str) -> (String, HashSet<String>) {
         }
     }
 
-    // Process impl blocks
+    // Process impl blocks for missing types
     for cap in IMPL_RE.captures_iter(code) {
         let trait_name = cap.get(1).map(|m| m.as_str());
         let type_name = cap.get(2).map(|m| m.as_str()).unwrap_or("");
@@ -59,7 +59,7 @@ pub fn create_dummy_types_str(code: &str) -> (String, HashSet<String>) {
         }
     }
 
-    // Extract trait methods
+    // Extract trait methods from impl blocks
     let mut in_trait_impl = false;
     let mut current_trait = String::new();
     let mut depth = 0;
@@ -70,9 +70,12 @@ pub fn create_dummy_types_str(code: &str) -> (String, HashSet<String>) {
         if trimmed.starts_with("impl ") && trimmed.contains(" for ") {
             if let Some(caps) = IMPL_RE.captures(trimmed) {
                 if let Some(trait_name) = caps.get(1).map(|m| m.as_str()) {
-                    current_trait = trait_name.to_string();
-                    in_trait_impl = true;
-                    depth = 0;
+                    // Only track if this trait needs to be defined
+                    if !existing_types.contains(trait_name) {
+                        current_trait = trait_name.to_string();
+                        in_trait_impl = true;
+                        depth = 0;
+                    }
                 }
             }
         }
@@ -84,9 +87,10 @@ pub fn create_dummy_types_str(code: &str) -> (String, HashSet<String>) {
             if trimmed.contains("fn ") && !current_trait.is_empty() {
                 if let Some(body_start) = trimmed.find('{') {
                     let sig = trimmed[..body_start].trim().to_string() + ";";
-                    if let Some(methods) = trait_methods.get_mut(&current_trait) {
-                        methods.push(sig);
-                    }
+                    trait_methods
+                        .entry(current_trait.clone())
+                        .or_insert_with(Vec::new)
+                        .push(sig);
                 }
             }
 
@@ -97,6 +101,7 @@ pub fn create_dummy_types_str(code: &str) -> (String, HashSet<String>) {
         }
     }
 
+    // Generate trait definitions (only for traits that aren't already defined)
     for (trait_name, methods) in trait_methods {
         types_to_define.push(if methods.is_empty() {
             format!("pub trait {} {{}}", trait_name)
@@ -187,8 +192,5 @@ pub fn format_with_rustfmt(code: &str) -> Option<String> {
         .stdin_bytes(code)
         .read()
         .ok()
-        .or_else(|| {
-            eprintln!("rustfmt failed, using unformatted code");
-            Some(code.to_string())
-        })
+        .or_else(|| Some(code.to_string()))
 }
