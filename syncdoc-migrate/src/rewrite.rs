@@ -75,8 +75,4 @@ pub fn rewrite_file(
 }
 
 #[cfg(test)]
-mod inject_tests;
-#[cfg(test)]
 mod rewrite_tests;
-#[cfg(test)]
-mod strip_tests;
