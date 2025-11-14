@@ -1,6 +1,6 @@
+use itertools::Itertools;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
-use std::process::Command;
 use std::sync::LazyLock;
 
 static IMPL_RE: LazyLock<Regex> =
@@ -93,7 +93,7 @@ pub fn create_dummy_types_str(code: &str, existing_types: &HashSet<String>) -> S
         if methods.is_empty() {
             types_to_define.push(format!("pub trait {} {{}}", trait_name));
         } else {
-            let methods_str = methods.join("\n    ");
+            let methods_str = methods.iter().join("\n    ");
             types_to_define.push(format!(
                 "pub trait {} {{\n    {}\n}}",
                 trait_name, methods_str
@@ -101,7 +101,7 @@ pub fn create_dummy_types_str(code: &str, existing_types: &HashSet<String>) -> S
         }
     }
 
-    types_to_define.join("\n")
+    types_to_define.iter().join("\n")
 }
 
 pub fn inject_types_into_modules(code: &str, existing_types: &HashSet<String>) -> String {
@@ -138,23 +138,21 @@ fn inject_types_recursive(code: &str, existing_types: &HashSet<String>) -> Strin
             let module_content = module_content_lines.join("\n");
 
             // Find types needed
-            let mut types_needed = Vec::new();
-            for content_line in module_content_lines {
-                if let Some(caps) = IMPL_RE.captures(content_line.trim()) {
-                    let type_name = caps
-                        .get(1)
-                        .or(caps.get(2))
-                        .map(|m| m.as_str())
-                        .unwrap_or("");
-
-                    if !type_name.is_empty()
-                        && !existing_types.contains(type_name)
-                        && !types_needed.contains(&type_name.to_string())
-                    {
-                        types_needed.push(type_name.to_string());
-                    }
-                }
-            }
+            let types_needed: Vec<String> = module_content_lines
+                .iter()
+                .filter_map(|content_line| {
+                    IMPL_RE.captures(content_line.trim()).and_then(|caps| {
+                        caps.get(1)
+                            .or(caps.get(2))
+                            .map(|m| m.as_str())
+                            .filter(|&type_name| {
+                                !type_name.is_empty() && !existing_types.contains(type_name)
+                            })
+                            .map(|s| s.to_string())
+                    })
+                })
+                .unique()
+                .collect();
 
             let processed_content = inject_types_recursive(&module_content, existing_types);
 
@@ -188,26 +186,14 @@ fn inject_types_recursive(code: &str, existing_types: &HashSet<String>) -> Strin
 }
 
 pub fn format_with_rustfmt(code: &str) -> Option<String> {
-    use std::io::Write;
+    use duct::cmd;
 
-    let mut child = Command::new("rustfmt")
-        .args(&["--edition", "2021"])
-        .stdin(std::process::Stdio::piped())
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
-        .spawn()
-        .ok()?;
-
-    if let Some(mut stdin) = child.stdin.take() {
-        stdin.write_all(code.as_bytes()).ok()?;
-    }
-
-    let output = child.wait_with_output().ok()?;
-
-    if output.status.success() {
-        String::from_utf8(output.stdout).ok()
-    } else {
-        eprintln!("rustfmt failed, using unformatted code");
-        Some(code.to_string())
-    }
+    cmd!("rustfmt", "--edition", "2021")
+        .stdin_bytes(code)
+        .read()
+        .ok()
+        .or_else(|| {
+            eprintln!("rustfmt failed, using unformatted code");
+            Some(code.to_string())
+        })
 }

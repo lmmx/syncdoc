@@ -22,7 +22,9 @@ textum.workspace = true
 unsynn.workspace = true
 
 [dev-dependencies]
+duct = "1.1.1"
 insta.workspace = true
+itertools = "0.14.0"
 regex = "1.12.2"
 rust-format.workspace = true
 tempfile.workspace = true
