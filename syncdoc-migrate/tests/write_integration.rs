@@ -30,7 +30,7 @@ fn test_extract_and_write_function_docs() {
         extractions[0].markdown_path.to_str().unwrap(),
         "docs/my_function.md"
     );
-    assert_eq!(extractions[0].content, "A simple function");
+    assert_eq!(extractions[0].content, "A simple function\n");
 }
 
 #[test]
@@ -53,13 +53,13 @@ fn test_extract_and_write_module_docs() {
         .iter()
         .find(|e| e.markdown_path.to_str().unwrap() == "docs/my_module.md")
         .expect("Should find module doc");
-    assert_eq!(module_doc.content, "Module documentation");
+    assert_eq!(module_doc.content, "Module documentation\n");
 
     let func_doc = extractions
         .iter()
         .find(|e| e.markdown_path.to_str().unwrap() == "docs/my_module/inner_func.md")
         .expect("Should find inner function doc");
-    assert_eq!(func_doc.content, "Inner function");
+    assert_eq!(func_doc.content, "Inner function\n");
 }
 
 #[test]
@@ -84,11 +84,11 @@ fn test_extract_and_write_impl_method_docs() {
 
     assert!(extractions.iter().any(|e| e.markdown_path.to_str().unwrap()
         == "docs/MyType/my_method.md"
-        && e.content == "A method"));
+        && e.content == "A method\n"));
 
     assert!(extractions.iter().any(|e| e.markdown_path.to_str().unwrap()
         == "docs/MyType/another_method.md"
-        && e.content == "Another method"));
+        && e.content == "Another method\n"));
 }
 
 #[test]
@@ -115,12 +115,12 @@ fn test_extract_and_write_struct_and_field_docs() {
         .iter()
         .find(|e| e.markdown_path.to_str().unwrap() == "docs/MyStruct.md")
         .expect("Should find struct doc");
-    assert_eq!(struct_doc.content, "A documented struct");
+    assert_eq!(struct_doc.content, "A documented struct\n");
 
     for (field_name, expected_content) in [
-        ("field1", "First field"),
-        ("field2", "Second field"),
-        ("field3", "Third field"),
+        ("field1", "First field\n"),
+        ("field2", "Second field\n"),
+        ("field3", "Third field\n"),
     ] {
         let field_doc = extractions
             .iter()
@@ -156,12 +156,12 @@ fn test_extract_and_write_enum_and_variant_docs() {
         .iter()
         .find(|e| e.markdown_path.to_str().unwrap() == "docs/MyEnum.md")
         .expect("Should find enum doc");
-    assert_eq!(enum_doc.content, "An enum");
+    assert_eq!(enum_doc.content, "An enum\n");
 
     for (variant_name, expected_content) in [
-        ("Variant1", "First variant"),
-        ("Variant2", "Second variant"),
-        ("Variant3", "Third variant"),
+        ("Variant1", "First variant\n"),
+        ("Variant2", "Second variant\n"),
+        ("Variant3", "Third variant\n"),
     ] {
         let variant_doc = extractions
             .iter()
@@ -191,13 +191,13 @@ fn test_extract_and_write_trait_method_docs() {
 
     assert_eq!(extractions.len(), 2);
 
-    assert!(extractions
-        .iter()
-        .any(|e| e.markdown_path.to_str().unwrap() == "docs/MyTrait.md" && e.content == "A trait"));
+    assert!(extractions.iter().any(
+        |e| e.markdown_path.to_str().unwrap() == "docs/MyTrait.md" && e.content == "A trait\n"
+    ));
 
     assert!(extractions.iter().any(|e| e.markdown_path.to_str().unwrap()
         == "docs/MyTrait/default_method.md"
-        && e.content == "Default method with body"));
+        && e.content == "Default method with body\n"));
 }
 
 #[test]
@@ -222,16 +222,17 @@ fn test_extract_const_static_type_alias() {
     assert!(extractions
         .iter()
         .any(|e| e.markdown_path.to_str().unwrap() == "docs/MY_CONST.md"
-            && e.content == "A constant"));
+            && e.content == "A constant\n"));
 
-    assert!(extractions.iter().any(
-        |e| e.markdown_path.to_str().unwrap() == "docs/MY_STATIC.md" && e.content == "A static"
-    ));
+    assert!(extractions
+        .iter()
+        .any(|e| e.markdown_path.to_str().unwrap() == "docs/MY_STATIC.md"
+            && e.content == "A static\n"));
 
     assert!(extractions
         .iter()
         .any(|e| e.markdown_path.to_str().unwrap() == "docs/MyType.md"
-            && e.content == "A type alias"));
+            && e.content == "A type alias\n"));
 }
 
 #[test]
@@ -254,7 +255,7 @@ fn test_nested_modules_create_correct_paths() {
         extractions[0].markdown_path.to_str().unwrap(),
         "docs/outer/inner/deep_func.md"
     );
-    assert_eq!(extractions[0].content, "Deeply nested function");
+    assert_eq!(extractions[0].content, "Deeply nested function\n");
 }
 
 #[test]
@@ -290,10 +291,10 @@ fn test_write_extractions_creates_files() {
 
     // Verify content
     let content = fs::read_to_string(docs_dir.join("my_func.md")).unwrap();
-    assert_eq!(content, "A function");
+    assert_eq!(content, "A function\n");
 
     let sub_content = fs::read_to_string(docs_dir.join("submod/sub_func.md")).unwrap();
-    assert_eq!(sub_content, "Submodule function");
+    assert_eq!(sub_content, "Submodule function\n");
 }
 
 #[test]
