@@ -38,6 +38,48 @@ pub fn syncdoc_impl(
     Ok(generate_documented_function(syncdoc_args, func))
 }
 
+/// Implementation for the module_doc!() macro
+///
+/// Generates an include_str!() call with the automatically resolved path
+/// to the module's markdown documentation file.
+pub fn module_doc_impl() -> core::result::Result<TokenStream, TokenStream> {
+    let call_site = proc_macro2::Span::call_site();
+    let source_file = call_site
+        .local_file()
+        .ok_or_else(|| {
+            let error = "Could not determine source file location";
+            quote! { compile_error!(#error) }
+        })?
+        .to_string_lossy()
+        .to_string();
+
+    // Get the base docs path from config
+    let base_path = crate::config::get_docs_path(&source_file).map_err(|e| {
+        let error = format!("Failed to get docs path from config: {}", e);
+        quote! { compile_error!(#error) }
+    })?;
+
+    // Extract module path and construct full doc path
+    let module_path = crate::path_utils::extract_module_path(&source_file);
+    let doc_path = if module_path.is_empty() {
+        format!("{}.md", base_path)
+    } else {
+        format!("{}/{}.md", base_path, module_path)
+    };
+
+    // Make path relative to call site
+    let local_file = call_site.local_file().ok_or_else(|| {
+        let error = "Could not find local file";
+        quote! { compile_error!(#error) }
+    })?;
+    let rel_doc_path = make_manifest_relative_path(&doc_path, &local_file);
+
+    // Generate include_str!() call
+    Ok(quote! {
+        include_str!(#rel_doc_path)
+    })
+}
+
 #[derive(Debug)]
 struct SyncDocArgs {
     base_path: String,

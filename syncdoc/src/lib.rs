@@ -98,3 +98,40 @@ pub fn omnidoc(args: TokenStream, input: TokenStream) -> TokenStream {
         Err(error_tokens) => error_tokens.into(),
     }
 }
+
+/// Generates a path to the module's documentation file.
+///
+/// This is specifically designed for module-level (inner) documentation attributes.
+/// It automatically calculates the path based on the module hierarchy and the
+/// `docs-path` configured in your `Cargo.toml`.
+///
+/// # Usage
+///
+/// ```ignore
+/// #![doc = syncdoc::module_doc!()]
+///
+/// pub struct MyStruct;
+/// ```
+///
+/// This will resolve to something like:
+/// ```ignore
+/// #![doc = include_str!("../../docs/my_module.md")]
+/// ```
+///
+/// But without requiring you to manually calculate the `../../` prefix or
+/// track your module hierarchy.
+///
+/// # Configuration
+///
+/// Add to your `Cargo.toml`:
+/// ```toml
+/// [package.metadata.syncdoc]
+/// docs-path = "docs"
+/// ```
+#[proc_macro]
+pub fn module_doc(_input: TokenStream) -> TokenStream {
+    match syncdoc_core::module_doc_impl() {
+        Ok(tokens) => tokens.into(),
+        Err(error_tokens) => error_tokens.into(),
+    }
+}
