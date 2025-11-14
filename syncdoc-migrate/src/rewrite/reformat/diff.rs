@@ -55,74 +55,64 @@ pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> 
     let original_lines: Vec<&str> = original.lines().collect();
     let after_lines: Vec<&str> = formatted_after.lines().collect();
 
-    #[cfg(debug_assertions)]
-    {
-        eprintln!("=== APPLY DEBUG ===");
-        eprintln!("Original has {} lines", original_lines.len());
-        eprintln!("After has {} lines", after_lines.len());
-        eprintln!("Applying {} hunks", hunks.len());
-    }
-
     let mut result = Vec::new();
     let mut orig_idx = 0;
 
     for (_hunk_num, hunk) in hunks.iter().enumerate() {
-        #[cfg(debug_assertions)]
-        eprintln!("Processing hunk {}: orig_idx={}", _hunk_num, orig_idx);
-
         // Copy unchanged lines from original up to hunk start
         while orig_idx < hunk.before_start {
             if orig_idx < original_lines.len() {
                 result.push(original_lines[orig_idx]);
-                #[cfg(debug_assertions)]
-                eprintln!(
-                    "  Copy original[{}]: {:?}",
-                    orig_idx, original_lines[orig_idx]
-                );
             }
             orig_idx += 1;
         }
 
+        // Check if we're removing blank lines
+        let removed_blank_lines = (0..hunk.before_count)
+            .filter(|i| {
+                let idx = hunk.before_start + i;
+                idx < original_lines.len() && original_lines[idx].trim().is_empty()
+            })
+            .count();
+
+        // Check if the new content is a module docstring (starts with #!)
+        let is_module_doc = hunk.after_count > 0
+            && hunk.after_start < after_lines.len()
+            && after_lines[hunk.after_start]
+                .replace(" ", "")
+                .starts_with("#!");
+
+        // For module docstrings, preserve blank lines AFTER
+        // For everything else, preserve blank lines BEFORE
+        if removed_blank_lines > 0 && !is_module_doc {
+            for _ in 0..removed_blank_lines {
+                result.push("");
+            }
+        }
+
         // Skip removed lines in original
-        #[cfg(debug_assertions)]
-        eprintln!("  Skipping {} lines from original", hunk.before_count);
         orig_idx += hunk.before_count;
 
         // Add new lines from after
         let after_end = hunk.after_start + hunk.after_count;
-        #[cfg(debug_assertions)]
-        eprintln!(
-            "  Adding lines from after[{}..{}]",
-            hunk.after_start, after_end
-        );
-
         for i in hunk.after_start..after_end {
             if i < after_lines.len() {
                 result.push(after_lines[i]);
-                #[cfg(debug_assertions)]
-                eprintln!("    Add after[{}]: {:?}", i, after_lines[i]);
+            }
+        }
+
+        // For module docstrings, preserve blank lines AFTER
+        if removed_blank_lines > 0 && is_module_doc {
+            for _ in 0..removed_blank_lines {
+                result.push("");
             }
         }
     }
 
     // Copy remaining unchanged lines from original
-    #[cfg(debug_assertions)]
-    eprintln!("Copying remaining lines from orig_idx={}", orig_idx);
-
     while orig_idx < original_lines.len() {
         result.push(original_lines[orig_idx]);
-        #[cfg(debug_assertions)]
-        eprintln!(
-            "  Copy original[{}]: {:?}",
-            orig_idx, original_lines[orig_idx]
-        );
         orig_idx += 1;
-    }
-
-    #[cfg(debug_assertions)]
-    {
-        eprintln!("Result has {} lines", result.len());
-        eprintln!("==================");
     }
 
     result.join("\n")
