@@ -4,16 +4,16 @@ expression: result
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-    pub struct OuterStruct;
+pub struct OuterStruct;
 pub struct InnerStruct;
 
-    use syncdoc::omnidoc;
+use syncdoc::omnidoc;
 
-    #[omnidoc(path = "docs")]
-    
+#[omnidoc(path = "docs")]
+
 mod outer {
-    use crate::OuterStruct;
     use crate::InnerStruct;
+    use crate::OuterStruct;
 
     pub fn outer_function() {}
 
@@ -22,7 +22,7 @@ mod outer {
     }
 
     mod inner {
-    use crate::InnerStruct;
+        use crate::InnerStruct;
 
         pub fn inner_function() {}
 

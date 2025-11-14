@@ -24,4 +24,5 @@ unsynn.workspace = true
 [dev-dependencies]
 insta.workspace = true
 rust-format.workspace = true
+rustfmt = "0.10.0"
 tempfile.workspace = true

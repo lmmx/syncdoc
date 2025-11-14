@@ -4,12 +4,14 @@ expression: result
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-    pub struct GenericStruct<T> { _inner: std::marker::PhantomData<T> }
+pub struct GenericStruct<T> {
+    _inner: std::marker::PhantomData<T>,
+}
 
-    use syncdoc::omnidoc;
+use syncdoc::omnidoc;
 
-    #[omnidoc(path = "docs")]
-    
+#[omnidoc(path = "docs")]
+
 impl<T> GenericStruct<T>
 where
     T: Clone,

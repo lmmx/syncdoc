@@ -4,15 +4,15 @@ expression: "test_with_code(\"test_ignores_type_alias_with_fn\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-    
+use syncdoc::omnidoc;
 
-    use syncdoc::omnidoc;
+#[omnidoc(path = "docs")]
 
-    #[omnidoc(path = "docs")]
-    
 type FnPointer = fn() -> i32;
 
-fn dummy_fn() -> i32 { 42 }
+fn dummy_fn() -> i32 {
+    42
+}
 
 fn use_fn_pointer(f: FnPointer) -> i32 {
     f()

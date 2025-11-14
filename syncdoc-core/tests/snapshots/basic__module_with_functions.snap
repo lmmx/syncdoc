@@ -4,12 +4,10 @@ expression: "test_with_code(\"test_module_with_functions\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-    
+use syncdoc::omnidoc;
 
-    use syncdoc::omnidoc;
+#[omnidoc(path = "docs")]
 
-    #[omnidoc(path = "docs")]
-    
 mod calculations {
     pub fn fibonacci(n: u64) -> u64 {
         if n <= 1 {

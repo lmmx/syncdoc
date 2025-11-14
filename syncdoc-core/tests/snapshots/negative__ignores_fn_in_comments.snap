@@ -4,12 +4,10 @@ expression: "test_with_code(\"test_ignores_fn_in_comments\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-    
+use syncdoc::omnidoc;
 
-    use syncdoc::omnidoc;
+#[omnidoc(path = "docs")]
 
-    #[omnidoc(path = "docs")]
-    
 // fn this_is_commented_out() {}
 /* fn this_is_also_commented() {} */
 

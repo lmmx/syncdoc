@@ -4,12 +4,10 @@ expression: "test_with_code(\"test_function_returning_fn_type\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-    
+use syncdoc::omnidoc;
 
-    use syncdoc::omnidoc;
+#[omnidoc(path = "docs")]
 
-    #[omnidoc(path = "docs")]
-    
 fn returns_fn() -> fn() -> i32 {
     || 42
 }

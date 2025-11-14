@@ -4,12 +4,12 @@ expression: "test_with_code(\"test_ignores_non_functions\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-    
+use syncdoc::omnidoc;
 
-    use syncdoc::omnidoc;
+#[omnidoc(path = "docs")]
 
-    #[omnidoc(path = "docs")]
-    
 const x: &str = "fn not_a_function";
-struct Foo { field: i32 }
+struct Foo {
+    field: i32,
+}
 fn actual_function() {}

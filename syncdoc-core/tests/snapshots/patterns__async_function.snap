@@ -4,12 +4,10 @@ expression: "test_with_code(\"test_async_function_pattern\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-    
+use syncdoc::omnidoc;
 
-    use syncdoc::omnidoc;
+#[omnidoc(path = "docs")]
 
-    #[omnidoc(path = "docs")]
-    
 async fn hello() {
     println!("world");
 }

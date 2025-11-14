@@ -574,9 +574,40 @@ docs-path = "docs"
 
     /// Gets the expanded/documented source code for snapshotting
     pub fn get_expanded_lib(&self) -> Option<String> {
-        // Run rustfmt on the lib.rs to get formatted output
         let lib_path = self.root.join("src/lib.rs");
-        fs::read_to_string(lib_path).ok()
+        let content = fs::read_to_string(&lib_path).ok()?;
+
+        // Format the content using rustfmt
+        let formatted = self.format_with_rustfmt(&content)?;
+
+        Some(formatted)
+    }
+
+    /// Format code using rustfmt
+    fn format_with_rustfmt(&self, code: &str) -> Option<String> {
+        use std::io::Write;
+
+        let mut child = Command::new("rustfmt")
+            .args(&["--edition", "2021"])
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .ok()?;
+
+        if let Some(mut stdin) = child.stdin.take() {
+            stdin.write_all(code.as_bytes()).ok()?;
+        }
+
+        let output = child.wait_with_output().ok()?;
+
+        if output.status.success() {
+            String::from_utf8(output.stdout).ok()
+        } else {
+            // If rustfmt fails, fall back to original content
+            eprintln!("rustfmt failed, using unformatted code");
+            Some(code.to_string())
+        }
     }
 
     /// Creates dummy type definitions for impl blocks to compile
