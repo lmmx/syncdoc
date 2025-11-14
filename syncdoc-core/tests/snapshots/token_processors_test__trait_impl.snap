@@ -4,15 +4,15 @@ expression: result
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-pub struct MyStruct;
+    pub struct MyStruct;
 pub trait MyTrait {
     fn trait_method(&self);
 }
 
-use syncdoc::omnidoc;
+    use syncdoc::omnidoc;
 
-#[omnidoc(path = "docs")]
-
+    #[omnidoc(path = "docs")]
+    
 impl MyTrait for MyStruct {
     fn trait_method(&self) {
         println!("implementation");

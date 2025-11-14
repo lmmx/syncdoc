@@ -4,12 +4,12 @@ expression: "test_with_code(\"test_function_with_where_clause\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 
+    
 
+    use syncdoc::omnidoc;
 
-use syncdoc::omnidoc;
-
-#[omnidoc(path = "docs")]
-
+    #[omnidoc(path = "docs")]
+    
 fn with_where<T>(value: T) -> T
 where
     T: Clone + std::fmt::Debug,

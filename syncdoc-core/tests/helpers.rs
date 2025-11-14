@@ -51,19 +51,22 @@ docs-path = "docs"
         // First, extract any existing type definitions from the code to avoid duplicates
         let existing_types = self.extract_existing_types(code);
 
-        // Create dummy types, excluding ones that already exist
+        // Create dummy types, excluding ones that already exist - defined at crate root
         let dummy_types = self.create_dummy_types_str(code, &existing_types);
+
+        // Inject the dummy types INTO the modules where they're used
+        let code_with_types = self.inject_types_into_modules(code, &existing_types);
 
         let full_content = format!(
             r#"#![doc = include_str!("../docs/lib.md")]
 
-{}
+    {}
 
-use syncdoc::omnidoc;
+    use syncdoc::omnidoc;
 
-#[omnidoc(path = "docs")]
-{}"#,
-            dummy_types, code
+    #[omnidoc(path = "docs")]
+    {}"#,
+            dummy_types, code_with_types
         );
         fs::write(self.root.join("src/lib.rs"), full_content).unwrap();
     }
@@ -805,5 +808,101 @@ use syncdoc::omnidoc;
                 }
             }
         }
+    }
+
+    fn inject_types_into_modules(
+        &self,
+        code: &str,
+        existing_types: &std::collections::HashSet<String>,
+    ) -> String {
+        let mut result = String::new();
+        let mut in_module = false;
+        let mut module_depth = 0;
+        let mut types_needed_in_module = Vec::new();
+        let mut module_content = String::new();
+
+        for line in code.lines() {
+            let trimmed = line.trim();
+
+            // Entering a module
+            if (trimmed.starts_with("mod ") || trimmed.starts_with("pub mod "))
+                && trimmed.contains('{')
+            {
+                in_module = true;
+                module_depth = 0;
+                types_needed_in_module.clear();
+                module_content.clear();
+                result.push_str(line);
+                result.push('\n');
+                continue;
+            }
+
+            if in_module {
+                module_depth += trimmed.matches('{').count();
+                module_depth -= trimmed.matches('}').count();
+
+                // Collect what types are referenced in impl blocks within this module
+                if trimmed.starts_with("impl ") || trimmed.starts_with("impl<") {
+                    let impl_part = trimmed.split('{').next().unwrap_or("");
+
+                    if let Some(for_pos) = impl_part.find(" for ") {
+                        let type_part = impl_part[for_pos + 5..].trim();
+                        let type_name = type_part
+                            .split_whitespace()
+                            .next()
+                            .unwrap_or("")
+                            .split('<')
+                            .next()
+                            .unwrap_or("")
+                            .trim();
+                        if !type_name.is_empty() && !existing_types.contains(type_name) {
+                            if !types_needed_in_module.contains(&type_name.to_string()) {
+                                types_needed_in_module.push(type_name.to_string());
+                            }
+                        }
+                    } else {
+                        let parts: Vec<&str> = impl_part.split_whitespace().collect();
+                        if let Some(last) = parts.last() {
+                            let type_name = last.split('<').next().unwrap_or(last).trim();
+                            if !type_name.is_empty() && !existing_types.contains(type_name) {
+                                if !types_needed_in_module.contains(&type_name.to_string()) {
+                                    types_needed_in_module.push(type_name.to_string());
+                                }
+                            }
+                        }
+                    }
+                }
+
+                module_content.push_str(line);
+                module_content.push('\n');
+
+                // Exiting module
+                if module_depth == 0 && trimmed.ends_with('}') {
+                    // Inject type imports at the beginning of the module
+                    if !types_needed_in_module.is_empty() {
+                        let mut injected_module = String::new();
+                        for type_name in &types_needed_in_module {
+                            injected_module.push_str(&format!("    use crate::{};\n", type_name));
+                        }
+                        injected_module.push_str("\n");
+                        injected_module.push_str(&module_content);
+
+                        result.push_str(&injected_module);
+                    } else {
+                        result.push_str(&module_content);
+                    }
+
+                    in_module = false;
+                    module_content.clear();
+                    types_needed_in_module.clear();
+                    continue;
+                }
+            } else {
+                result.push_str(line);
+                result.push('\n');
+            }
+        }
+
+        result
     }
 }

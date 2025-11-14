@@ -4,13 +4,13 @@ expression: result
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-pub struct FirstStruct;
+    pub struct FirstStruct;
 pub struct SecondStruct;
 
-use syncdoc::omnidoc;
+    use syncdoc::omnidoc;
 
-#[omnidoc(path = "docs")]
-
+    #[omnidoc(path = "docs")]
+    
 impl FirstStruct {
     fn first_method(&self) {}
 }

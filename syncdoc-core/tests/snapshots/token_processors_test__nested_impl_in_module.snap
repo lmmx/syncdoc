@@ -10,8 +10,10 @@ expression: result
 
     #[omnidoc(path = "docs")]
     
-impl MyStruct {
-    fn method(&self) {
-        println!("method");
+mod my_module {
+    use crate::MyStruct;
+
+    impl MyStruct {
+        fn module_method(&self) {}
     }
 }

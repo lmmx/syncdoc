@@ -4,12 +4,12 @@ expression: "test_with_code(\"test_complex_edge_cases\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 
+    
 
+    use syncdoc::omnidoc;
 
-use syncdoc::omnidoc;
-
-#[omnidoc(path = "docs")]
-
+    #[omnidoc(path = "docs")]
+    
 fn some_function_call() {}
 fn another_fn_call() {}
 fn yet_another_fn_call() {}

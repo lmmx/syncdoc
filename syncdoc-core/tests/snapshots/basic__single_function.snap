@@ -4,12 +4,12 @@ expression: "test_with_code(\"test_single_function\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 
+    
 
+    use syncdoc::omnidoc;
 
-use syncdoc::omnidoc;
-
-#[omnidoc(path = "docs")]
-
+    #[omnidoc(path = "docs")]
+    
 fn hello() {
     println!("world");
 }

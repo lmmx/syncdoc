@@ -4,12 +4,12 @@ expression: "test_with_code(\"test_ignores_function_calls\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 
+    
 
+    use syncdoc::omnidoc;
 
-use syncdoc::omnidoc;
-
-#[omnidoc(path = "docs")]
-
+    #[omnidoc(path = "docs")]
+    
 fn some_fn_call() -> i32 { 42 }
 fn another_fn_call(_x: i32, _y: &str) {}
 
