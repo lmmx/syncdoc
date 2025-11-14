@@ -815,91 +815,111 @@ docs-path = "docs"
         code: &str,
         existing_types: &std::collections::HashSet<String>,
     ) -> String {
-        let mut result = String::new();
-        let mut in_module = false;
-        let mut module_depth = 0;
-        let mut types_needed_in_module = Vec::new();
-        let mut module_content = String::new();
+        self.inject_types_recursive(code, existing_types)
+    }
 
-        for line in code.lines() {
+    fn inject_types_recursive(
+        &self,
+        code: &str,
+        existing_types: &std::collections::HashSet<String>,
+    ) -> String {
+        let mut result = String::new();
+        let lines: Vec<&str> = code.lines().collect();
+        let mut i = 0;
+
+        while i < lines.len() {
+            let line = lines[i];
             let trimmed = line.trim();
 
-            // Entering a module
+            // Check if this line starts a module
             if (trimmed.starts_with("mod ") || trimmed.starts_with("pub mod "))
                 && trimmed.contains('{')
             {
-                in_module = true;
-                module_depth = 0;
-                types_needed_in_module.clear();
-                module_content.clear();
-                result.push_str(line);
+                // Found a module, collect its content
+                let module_start = i;
+                let mut depth = 1;
+                let mut j = i + 1;
+
+                // Find the end of this module
+                while j < lines.len() && depth > 0 {
+                    let module_line = lines[j];
+                    depth += module_line.matches('{').count();
+                    depth -= module_line.matches('}').count();
+                    j += 1;
+                }
+
+                // Now lines[i] is "mod name {" and lines[j-1] is the closing "}"
+                let module_end = j - 1;
+
+                // Extract module content (everything between opening and closing braces)
+                let module_content_lines = &lines[(module_start + 1)..module_end];
+                let module_content = module_content_lines.join("\n");
+
+                // Find types needed in this module
+                let mut types_needed = Vec::new();
+                for content_line in module_content_lines {
+                    let trimmed_content = content_line.trim();
+                    if trimmed_content.starts_with("impl ") || trimmed_content.starts_with("impl<")
+                    {
+                        let impl_part = trimmed_content.split('{').next().unwrap_or("");
+
+                        let type_name = if let Some(for_pos) = impl_part.find(" for ") {
+                            let type_part = impl_part[for_pos + 5..].trim();
+                            type_part
+                                .split_whitespace()
+                                .next()
+                                .unwrap_or("")
+                                .split('<')
+                                .next()
+                                .unwrap_or("")
+                                .trim()
+                        } else {
+                            let parts: Vec<&str> = impl_part.split_whitespace().collect();
+                            parts
+                                .last()
+                                .map(|s| s.split('<').next().unwrap_or(s).trim())
+                                .unwrap_or("")
+                        };
+
+                        if !type_name.is_empty()
+                            && !existing_types.contains(type_name)
+                            && !types_needed.contains(&type_name.to_string())
+                        {
+                            types_needed.push(type_name.to_string());
+                        }
+                    }
+                }
+
+                // Recursively process module content
+                let processed_content =
+                    self.inject_types_recursive(&module_content, existing_types);
+
+                // Write module with injected imports
+                result.push_str(lines[module_start]); // "mod name {"
                 result.push('\n');
-                continue;
-            }
 
-            if in_module {
-                module_depth += trimmed.matches('{').count();
-                module_depth -= trimmed.matches('}').count();
-
-                // Collect what types are referenced in impl blocks within this module
-                if trimmed.starts_with("impl ") || trimmed.starts_with("impl<") {
-                    let impl_part = trimmed.split('{').next().unwrap_or("");
-
-                    if let Some(for_pos) = impl_part.find(" for ") {
-                        let type_part = impl_part[for_pos + 5..].trim();
-                        let type_name = type_part
-                            .split_whitespace()
-                            .next()
-                            .unwrap_or("")
-                            .split('<')
-                            .next()
-                            .unwrap_or("")
-                            .trim();
-                        if !type_name.is_empty() && !existing_types.contains(type_name) {
-                            if !types_needed_in_module.contains(&type_name.to_string()) {
-                                types_needed_in_module.push(type_name.to_string());
-                            }
-                        }
-                    } else {
-                        let parts: Vec<&str> = impl_part.split_whitespace().collect();
-                        if let Some(last) = parts.last() {
-                            let type_name = last.split('<').next().unwrap_or(last).trim();
-                            if !type_name.is_empty() && !existing_types.contains(type_name) {
-                                if !types_needed_in_module.contains(&type_name.to_string()) {
-                                    types_needed_in_module.push(type_name.to_string());
-                                }
-                            }
-                        }
+                if !types_needed.is_empty() {
+                    for type_name in &types_needed {
+                        result.push_str(&format!("    use crate::{};\n", type_name));
                     }
+                    result.push('\n');
                 }
 
-                module_content.push_str(line);
-                module_content.push('\n');
-
-                // Exiting module
-                if module_depth == 0 && trimmed.ends_with('}') {
-                    // Inject type imports at the beginning of the module
-                    if !types_needed_in_module.is_empty() {
-                        let mut injected_module = String::new();
-                        for type_name in &types_needed_in_module {
-                            injected_module.push_str(&format!("    use crate::{};\n", type_name));
-                        }
-                        injected_module.push_str("\n");
-                        injected_module.push_str(&module_content);
-
-                        result.push_str(&injected_module);
-                    } else {
-                        result.push_str(&module_content);
-                    }
-
-                    in_module = false;
-                    module_content.clear();
-                    types_needed_in_module.clear();
-                    continue;
+                result.push_str(&processed_content);
+                if !processed_content.is_empty() && !processed_content.ends_with('\n') {
+                    result.push('\n');
                 }
+
+                result.push_str(lines[module_end]); // "}"
+                result.push('\n');
+
+                // Skip past this module
+                i = j;
             } else {
+                // Regular line, just copy it
                 result.push_str(line);
                 result.push('\n');
+                i += 1;
             }
         }
 

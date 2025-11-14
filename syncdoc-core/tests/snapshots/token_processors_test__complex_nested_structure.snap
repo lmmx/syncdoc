@@ -1,0 +1,33 @@
+---
+source: syncdoc-core/tests/token_processors_test.rs
+expression: result
+---
+#![doc = include_str!("../docs/lib.md")]
+
+    pub struct OuterStruct;
+pub struct InnerStruct;
+
+    use syncdoc::omnidoc;
+
+    #[omnidoc(path = "docs")]
+    
+mod outer {
+    use crate::OuterStruct;
+    use crate::InnerStruct;
+
+    pub fn outer_function() {}
+
+    impl OuterStruct {
+        pub fn outer_method(&self) {}
+    }
+
+    mod inner {
+    use crate::InnerStruct;
+
+        pub fn inner_function() {}
+
+        impl InnerStruct {
+            pub fn inner_method(&self) {}
+        }
+    }
+}
