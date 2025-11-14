@@ -93,8 +93,21 @@ impl TokenProcessor {
     }
 
     fn process_impl_block(&self, impl_block: ImplBlockSig) -> TokenStream {
-        // Extract the struct/type name for context
-        let type_name = extract_type_name(&impl_block.target_type);
+        // Check if this is a trait impl (has "for" clause)
+        let context_path = if let Some(for_trait) = &impl_block.for_trait {
+            // This is "impl Trait for Type"
+            // target_type contains the TRAIT name (before "for")
+            let trait_name = extract_type_name(&impl_block.target_type);
+            // for_trait contains "for Type" - extract Type
+            let type_name = extract_first_ident_from_tokens(&for_trait.second);
+            // Context should be: Type/Trait
+            vec![type_name, trait_name]
+        } else {
+            // This is "impl Type"
+            // target_type is the type being implemented
+            let type_name = extract_type_name(&impl_block.target_type);
+            vec![type_name]
+        };
 
         // Get the body content as TokenStream
         let body_stream = {
@@ -110,7 +123,7 @@ impl TokenProcessor {
 
         // Create new processor with updated context
         let mut new_context = self.context.clone();
-        new_context.push(type_name);
+        new_context.extend(context_path);
         let new_processor = TokenProcessor {
             input: body_stream,
             base_path: self.base_path.clone(),
@@ -543,6 +556,17 @@ fn extract_type_name(
     // Extract just the type name from the target_type tokens
     // This is a simplified version - for complex cases we might need more sophistication
     if let Some(first) = target_type.0.first() {
+        if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
+            return ident.to_string();
+        }
+    }
+    "Unknown".to_string()
+}
+
+fn extract_first_ident_from_tokens(
+    tokens: &unsynn::Many<unsynn::Cons<unsynn::Except<unsynn::BraceGroup>, proc_macro2::TokenTree>>,
+) -> String {
+    if let Some(first) = tokens.0.first() {
         if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
             return ident.to_string();
         }
