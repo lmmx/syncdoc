@@ -87,15 +87,104 @@ fn is_doc_related_hunk(hunk: &DiffHunk, original_lines: &[&str], after_lines: &[
     false
 }
 
+/// Splits a hunk if it contains both module-level and item-level doc changes
+fn split_hunk_if_mixed(hunk: &DiffHunk, after_lines: &[&str]) -> Vec<DiffHunk> {
+    let after_end = hunk.after_start + hunk.after_count;
+
+    // Find if there's a module doc line followed by item doc line
+    let mut module_doc_end = None;
+
+    for i in hunk.after_start..after_end {
+        if i >= after_lines.len() {
+            break;
+        }
+
+        let line = after_lines[i].replace(" ", "");
+
+        // If this is a module doc
+        if line.starts_with("#![") || line.starts_with("#!{") {
+            // Check if there's a non-blank, non-module-doc line after
+            for j in (i + 1)..after_end {
+                if j >= after_lines.len() {
+                    break;
+                }
+
+                let next_line = after_lines[j];
+                if next_line.trim().is_empty() {
+                    continue; // Skip blank lines
+                }
+
+                let next_trimmed = next_line.replace(" ", "");
+                // If we find an item-level attribute, split here
+                if next_trimmed.starts_with("#[") {
+                    module_doc_end = Some(i + 1); // Split after the module doc line
+                    break;
+                }
+
+                break; // Found non-blank, non-attribute line
+            }
+
+            if module_doc_end.is_some() {
+                break;
+            }
+        }
+    }
+
+    if let Some(split_point) = module_doc_end {
+        let lines_in_first = split_point - hunk.after_start;
+
+        vec![
+            DiffHunk {
+                before_start: hunk.before_start,
+                before_count: lines_in_first,
+                after_start: hunk.after_start,
+                after_count: lines_in_first,
+            },
+            DiffHunk {
+                before_start: hunk.before_start + lines_in_first,
+                before_count: hunk.before_count - lines_in_first,
+                after_start: split_point,
+                after_count: hunk.after_count - lines_in_first,
+            },
+        ]
+    } else {
+        vec![hunk.clone()]
+    }
+}
+
 /// Applies diff hunks to original source
 pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> String {
     let original_lines: Vec<&str> = original.lines().collect();
     let after_lines: Vec<&str> = formatted_after.lines().collect();
 
+    // Split mixed hunks first
+    let mut split_hunks = Vec::new();
+    for hunk in hunks {
+        split_hunks.extend(split_hunk_if_mixed(hunk, &after_lines));
+    }
+
+    #[cfg(debug_assertions)]
+    {
+        eprintln!("=== SPLIT HUNKS ===");
+        eprintln!("Original hunks: {}", hunks.len());
+        eprintln!("After splitting: {}", split_hunks.len());
+        for (i, hunk) in split_hunks.iter().enumerate() {
+            eprintln!(
+                "Split hunk {}: before[{}..{}] -> after[{}..{}]",
+                i,
+                hunk.before_start,
+                hunk.before_start + hunk.before_count,
+                hunk.after_start,
+                hunk.after_start + hunk.after_count
+            );
+        }
+        eprintln!("===================");
+    }
+
     let mut result = Vec::new();
     let mut orig_idx = 0;
 
-    for (_hunk_num, hunk) in hunks.iter().enumerate() {
+    for (_hunk_num, hunk) in split_hunks.iter().enumerate() {
         // ONLY apply doc-related hunks
         if !is_doc_related_hunk(hunk, &original_lines, &after_lines) {
             #[cfg(debug_assertions)]
