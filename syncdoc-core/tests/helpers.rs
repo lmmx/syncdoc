@@ -583,15 +583,11 @@ use syncdoc::omnidoc;
         existing_types: &std::collections::HashSet<String>,
     ) -> String {
         let mut types_to_define = Vec::new();
-        let mut in_module = false;
+        let mut trait_methods: std::collections::HashMap<String, Vec<String>> =
+            std::collections::HashMap::new();
 
         for line in code.lines() {
             let trimmed = line.trim();
-
-            // Track if we're in a module
-            if trimmed.starts_with("mod ") || trimmed.starts_with("pub mod ") {
-                in_module = true;
-            }
 
             if trimmed.starts_with("impl ") || trimmed.starts_with("impl<") {
                 let impl_part = trimmed.split('{').next().unwrap_or("");
@@ -616,7 +612,10 @@ use syncdoc::omnidoc;
                         && trait_name.chars().next().unwrap().is_uppercase()
                         && !existing_types.contains(trait_name)
                     {
-                        types_to_define.push(format!("trait {} {{}}", trait_name));
+                        // Initialize trait for method collection
+                        trait_methods
+                            .entry(trait_name.to_string())
+                            .or_insert_with(Vec::new);
                     }
 
                     // Extract type name
@@ -633,7 +632,7 @@ use syncdoc::omnidoc;
                         && type_name.chars().next().unwrap().is_uppercase()
                         && !existing_types.contains(type_name)
                     {
-                        types_to_define.push(format!("struct {};", type_name));
+                        types_to_define.push(format!("pub struct {};", type_name));
                     }
                 } else {
                     // "impl Type" or "impl<T> Type"
@@ -649,21 +648,90 @@ use syncdoc::omnidoc;
                                 .unwrap_or(false)
                             && !existing_types.contains(type_name)
                         {
-                            if impl_part.contains('<') && !impl_part.starts_with("impl<") {
-                                types_to_define.push(format!(
-                                    "struct {}<T> {{ _inner: std::marker::PhantomData<T> }}",
+                            // Check if impl block has generics like impl<T> GenericStruct<T>
+                            let has_generics = last.contains('<') && last.contains('>');
+
+                            let def = if has_generics {
+                                format!(
+                                    "pub struct {}<T> {{ _inner: std::marker::PhantomData<T> }}",
                                     type_name
-                                ));
+                                )
                             } else {
-                                types_to_define.push(format!("struct {};", type_name));
-                            }
+                                format!("pub struct {};", type_name)
+                            };
+
+                            types_to_define.push(def);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Now scan for methods inside trait impls to add to trait definitions
+        let mut in_trait_impl = false;
+        let mut current_trait = String::new();
+        let mut depth = 0;
+
+        for line in code.lines() {
+            let trimmed = line.trim();
+
+            if trimmed.starts_with("impl ") && trimmed.contains(" for ") {
+                if let Some(impl_part) = trimmed.split('{').next() {
+                    if let Some(for_pos) = impl_part.find(" for ") {
+                        let trait_part = impl_part[4..for_pos].trim();
+                        let trait_name = trait_part
+                            .split_whitespace()
+                            .last()
+                            .unwrap_or("")
+                            .split('<')
+                            .next()
+                            .unwrap_or("")
+                            .trim();
+
+                        if !trait_name.is_empty() {
+                            current_trait = trait_name.to_string();
+                            in_trait_impl = true;
+                            depth = 0;
                         }
                     }
                 }
             }
 
-            if trimmed == "}" {
-                in_module = false;
+            if in_trait_impl {
+                depth += trimmed.matches('{').count();
+                depth -= trimmed.matches('}').count();
+
+                // Extract method signatures
+                if trimmed.contains("fn ") && !current_trait.is_empty() {
+                    // Simple method signature extraction
+                    if let Some(fn_pos) = trimmed.find("fn ") {
+                        let after_fn = &trimmed[fn_pos..];
+                        if let Some(body_start) = after_fn.find('{') {
+                            let sig = after_fn[..body_start].trim().to_string() + ";";
+                            if let Some(methods) = trait_methods.get_mut(&current_trait) {
+                                methods.push(sig);
+                            }
+                        }
+                    }
+                }
+
+                if depth == 0 {
+                    in_trait_impl = false;
+                    current_trait.clear();
+                }
+            }
+        }
+
+        // Generate trait definitions with methods
+        for (trait_name, methods) in trait_methods {
+            if methods.is_empty() {
+                types_to_define.push(format!("pub trait {} {{}}", trait_name));
+            } else {
+                let methods_str = methods.join("\n    ");
+                types_to_define.push(format!(
+                    "pub trait {} {{\n    {}\n}}",
+                    trait_name, methods_str
+                ));
             }
         }
 

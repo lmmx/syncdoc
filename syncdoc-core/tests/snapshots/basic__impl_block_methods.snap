@@ -4,7 +4,7 @@ expression: "test_with_code(\"test_impl_block_methods\", code)"
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-struct Calculator;
+pub struct Calculator;
 
 use syncdoc::omnidoc;
 

@@ -4,8 +4,8 @@ expression: result
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-struct FirstStruct;
-struct SecondStruct;
+pub struct FirstStruct;
+pub struct SecondStruct;
 
 use syncdoc::omnidoc;
 

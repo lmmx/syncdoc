@@ -4,7 +4,7 @@ expression: result
 ---
 #![doc = include_str!("../docs/lib.md")]
 
-struct Calculator;
+pub struct Calculator;
 
 use syncdoc::omnidoc;
 
