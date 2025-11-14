@@ -10,7 +10,7 @@ use imara_diff::{Algorithm, Diff, InternedInput};
 pub fn compute_line_diff(before: &str, after: &str) -> Vec<DiffHunk> {
     let input = InternedInput::new(before, after);
 
-    let mut diff = Diff::compute(Algorithm::Histogram, &input);
+    let mut diff = Diff::compute(Algorithm::Myers, &input);
     diff.postprocess_lines(&input);
 
     let hunks: Vec<_> = diff
