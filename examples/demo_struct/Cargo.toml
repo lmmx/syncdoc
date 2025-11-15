@@ -2,7 +2,7 @@
 edition = "2021"
 name = "demo_struct"
 publish = false
-version = "0.2.1"
+version = "0.3.0"
 
 [dependencies]
 syncdoc.workspace = true

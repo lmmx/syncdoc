@@ -31,11 +31,11 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
 name = "cli_demo_basic"
-version = "0.2.1"
+version = "0.3.0"
 
 [[package]]
 name = "cli_demo_basic_migrated"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "syncdoc",
 ]
@@ -54,70 +54,70 @@ dependencies = [
 
 [[package]]
 name = "demo_cfg_attr_call"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_cfg_attr_toml"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_double_doc"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_enum"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_fn"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_impl"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_module"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_struct"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_submodule"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_toml_path"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "syncdoc",
 ]
@@ -535,7 +535,7 @@ checksum = "d08889ec5408683408db66ad89e0e1f93dff55c73a4ccc71c427d5b277ee47e6"
 
 [[package]]
 name = "syncdoc"
-version = "0.2.4"
+version = "0.3.0"
 dependencies = [
  "facet",
  "facet-args",
@@ -548,7 +548,7 @@ dependencies = [
 
 [[package]]
 name = "syncdoc-core"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "duct",
  "insta",
@@ -565,7 +565,7 @@ dependencies = [
 
 [[package]]
 name = "syncdoc-migrate"
-version = "0.2.3"
+version = "0.3.0"
 dependencies = [
  "duct",
  "imara-diff",

@@ -2,7 +2,7 @@
 edition = "2021"
 name = "demo_cfg_attr_toml"
 publish = false
-version = "0.2.1"
+version = "0.3.0"
 
 [package.metadata.syncdoc]
 cfg-attr = "doc"
