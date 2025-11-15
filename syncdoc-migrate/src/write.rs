@@ -1,4 +1,4 @@
-// syncdoc-migrate/src/write.rs
+//! List all the files we expect to be produced from code with omnidoc attributes.
 
 use crate::discover::ParsedFile;
 use crate::extract::extract_doc_content;
@@ -11,6 +11,9 @@ use syncdoc_core::parse::{
     StructSig, TraitSig,
 };
 use unsynn::*;
+
+mod expected;
+pub use expected::find_expected_doc_paths;
 
 /// Represents a documentation extraction with its target path and metadata
 #[derive(Debug, Clone, PartialEq)]
@@ -206,19 +209,51 @@ fn extract_impl_docs(
 ) -> Vec<DocExtraction> {
     let mut extractions = Vec::new();
 
-    // Extract type name from target_type - reuse logic from token_processors.rs
-    let type_name = if let Some(first) = impl_block.target_type.0.first() {
-        if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
-            ident.to_string()
+    // Determine the context path for the impl block
+    // If this is `impl Trait for Type`, context is [Type, Trait]
+    // If this is `impl Type`, context is [Type]
+    let impl_context = if let Some(for_trait) = &impl_block.for_trait {
+        // This is `impl Trait for Type`
+        // target_type contains the TRAIT name (before "for")
+        let trait_name = if let Some(first) = impl_block.target_type.0.first() {
+            if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
+                ident.to_string()
+            } else {
+                "Unknown".to_string()
+            }
         } else {
             "Unknown".to_string()
-        }
+        };
+
+        // for_trait.second contains the TYPE name (after "for")
+        let type_name = if let Some(first) = for_trait.second.0.first() {
+            if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
+                ident.to_string()
+            } else {
+                "Unknown".to_string()
+            }
+        } else {
+            "Unknown".to_string()
+        };
+
+        // Context is Type/Trait
+        vec![type_name, trait_name]
     } else {
-        "Unknown".to_string()
+        // This is `impl Type`, extract Type from target_type
+        let type_name = if let Some(first) = impl_block.target_type.0.first() {
+            if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
+                ident.to_string()
+            } else {
+                "Unknown".to_string()
+            }
+        } else {
+            "Unknown".to_string()
+        };
+        vec![type_name]
     };
 
     let mut new_context = context;
-    new_context.push(type_name);
+    new_context.extend(impl_context);
 
     // Parse the body content
     let body_stream = extract_brace_content(&impl_block.body);

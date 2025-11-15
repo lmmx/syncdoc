@@ -18,8 +18,8 @@ pub mod inner {
     use std::io;
     use std::path::Path;
     use syncdoc_migrate::{
-        discover_rust_files, extract_all_docs, get_or_create_docs_path, parse_file, rewrite_file,
-        write_extractions,
+        discover_rust_files, extract_all_docs, find_expected_doc_paths, get_or_create_docs_path,
+        parse_file, rewrite_file, write_extractions,
     };
 
     #[derive(Facet)]
@@ -39,6 +39,10 @@ pub mod inner {
         /// Add #[omnidoc] attributes to items
         #[facet(named, rename = "add", short = 'a', long, default)]
         annotate: bool,
+
+        /// Add #[omnidoc] attributes to items
+        #[facet(named, short = 't', long, default)]
+        touch: bool,
 
         /// Preview changes without writing files
         #[facet(named, short = 'n', long, default)]
@@ -67,6 +71,7 @@ pub mod inner {
         );
         println!("  -c, --cut          Cut out doc comments from source files");
         println!("  -a, --add          Rewrite code with #[omnidoc] attributes");
+        println!("  -t, --touch        Touch empty markdown files for any that don't exist");
         println!("  -n, --dry-run      Preview changes without writing files");
         println!("  -v, --verbose      Show verbose output");
         println!("  -h, --help         Show this help message");
@@ -83,6 +88,12 @@ pub mod inner {
         println!();
         println!("  # Preview what would happen if you ran a 'cut and paste'");
         println!("  syncdoc --cut --add --dry-run (or `-c -a -n`)");
+        println!();
+        println!("  # Create empty markdown files for all items that would need docs");
+        println!("  syncdoc --add --touch (or `-a -t`)");
+        println!();
+        println!("  # Full migration: cut docs, add attributes, and touch missing files");
+        println!("  syncdoc --cut --add --touch (or `-c -a -t`)");
     }
 
     /// Entry point for the `syncdoc` command-line interface.
@@ -146,6 +157,7 @@ pub mod inner {
         let mut total_extractions = 0;
         let mut files_processed = 0;
         let mut files_rewritten = 0;
+        let mut files_touched = 0;
         let mut parse_errors = Vec::new();
         let mut all_extractions = Vec::new();
 
@@ -179,6 +191,29 @@ pub mod inner {
             }
 
             all_extractions.extend(extractions);
+
+            // If touch mode and we're adding annotations, find expected paths
+            if args.touch && args.annotate {
+                let expected_paths = find_expected_doc_paths(&parsed, &docs_root);
+
+                if args.verbose {
+                    eprintln!("  Found {} expected doc path(s)", expected_paths.len());
+                }
+
+                // Filter to only those that don't already exist
+                let missing_paths: Vec<_> = expected_paths
+                    .into_iter()
+                    .filter(|extraction| !extraction.markdown_path.exists())
+                    .collect();
+
+                if !missing_paths.is_empty() {
+                    if args.verbose {
+                        eprintln!("  Will touch {} missing file(s)", missing_paths.len());
+                    }
+                    files_touched += missing_paths.len();
+                    all_extractions.extend(missing_paths);
+                }
+            }
 
             // Rewrite source file if requested
             if args.strip_docs || args.annotate {
@@ -224,6 +259,9 @@ pub mod inner {
             eprintln!("=== Dry Run Summary ===");
             eprintln!("Would process {} file(s)", files_processed);
             eprintln!("Would extract {} documentation(s)", total_extractions);
+            if args.touch {
+                eprintln!("Would touch {} missing file(s)", files_touched);
+            }
             if args.strip_docs || args.annotate {
                 eprintln!("Would rewrite {} file(s)", files_rewritten);
             }
@@ -231,6 +269,9 @@ pub mod inner {
             eprintln!("=== Migration Summary ===");
             eprintln!("Processed {} file(s)", files_processed);
             eprintln!("Extracted {} documentation(s)", total_extractions);
+            if args.touch {
+                eprintln!("Touched {} missing file(s)", files_touched);
+            }
             if args.strip_docs || args.annotate {
                 eprintln!("Rewrote {} file(s)", files_rewritten);
             }
