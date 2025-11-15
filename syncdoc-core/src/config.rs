@@ -1,3 +1,4 @@
+use crate::path_utils::find_manifest_dir;
 use crate::syncdoc_debug;
 use ropey::Rope;
 use std::fs;
@@ -49,11 +50,15 @@ fn get_attribute_from_cargo_toml(
 }
 
 /// Get the cfg-attr from the current crate's Cargo.toml, relative to the source file
-pub fn get_cfg_attr() -> Result<Option<String>, Box<dyn std::error::Error>> {
-    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
-        .map_err(|_| "CARGO_MANIFEST_DIR not set - must be called from within a Cargo project")?;
+pub fn get_cfg_attr(source_file: &str) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    let source_path = Path::new(source_file);
+    let source_dir = source_path
+        .parent()
+        .ok_or("Source file has no parent directory")?;
 
-    let cargo_toml_path = PathBuf::from(&manifest_dir).join("Cargo.toml");
+    let manifest_dir = find_manifest_dir(source_dir).ok_or("Could not find Cargo.toml")?;
+
+    let cargo_toml_path = manifest_dir.join("Cargo.toml");
     get_attribute_from_cargo_toml(cargo_toml_path.to_str().unwrap(), "cfg-attr")
 }
 
@@ -62,32 +67,35 @@ pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Er
     syncdoc_debug!("get_docs_path called:");
     syncdoc_debug!("  source_file: {}", source_file);
 
-    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")?;
-    syncdoc_debug!("  CARGO_MANIFEST_DIR: {}", manifest_dir);
+    let source_path = Path::new(source_file);
+    let source_dir = source_path
+        .parent()
+        .ok_or("Source file has no parent directory")?;
 
-    let cargo_toml_path = PathBuf::from(&manifest_dir).join("Cargo.toml");
+    let manifest_dir = find_manifest_dir(source_dir).ok_or("Could not find Cargo.toml")?;
+    syncdoc_debug!("  manifest_dir: {}", manifest_dir.display());
+
+    let cargo_toml_path = manifest_dir.join("Cargo.toml");
     let docs_path = get_attribute_from_cargo_toml(cargo_toml_path.to_str().unwrap(), "docs-path")?
         .ok_or("docs-path not found")?;
     syncdoc_debug!("  docs_path from toml: {}", docs_path);
 
-    let manifest_path = Path::new(&manifest_dir).canonicalize()?;
+    let manifest_path = manifest_dir.canonicalize()?;
     syncdoc_debug!("  manifest_path (canonical): {}", manifest_path.display());
 
-    // Get the source file's directory
-    let source_path = Path::new(source_file);
-    let source_dir = source_path
-        .parent()
-        .ok_or("Source file has no parent directory")?
-        .canonicalize()?;
-    syncdoc_debug!("  source_dir (canonical): {}", source_dir.display());
+    let source_dir_canonical = source_dir.canonicalize()?;
+    syncdoc_debug!(
+        "  source_dir (canonical): {}",
+        source_dir_canonical.display()
+    );
 
     // Security check: ensure source_dir is within manifest_dir
-    if !source_dir.starts_with(&manifest_path) {
+    if !source_dir_canonical.starts_with(&manifest_path) {
         return Err("Source file is outside the manifest directory (security violation)".into());
     }
 
     // Calculate number of ".." needed to go from source_dir to manifest_dir
-    let relative_path = source_dir
+    let relative_path = source_dir_canonical
         .strip_prefix(&manifest_path)
         .map_err(|_| "Failed to strip prefix")?;
     syncdoc_debug!("  relative_path (stripped): {}", relative_path.display());

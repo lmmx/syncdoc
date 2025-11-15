@@ -122,10 +122,14 @@ pub fn get_or_create_docs_path(source_file: &Path) -> std::result::Result<String
         Ok(path) => Ok(path),
         Err(_) => {
             // Need to add default docs-path to Cargo.toml
-            let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
-                .map_err(|_| ConfigError::Other("CARGO_MANIFEST_DIR not set".to_string()))?;
+            let source_dir = source_file.parent().ok_or_else(|| {
+                ConfigError::Other("Source file has no parent directory".to_string())
+            })?;
 
-            let cargo_toml_path = PathBuf::from(&manifest_dir).join("Cargo.toml");
+            let manifest_dir = syncdoc_core::path_utils::find_manifest_dir(source_dir)
+                .ok_or_else(|| ConfigError::Other("Could not find Cargo.toml".to_string()))?;
+
+            let cargo_toml_path = manifest_dir.join("Cargo.toml");
 
             // Read existing content
             let mut content = fs::read_to_string(&cargo_toml_path)?;
