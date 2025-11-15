@@ -3,7 +3,7 @@
 use insta::assert_snapshot;
 use proc_macro2::TokenStream;
 use std::str::FromStr;
-use syncdoc_migrate::{parse_file, rewrite::rewrite_file};
+use syncdoc_migrate::{parse_file, rewrite::rewrite_file, DocsPathMode};
 
 mod helpers;
 use helpers::*;
@@ -11,7 +11,7 @@ use helpers::*;
 fn test_rewrite(source: &str, strip: bool, annotate: bool) -> String {
     let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
-    let result = rewrite_file(&parsed, "docs", strip, annotate);
+    let result = rewrite_file(&parsed, "docs", DocsPathMode::TomlConfig, strip, annotate);
 
     match result {
         Some(code) => code, // Return raw code with comments preserved
@@ -370,7 +370,7 @@ pub enum TimeOfDay {
     let parsed = parse_file(&file_path).unwrap();
 
     // Test strip only
-    let stripped = rewrite_file(&parsed, "docs", true, false);
+    let stripped = rewrite_file(&parsed, "docs", DocsPathMode::TomlConfig, true, false);
     assert!(stripped.is_some());
 
     // Verify it compiles (would need rustfmt check)
@@ -393,7 +393,7 @@ fn test_strip_enum_variant_docs_preserves_variants() {
 
     let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
-    let stripped = rewrite_file(&parsed, "docs", true, false);
+    let stripped = rewrite_file(&parsed, "docs", DocsPathMode::TomlConfig, true, false);
 
     assert!(stripped.is_some());
     let code = stripped.unwrap();
@@ -522,6 +522,6 @@ fn draw_list_with_command() {
     );
 
     // Both should have omnidoc
-    assert!(result.contains("#[syncdoc::omnidoc(path = \"docs\")]\nfn draw_list()"));
-    assert!(result.contains("#[syncdoc::omnidoc(path = \"docs\")]\nfn draw_list_with_command()"));
+    assert!(result.contains("#[syncdoc::omnidoc]\nfn draw_list()"));
+    assert!(result.contains("#[syncdoc::omnidoc]\nfn draw_list_with_command()"));
 }

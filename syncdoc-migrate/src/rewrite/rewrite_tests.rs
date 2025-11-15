@@ -3,6 +3,8 @@
 use super::*;
 use syncdoc_core::parse::ModuleContent;
 
+use crate::config::DocsPathMode;
+
 use std::str::FromStr;
 
 #[test]
@@ -27,7 +29,7 @@ fn test_rewrite_roundtrip() {
     let parsed = crate::discover::parse_file(&file_path).unwrap();
 
     // Strip docs
-    let stripped = rewrite_file(&parsed, "docs", true, false);
+    let stripped = rewrite_file(&parsed, "docs", DocsPathMode::TomlConfig, true, false);
     assert!(stripped.is_some());
     let stripped_code = stripped.unwrap();
 
@@ -50,7 +52,7 @@ fn test_rewrite_none_when_no_ops() {
     fs::write(&file_path, "fn test() {}").unwrap();
 
     let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let result = rewrite_file(&parsed, "docs", false, false);
+    let result = rewrite_file(&parsed, "docs", DocsPathMode::TomlConfig, false, false);
 
     assert!(result.is_none());
 }
@@ -88,7 +90,7 @@ pub struct Foo;
     };
 
     // Run migration (strip + annotate)
-    let result = rewrite_file(&parsed, "docs", true, true).unwrap();
+    let result = rewrite_file(&parsed, "docs", DocsPathMode::TomlConfig, true, true).unwrap();
 
     // Count blank lines between items in original
     let _original_lines: Vec<&str> = original_source.lines().collect();
@@ -140,7 +142,7 @@ pub struct Foo;
     };
 
     // Run migration (strip + annotate)
-    let result = rewrite_file(&parsed, "docs", true, true).unwrap();
+    let result = rewrite_file(&parsed, "docs", DocsPathMode::TomlConfig, true, true).unwrap();
 
     // Count blank lines between items in original
     let _original_lines: Vec<&str> = original_source.lines().collect();

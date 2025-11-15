@@ -2,25 +2,25 @@
 source: syncdoc-migrate/tests/rewrite_integration.rs
 expression: "test_rewrite(source, true, true)"
 ---
-#[syncdoc::omnidoc(path = "docs")]
+#[syncdoc::omnidoc]
 pub mod calculations {
     pub fn add(a: i32, b: i32) -> i32 {
         a + b
     }
 }
 
-#[syncdoc::omnidoc(path = "docs")]
+#[syncdoc::omnidoc]
 #[derive(Debug)]
 pub struct Calculator {
     value: i32,
 }
 
-#[syncdoc::omnidoc(path = "docs")]
+#[syncdoc::omnidoc]
 impl Calculator {
     pub fn new() -> Self {
         Self { value: 0 }
     }
 }
 
-#[syncdoc::omnidoc(path = "docs")]
+#[syncdoc::omnidoc]
 pub fn standalone() {}

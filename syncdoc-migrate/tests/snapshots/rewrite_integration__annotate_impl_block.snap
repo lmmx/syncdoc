@@ -2,7 +2,7 @@
 source: syncdoc-migrate/tests/rewrite_integration.rs
 expression: "test_rewrite(source, false, true)"
 ---
-#[syncdoc::omnidoc(path = "docs")]
+#[syncdoc::omnidoc]
 impl MyStruct {
     pub fn method(&self) -> i32 {
         42

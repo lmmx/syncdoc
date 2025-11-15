@@ -2,7 +2,7 @@
 source: syncdoc-migrate/tests/rewrite_integration.rs
 expression: "test_rewrite(source, false, true)"
 ---
-#[syncdoc::omnidoc(path = "docs")]
+#[syncdoc::omnidoc]
 pub trait MyTrait {
     fn required_method(&self);
 

@@ -19,7 +19,7 @@ pub mod inner {
     use std::path::Path;
     use syncdoc_migrate::{
         discover_rust_files, extract_all_docs, find_expected_doc_paths, get_or_create_docs_path,
-        parse_file, rewrite_file, write_extractions,
+        parse_file, rewrite_file, write_extractions, DocsPathMode,
     };
 
     #[derive(Facet)]
@@ -52,6 +52,10 @@ pub mod inner {
         #[facet(named, short = 'n', long, default)]
         dry_run: bool,
 
+        /// Use inline path parameters instead of Cargo.toml config
+        #[facet(named, long, default)]
+        inline_paths: bool,
+
         /// Show verbose output
         #[facet(named, short = 'v', long, default)]
         verbose: bool,
@@ -77,6 +81,7 @@ pub mod inner {
         println!("  -c, --cut          Cut out doc comments from source files");
         println!("  -a, --add          Rewrite code with #[omnidoc] attributes");
         println!("  -t, --touch        Touch empty markdown files for any that don't exist");
+        println!("      --inline-paths Use inline path= parameters instead of Cargo.toml");
         println!("  -n, --dry-run      Preview changes without writing files");
         println!("  -v, --verbose      Show verbose output");
         println!("  -h, --help         Show this help message");
@@ -91,11 +96,8 @@ pub mod inner {
         println!("  # Full migration: cut docs, add attributes, and touch missing files");
         println!("  syncdoc --migrate (or `-m` for short, equal to `--cut --add --touch`)");
         println!();
-        println!("  # 'Cut' docstrings out of src/ as well as creating in docs/");
-        println!("  syncdoc --cut (or `-c` for short)");
-        println!();
-        println!("  # 'Cut and paste' by replacing doc comments with omnidoc attributes");
-        println!("  syncdoc --cut --add (or `-c -a` for short)");
+        println!("  # Migrate with inline paths instead of Cargo.toml config");
+        println!("  syncdoc --migrate --inline-paths");
     }
 
     /// Entry point for the `syncdoc` command-line interface.
@@ -131,17 +133,19 @@ pub mod inner {
             std::process::exit(1);
         }
 
-        // Get docs root path
-        let docs_root = if let Some(docs) = args.docs {
-            docs
+        // Get docs root path and mode
+        let (docs_root, docs_mode) = if args.inline_paths || args.docs.is_some() {
+            // Explicit --inline-paths or --docs flag means inline mode
+            let path = args.docs.unwrap_or_else(|| "docs".to_string());
+            (path, DocsPathMode::InlinePaths)
         } else {
             // Try to get from Cargo.toml, or use/create default
             match get_or_create_docs_path(source_path, args.dry_run) {
-                Ok(path) => path,
+                Ok((path, mode)) => (path, mode),
                 Err(e) => {
                     eprintln!("Warning: Failed to get docs path from Cargo.toml: {}", e);
-                    eprintln!("Using default 'docs' directory");
-                    "docs".to_string()
+                    eprintln!("Using default 'docs' directory with inline paths");
+                    ("docs".to_string(), DocsPathMode::InlinePaths)
                 }
             }
         };
@@ -149,6 +153,7 @@ pub mod inner {
         if args.verbose {
             eprintln!("Source directory: {}", source_path.display());
             eprintln!("Docs root: {}", docs_root);
+            eprintln!("Docs mode: {:?}", docs_mode);
             eprintln!("Strip docs: {}", args.strip_docs);
             eprintln!("Annotate: {}", args.annotate);
             eprintln!();
@@ -232,9 +237,13 @@ pub mod inner {
 
             // Rewrite source file if requested
             if args.strip_docs || args.annotate {
-                if let Some(rewritten) =
-                    rewrite_file(&parsed, &docs_root, args.strip_docs, args.annotate)
-                {
+                if let Some(rewritten) = rewrite_file(
+                    &parsed,
+                    &docs_root,
+                    docs_mode,
+                    args.strip_docs,
+                    args.annotate,
+                ) {
                     if args.dry_run {
                         if args.verbose {
                             eprintln!("  Would rewrite: {}", file_path.display());
