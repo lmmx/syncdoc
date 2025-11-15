@@ -365,9 +365,13 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
         }
 
         ModuleItem::Other(token) => {
-            let mut output = TokenStream::new();
-            unsynn::ToTokens::to_tokens(token, &mut output);
-            output
+            // Convert to token stream
+            let mut ts = TokenStream::new();
+            unsynn::ToTokens::to_tokens(token, &mut ts);
+
+            // Try to parse as something with attributes and strip them
+            // This handles trait method signatures and other items
+            strip_doc_attrs_from_token_stream(ts)
         }
     }
 }
@@ -456,6 +460,37 @@ fn strip_doc_attrs_from_fields(
         if idx < fields.0.len() - 1 {
             output.extend(quote! { , });
         }
+    }
+
+    output
+}
+
+/// Strips doc attributes from a raw token stream
+/// Used for items that don't fit other categories (e.g., trait method signatures)
+fn strip_doc_attrs_from_token_stream(ts: TokenStream) -> TokenStream {
+    let tokens: Vec<_> = ts.into_iter().collect();
+    let mut output = TokenStream::new();
+    let mut i = 0;
+
+    while i < tokens.len() {
+        if let proc_macro2::TokenTree::Punct(p) = &tokens[i] {
+            if p.as_char() == '#' && i + 1 < tokens.len() {
+                if let proc_macro2::TokenTree::Group(g) = &tokens[i + 1] {
+                    let group_str = g.stream().to_string().replace(" ", "");
+                    // Check if this is a doc attribute
+                    if group_str.starts_with("doc=")
+                        || (group_str.starts_with("cfg_attr") && group_str.contains("doc"))
+                    {
+                        // Skip both the # and the group
+                        i += 2;
+                        continue;
+                    }
+                }
+            }
+        }
+
+        output.extend(std::iter::once(tokens[i].clone()));
+        i += 1;
     }
 
     output
