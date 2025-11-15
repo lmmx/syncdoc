@@ -1,21 +1,16 @@
 //! Line-level diff computation and application using imara-diff
 
-use imara_diff::{Algorithm, Diff, InternedInput};
+mod hunk;
 
-/// Represents a change hunk in the diff
-#[derive(Debug, Clone)]
-pub struct DiffHunk {
-    pub before_start: usize,
-    pub before_count: usize,
-    pub after_start: usize,
-    pub after_count: usize,
-}
+pub use hunk::{is_doc_related_hunk, split_hunk_if_mixed, DiffHunk};
+
+use imara_diff::{Algorithm, Diff, InternedInput};
 
 /// Computes line-level diff between before and after
 pub fn compute_line_diff(before: &str, after: &str) -> Vec<DiffHunk> {
     let input = InternedInput::new(before, after);
 
-    let mut diff = Diff::compute(Algorithm::Histogram, &input);
+    let mut diff = Diff::compute(Algorithm::Myers, &input);
     diff.postprocess_lines(&input);
 
     let hunks: Vec<_> = diff
@@ -50,52 +45,39 @@ pub fn compute_line_diff(before: &str, after: &str) -> Vec<DiffHunk> {
     hunks
 }
 
-/// Checks if a hunk is related to documentation changes
-fn is_doc_related_hunk(hunk: &DiffHunk, original_lines: &[&str], after_lines: &[&str]) -> bool {
-    // Check lines being removed
-    for i in 0..hunk.before_count {
-        let idx = hunk.before_start + i;
-        if idx < original_lines.len() {
-            let line = original_lines[idx].trim();
-            if line.starts_with("///")
-                || line.starts_with("//!")
-                || line.replace(" ", "").contains("#[doc")
-                || line.replace(" ", "").contains("#![doc")
-            {
-                return true;
-            }
-        }
-    }
-
-    // Check lines being added
-    let after_end = hunk.after_start + hunk.after_count;
-    for i in hunk.after_start..after_end {
-        if i < after_lines.len() {
-            let line = after_lines[i].trim();
-            if line.starts_with("///")
-                || line.starts_with("//!")
-                || line.replace(" ", "").contains("#[doc")
-                || line.replace(" ", "").contains("#![doc")
-                || line.replace(" ", "").contains("#[syncdoc::")
-                || line.replace(" ", "").contains("#[omnidoc")
-            {
-                return true;
-            }
-        }
-    }
-
-    false
-}
-
 /// Applies diff hunks to original source
 pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> String {
     let original_lines: Vec<&str> = original.lines().collect();
     let after_lines: Vec<&str> = formatted_after.lines().collect();
 
+    // Split mixed hunks first
+    let mut split_hunks = Vec::new();
+    for hunk in hunks {
+        split_hunks.extend(split_hunk_if_mixed(hunk, &after_lines));
+    }
+
+    #[cfg(debug_assertions)]
+    {
+        eprintln!("=== SPLIT HUNKS ===");
+        eprintln!("Original hunks: {}", hunks.len());
+        eprintln!("After splitting: {}", split_hunks.len());
+        for (i, hunk) in split_hunks.iter().enumerate() {
+            eprintln!(
+                "Split hunk {}: before[{}..{}] -> after[{}..{}]",
+                i,
+                hunk.before_start,
+                hunk.before_start + hunk.before_count,
+                hunk.after_start,
+                hunk.after_start + hunk.after_count
+            );
+        }
+        eprintln!("===================");
+    }
+
     let mut result = Vec::new();
     let mut orig_idx = 0;
 
-    for (_hunk_num, hunk) in hunks.iter().enumerate() {
+    for (_hunk_num, hunk) in split_hunks.iter().enumerate() {
         // ONLY apply doc-related hunks
         if !is_doc_related_hunk(hunk, &original_lines, &after_lines) {
             #[cfg(debug_assertions)]

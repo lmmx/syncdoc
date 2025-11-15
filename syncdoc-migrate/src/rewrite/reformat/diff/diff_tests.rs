@@ -22,22 +22,22 @@ fn test_compute_diff_no_changes() {
 
 #[test]
 fn test_apply_diff_replacement() {
-    let original = "line1\nline2\nline3\n";
-    let after = "line1\nmodified\nline3\n";
+    let original = "line1\n/// line2\nline3\n";
+    let after = "line1\n/// modified\nline3\n";
 
     let hunks = compute_line_diff(original, after);
     let result = apply_diff(original, &hunks, after);
 
-    assert_eq!(result, "line1\nmodified\nline3");
+    assert_eq!(result, "line1\n/// modified\nline3");
 }
 
 #[test]
 fn test_apply_diff_preserves_unchanged() {
-    let original = "  line1  \nline2\n  line3  \n";
-    let after = "line1\nmodified\nline3\n";
+    let original = "  line1  \n/// line2\n  line3  \n";
+    let after = "line1\n/// modified\nline3\n";
 
     let hunks = compute_line_diff(
-        "line1\nline2\nline3\n", // normalized for diff
+        "line1\n/// line2\nline3\n", // normalized for diff
         after,
     );
     let result = apply_diff(original, &hunks, after);
@@ -49,8 +49,8 @@ fn test_apply_diff_preserves_unchanged() {
 
 #[test]
 fn test_apply_diff_multiple_hunks() {
-    let before = "a\nb\nc\nd\ne\n";
-    let after = "a\nB\nc\nD\ne\n";
+    let before = "a\n/// b\nc\n/// d\ne\n";
+    let after = "a\n/// B\nc\n/// D\ne\n";
 
     let hunks = compute_line_diff(before, after);
     let result = apply_diff(before, &hunks, after);
@@ -64,8 +64,8 @@ fn test_apply_diff_multiple_hunks() {
 
 #[test]
 fn test_apply_diff_preserves_regular_comment_lines() {
-    let original = "// Regular comment\nline2\nline3\n";
-    let after = "line2\nMODIFIED\n";
+    let original = "// Regular comment\n/// line2\nline3\n";
+    let after = "/// MODIFIED\nline3\n";
 
     let hunks = vec![DiffHunk {
         before_start: 0,
@@ -78,8 +78,8 @@ fn test_apply_diff_preserves_regular_comment_lines() {
 
     // Should preserve regular comment
     assert!(result.contains("// Regular comment"));
-    assert!(result.contains("line2"));
     assert!(result.contains("MODIFIED"));
+    assert!(result.contains("line3"));
 }
 
 #[test]
@@ -158,4 +158,47 @@ fn test_apply_diff_mixed_comments() {
     // Doc comments removed
     assert!(!result.contains("/// Doc"));
     assert!(!result.contains("//! Inner doc"));
+}
+
+#[test]
+fn test_split_module_and_item_doc_hunk() {
+    let original = "//! Module doc\n\npub enum Foo {\n    Bar,\n}\n";
+    let after =
+        "#![doc = syncdoc::module_doc!()]\n#[syncdoc::omnidoc]\npub enum Foo {\n    Bar,\n}\n";
+
+    let hunks = compute_line_diff(original, after);
+    let result = apply_diff(original, &hunks, after);
+
+    eprintln!("Result:\n{}", result);
+
+    // Module doc should have blank line after
+    let lines: Vec<&str> = result.lines().collect();
+    let module_doc_idx = lines.iter().position(|l| l.contains("module_doc")).unwrap();
+
+    // Next line should be blank
+    assert_eq!(lines[module_doc_idx + 1].trim(), "");
+
+    // Then omnidoc attribute (no extra blank before it)
+    assert!(lines[module_doc_idx + 2].contains("omnidoc"));
+
+    // Then the enum declaration
+    assert!(lines[module_doc_idx + 3].contains("pub enum"));
+}
+
+#[test]
+fn test_split_preserves_original_blank_line() {
+    let original = "//! Module\n\nuse foo::Bar;\n";
+    let after = "#![doc = syncdoc::module_doc!()]\n\nuse foo::Bar;\n";
+
+    let hunks = compute_line_diff(original, after);
+    let result = apply_diff(original, &hunks, after);
+
+    // Should have exactly one blank line after module doc
+    let lines: Vec<&str> = result.lines().collect();
+    assert!(lines[0].contains("module_doc"));
+    assert_eq!(lines[1].trim(), "");
+    assert!(lines[2].contains("use"));
+
+    // Should not have double blank lines
+    assert_ne!(lines.get(2).map(|l| l.trim()), Some(""));
 }

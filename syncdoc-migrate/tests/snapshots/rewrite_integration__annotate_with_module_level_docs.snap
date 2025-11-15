@@ -3,9 +3,9 @@ source: syncdoc-migrate/tests/rewrite_integration.rs
 expression: "test_rewrite(source, true, true)"
 ---
 # ! [doc = syncdoc :: module_doc ! (path = "docs")]
+
+
 #[syncdoc::omnidoc(path = "docs")]
-
-
 pub enum MyEnum {
     Variant1,
 }

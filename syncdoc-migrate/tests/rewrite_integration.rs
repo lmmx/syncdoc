@@ -486,3 +486,65 @@ pub fn test() {
     assert!(result.contains("module_doc !"));
     assert!(result.contains("omnidoc"));
 }
+
+#[test]
+fn test_no_duplication_of_functions() {
+    let source = r#"
+fn draw_list() {
+    let items: Vec<ListItem> = app;
+    let tree_prefix = get_tree_prefix(node.tree_level, &parent_has_siblings);
+
+    let style = if node.section_index == app.moving_section_index {
+        match app.move_state {
+            MoveState::Selected => Style::default()
+                .fg(Color::Rgb(255, 165, 0)) // Orange
+                .add_modifier(Modifier::BOLD),
+            MoveState::Moved => Style::default()
+        }
+    };
+
+    ListItem::new(line).style(style)
+}
+
+fn draw_list_with_command() {
+    let items: Vec<ListItem> = app;
+    let tree_prefix = if app.file_mode == Multi {
+        get_tree_prefix(node.tree_level, &parent_has_siblings)
+    };
+
+    let style = if node.section_index == app.moving_section_index {
+        match app.move_state {
+            MoveState::Selected => Style::default()
+                .fg(Color::Rgb(255, 165, 0))
+                .add_modifier(Modifier::BOLD),
+            MoveState::Moved => Style::default()
+        }
+    };
+
+    ListItem::new(line).style(style)
+}
+"#;
+
+    let result = test_rewrite(source, false, true);
+
+    eprintln!("=== RESULT ===\n{}\n=== END ===", result);
+
+    // Count occurrences of each function
+    let draw_list_count = result.matches("fn draw_list()").count();
+    let draw_list_with_command_count = result.matches("fn draw_list_with_command()").count();
+
+    assert_eq!(
+        draw_list_count, 1,
+        "draw_list should appear exactly once, found {}",
+        draw_list_count
+    );
+    assert_eq!(
+        draw_list_with_command_count, 1,
+        "draw_list_with_command should appear exactly once, found {}",
+        draw_list_with_command_count
+    );
+
+    // Both should have omnidoc
+    assert!(result.contains("#[syncdoc::omnidoc(path = \"docs\")]\nfn draw_list()"));
+    assert!(result.contains("#[syncdoc::omnidoc(path = \"docs\")]\nfn draw_list_with_command()"));
+}
