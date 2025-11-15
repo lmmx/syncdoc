@@ -117,6 +117,7 @@ Options:
   -c, --cut          Cut out doc comments from source files
   -a, --add          Rewrite code with #[omnidoc] attributes
   -t, --touch        Touch empty markdown files for any that don't exist
+      --inline-paths Use inline path= parameters instead of Cargo.toml
   -n, --dry-run      Preview changes without writing files
   -v, --verbose      Show verbose output
   -h, --help         Show this help message
@@ -136,13 +137,9 @@ syncdoc --migrate --dry-run (or `-m -n` for short)
 ```sh
 syncdoc --migrate (or `-m` for short, equal to `--cut --add --touch`)
 ```
-- 'Cut' docstrings out of src/ as well as creating in docs/
+- Migrate with inline paths instead of Cargo.toml config
 ```sh
-syncdoc --cut (or `-c` for short)
-```
-- 'Cut and paste' by replacing doc comments with omnidoc attributes
-```sh
-syncdoc --cut --add (or `-c -a` for short)
+syncdoc --migrate --inline-paths
 ```
 
 #### `syncdoc-migrate` (preview)
