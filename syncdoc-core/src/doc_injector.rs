@@ -169,8 +169,14 @@ fn parse_syncdoc_args(input: &mut TokenIter) -> core::result::Result<SyncDocArgs
                 }
 
                 // We don't error on unconfigured cfg_attr, it's optional
-                if let Ok(cfg) = crate::config::get_cfg_attr() {
-                    args.cfg_attr = cfg;
+                if args.cfg_attr.is_none() {
+                    let call_site = proc_macro2::Span::call_site();
+                    if let Some(source_path) = call_site.local_file() {
+                        let source_file = source_path.to_string_lossy().to_string();
+                        if let Ok(cfg) = crate::config::get_cfg_attr(&source_file) {
+                            args.cfg_attr = cfg;
+                        }
+                    }
                 }
             }
 

@@ -115,29 +115,38 @@ pub fn parse_file(path: &Path) -> std::result::Result<ParsedFile, ParseError> {
 /// Gets or creates the docs-path configuration
 ///
 /// If the docs-path is not set in Cargo.toml, this function will append
-/// the default configuration and return "docs".
-pub fn get_or_create_docs_path(source_file: &Path) -> std::result::Result<String, ConfigError> {
+/// the default configuration and return "docs" (unless dry_run is true).
+pub fn get_or_create_docs_path(
+    source_file: &Path,
+    dry_run: bool,
+) -> std::result::Result<String, ConfigError> {
     // Try to get existing docs-path
     match syncdoc_core::config::get_docs_path(source_file.to_str().unwrap()) {
         Ok(path) => Ok(path),
         Err(_) => {
             // Need to add default docs-path to Cargo.toml
-            let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
-                .map_err(|_| ConfigError::Other("CARGO_MANIFEST_DIR not set".to_string()))?;
+            if !dry_run {
+                let source_dir = source_file.parent().ok_or_else(|| {
+                    ConfigError::Other("Source file has no parent directory".to_string())
+                })?;
 
-            let cargo_toml_path = PathBuf::from(&manifest_dir).join("Cargo.toml");
+                let manifest_dir = syncdoc_core::path_utils::find_manifest_dir(source_dir)
+                    .ok_or_else(|| ConfigError::Other("Could not find Cargo.toml".to_string()))?;
 
-            // Read existing content
-            let mut content = fs::read_to_string(&cargo_toml_path)?;
+                let cargo_toml_path = manifest_dir.join("Cargo.toml");
 
-            // Check if syncdoc section exists
-            if !content.contains("[package.metadata.syncdoc]") {
-                // Append the section
-                content.push_str("\n[package.metadata.syncdoc]\n");
-                content.push_str("docs-path = \"docs\"\n");
+                // Read existing content
+                let mut content = fs::read_to_string(&cargo_toml_path)?;
 
-                // Write back
-                fs::write(&cargo_toml_path, content)?;
+                // Check if syncdoc section exists
+                if !content.contains("[package.metadata.syncdoc]") {
+                    // Append the section
+                    content.push_str("\n[package.metadata.syncdoc]\n");
+                    content.push_str("docs-path = \"docs\"\n");
+
+                    // Write back
+                    fs::write(&cargo_toml_path, content)?;
+                }
             }
 
             Ok("docs".to_string())
