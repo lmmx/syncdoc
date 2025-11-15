@@ -136,7 +136,7 @@ pub mod inner {
             docs
         } else {
             // Try to get from Cargo.toml, or use/create default
-            match get_or_create_docs_path(source_path) {
+            match get_or_create_docs_path(source_path, args.dry_run) {
                 Ok(path) => path,
                 Err(e) => {
                     eprintln!("Warning: Failed to get docs path from Cargo.toml: {}", e);

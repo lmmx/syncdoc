@@ -25,6 +25,7 @@ repository = "https://github.com/lmmx/syncdoc"
 rust-version = "1.82.0"
 
 [workspace.dependencies]
+assert_cmd = "2"
 facet = "0.30.0"
 facet-args = "0.30.0"
 insta = "1.0"

@@ -22,12 +22,12 @@ clippy-fix:
     cargo clippy --fix --workspace --all-targets --all-features --target-dir target/clippy-all-features -- -D warnings
 
 test *args:
-    cargo nextest run {{args}} --no-fail-fast
+    cargo nextest run {{args}} --no-fail-fast --all-features
 
 test-ci *args:
     #!/usr/bin/env -S echo-comment --color bright-green
     # 🏃 Running Rust tests...
-    cargo test {{args}}
+    cargo test {{args}} --all-features
 
     # 📚 Running documentation tests...
-    cargo test --doc {{args}}
+    cargo test --doc {{args}} --all-features
