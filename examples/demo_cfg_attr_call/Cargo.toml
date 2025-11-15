@@ -2,7 +2,7 @@
 edition = "2021"
 name = "demo_cfg_attr_call"
 publish = false
-version = "0.1.5"
+version = "0.2.0"
 
 [package.metadata.syncdoc]
 docs-path = "docs"
