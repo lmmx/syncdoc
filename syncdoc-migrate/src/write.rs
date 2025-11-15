@@ -1,4 +1,4 @@
-// syncdoc-migrate/src/write.rs
+//! List all the files we expect to be produced from code with omnidoc attributes.
 
 use crate::discover::ParsedFile;
 use crate::extract::extract_doc_content;
@@ -11,6 +11,9 @@ use syncdoc_core::parse::{
     StructSig, TraitSig,
 };
 use unsynn::*;
+
+mod expected;
+pub use expected::find_expected_doc_paths;
 
 /// Represents a documentation extraction with its target path and metadata
 #[derive(Debug, Clone, PartialEq)]
