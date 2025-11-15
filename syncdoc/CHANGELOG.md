@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.3.2...syncdoc-v0.3.3) - 2025-11-15
+
+### <!-- 4 -->Documentation
+
+- update to mention inline paths CLI flag
+
+### <!-- 8 -->Styling
+
+- default to not injecting inline path (set in TOML) ([#42](https://github.com/lmmx/syncdoc/pull/42))
+
 ## [0.3.2](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.3.1...syncdoc-v0.3.2) - 2025-11-15
 
 ### <!-- 5 -->Refactor
