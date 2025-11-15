@@ -13,6 +13,7 @@ pub fn auto_create_docs(test_crate: &TestCrate, code: &str) {
         (&*ENUM_RE, "enum"),
         (&*CONST_RE, "const"),
         (&*TYPE_RE, "type alias"),
+        (&*TRAIT_RE, "trait"),
     ] {
         for cap in regex.captures_iter(code) {
             if let Some(name) = cap.get(1).map(|m| m.as_str()).filter(|s| !s.is_empty()) {
