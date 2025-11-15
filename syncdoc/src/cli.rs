@@ -200,10 +200,18 @@ pub mod inner {
                     eprintln!("  Found {} expected doc path(s)", expected_paths.len());
                 }
 
-                // Filter to only those that don't already exist
+                // Filter to only those that don't already exist in all_extractions
+                // First create a set of paths we already have content for
+                let existing_paths: std::collections::HashSet<_> =
+                    all_extractions.iter().map(|e| &e.markdown_path).collect();
+
+                // Then filter expected paths to only those we don't have AND that don't exist on disk
                 let missing_paths: Vec<_> = expected_paths
                     .into_iter()
-                    .filter(|extraction| !extraction.markdown_path.exists())
+                    .filter(|extraction| {
+                        !existing_paths.contains(&extraction.markdown_path)
+                            && !extraction.markdown_path.exists()
+                    })
                     .collect();
 
                 if !missing_paths.is_empty() {
