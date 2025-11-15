@@ -2,10 +2,10 @@
 source: syncdoc-migrate/tests/rewrite_integration.rs
 expression: "test_rewrite(source, true, true)"
 ---
-#![doc = syncdoc::module_doc!(path = "docs")]
+#![doc = syncdoc::module_doc!()]
 
 
-#[syncdoc::omnidoc(path = "docs")]
+#[syncdoc::omnidoc]
 pub enum TimeOfDay {
     Day,
     Night,

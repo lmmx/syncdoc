@@ -1,6 +1,7 @@
 // syncdoc-migrate/src/rewrite/tests.rs
 
 use super::*;
+use crate::config::DocsPathMode;
 use quote::quote;
 
 #[test]
@@ -9,7 +10,7 @@ fn test_inject_omnidoc_before_visibility() {
         pub fn test() {}
     };
 
-    let output = inject_omnidoc_attr(input, "docs");
+    let output = inject_omnidoc_attr(input, "docs", DocsPathMode::InlinePaths);
     let output_str = output.to_string();
 
     eprintln!("{}", output_str);
@@ -32,7 +33,7 @@ fn test_inject_omnidoc_before_derive() {
         pub struct MyStruct;
     };
 
-    let output = inject_omnidoc_attr(input, "docs");
+    let output = inject_omnidoc_attr(input, "docs", DocsPathMode::InlinePaths);
     let output_str = output.to_string();
 
     eprintln!("{}", output_str);
@@ -49,9 +50,26 @@ fn test_inject_omnidoc_no_visibility() {
         fn private_func() {}
     };
 
-    let output = inject_omnidoc_attr(input, "docs");
+    let output = inject_omnidoc_attr(input, "docs", DocsPathMode::InlinePaths);
     let output_str = output.to_string();
 
     assert!(output_str.contains("omnidoc"));
     assert!(output_str.contains("\"docs\""));
+}
+
+#[test]
+fn test_inject_omnidoc_toml_config_mode() {
+    let input = quote! {
+        pub fn test() {}
+    };
+
+    let output = inject_omnidoc_attr(input, "docs", DocsPathMode::TomlConfig);
+    let output_str = output.to_string();
+
+    eprintln!("{}", output_str);
+
+    // Should have omnidoc attribute WITHOUT path parameter
+    assert!(output_str.contains("omnidoc"));
+    assert!(!output_str.contains("path"));
+    assert!(!output_str.contains("\"docs\""));
 }

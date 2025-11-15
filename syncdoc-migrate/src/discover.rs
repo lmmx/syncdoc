@@ -1,5 +1,6 @@
 // syncdoc-migrate/src/discover.rs
 
+use crate::config::DocsPathMode;
 use proc_macro2::TokenStream;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -114,15 +115,18 @@ pub fn parse_file(path: &Path) -> std::result::Result<ParsedFile, ParseError> {
 
 /// Gets or creates the docs-path configuration
 ///
+/// Returns a tuple of (path, mode) where mode indicates whether the path
+/// is configured via TOML or should be inlined.
+///
 /// If the docs-path is not set in Cargo.toml, this function will append
 /// the default configuration and return "docs" (unless dry_run is true).
 pub fn get_or_create_docs_path(
     source_file: &Path,
     dry_run: bool,
-) -> std::result::Result<String, ConfigError> {
+) -> std::result::Result<(String, DocsPathMode), ConfigError> {
     // Try to get existing docs-path
     match syncdoc_core::config::get_docs_path(source_file.to_str().unwrap()) {
-        Ok(path) => Ok(path),
+        Ok(path) => Ok((path, DocsPathMode::TomlConfig)),
         Err(_) => {
             // Need to add default docs-path to Cargo.toml
             if !dry_run {
@@ -149,7 +153,8 @@ pub fn get_or_create_docs_path(
                 }
             }
 
-            Ok("docs".to_string())
+            // We just created/will create TOML config
+            Ok(("docs".to_string(), DocsPathMode::TomlConfig))
         }
     }
 }

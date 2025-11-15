@@ -8,6 +8,7 @@ pub use inject::{inject_module_doc_attr, inject_omnidoc_attr};
 pub use strip::strip_doc_attrs;
 use unsynn::*;
 
+use crate::config::DocsPathMode;
 use crate::discover::ParsedFile;
 use proc_macro2::TokenStream;
 use reformat::rewrite_preserving_format;
@@ -17,6 +18,7 @@ use syncdoc_core::parse::ModuleItem;
 pub fn rewrite_file(
     parsed: &ParsedFile,
     docs_root: &str,
+    docs_mode: DocsPathMode,
     strip: bool,
     annotate: bool,
 ) -> Option<String> {
@@ -43,7 +45,7 @@ pub fn rewrite_file(
 
             // Inject module_doc! for inner docs if any existed
             if content.inner_attrs.is_some() || parsed.content.inner_attrs.is_some() {
-                annotated.extend(inject_module_doc_attr(docs_root));
+                annotated.extend(inject_module_doc_attr(docs_root, docs_mode));
             }
 
             // Then handle regular items
@@ -65,7 +67,7 @@ pub fn rewrite_file(
                 );
 
                 if should_annotate {
-                    annotated.extend(inject_omnidoc_attr(item_ts, docs_root));
+                    annotated.extend(inject_omnidoc_attr(item_ts, docs_root, docs_mode));
                 } else {
                     annotated.extend(item_ts);
                 }
