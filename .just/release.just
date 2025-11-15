@@ -33,7 +33,16 @@ ship version="auto":
         fi
 
         # 🦀 Explicit version bump with release-plz
-        release-plz set-version {{version}}
+        crate_names=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[].name')
+        for crate in $crate_names; do
+          version_strings+="$crate@{{version}} "
+        done
+
+        # Trim the trailing whitespace
+        version_strings=$(echo $version_strings | xargs)
+
+        # Execute the release-plz command
+        release-plz set-version $version_strings
 
         # 🦀 Update changelog with new version
         release-plz update --allow-dirty
@@ -55,6 +64,7 @@ ship version="auto":
 
     # 📦 Create releases and tags
     just publish
+
 
 publish mode="":
     #!/usr/bin/env -S bash -euo pipefail
