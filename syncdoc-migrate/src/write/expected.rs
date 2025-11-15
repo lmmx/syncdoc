@@ -6,13 +6,10 @@
 //! be created.
 
 use crate::write::DocExtraction;
-use proc_macro2::TokenStream;
 use std::path::{Path, PathBuf};
 use syncdoc_core::parse::{
-    EnumSig, EnumVariant, ImplBlockSig, ModuleContent, ModuleItem, ModuleSig, StructField,
-    StructSig, TraitSig,
+    EnumSig, EnumVariantData, ImplBlockSig, ModuleItem, ModuleSig, StructSig, TraitSig,
 };
-use unsynn::*;
 
 use super::ParsedFile;
 
@@ -212,16 +209,14 @@ fn find_impl_paths(
     let mut new_context = context;
     new_context.extend(impl_context);
 
-    let body_stream = extract_brace_content(&impl_block.body);
-    if let Ok(content) = body_stream.into_token_iter().parse::<ModuleContent>() {
-        for item_delimited in &content.items.0 {
-            extractions.extend(find_item_paths(
-                &item_delimited.value,
-                new_context.clone(),
-                base_path,
-                source_file,
-            ));
-        }
+    let module_content = &impl_block.items.content;
+    for item_delimited in &module_content.items.0 {
+        extractions.extend(find_item_paths(
+            &item_delimited.value,
+            new_context.clone(),
+            base_path,
+            source_file,
+        ));
     }
 
     extractions
@@ -250,16 +245,14 @@ fn find_module_paths(
     let mut new_context = context;
     new_context.push(module.name.to_string());
 
-    let body_stream = extract_brace_content(&module.body);
-    if let Ok(content) = body_stream.into_token_iter().parse::<ModuleContent>() {
-        for item_delimited in &content.items.0 {
-            extractions.extend(find_item_paths(
-                &item_delimited.value,
-                new_context.clone(),
-                base_path,
-                source_file,
-            ));
-        }
+    let module_content = &module.items.content;
+    for item_delimited in &module_content.items.0 {
+        extractions.extend(find_item_paths(
+            &item_delimited.value,
+            new_context.clone(),
+            base_path,
+            source_file,
+        ));
     }
 
     extractions
@@ -288,16 +281,14 @@ fn find_trait_paths(
     let mut new_context = context;
     new_context.push(trait_def.name.to_string());
 
-    let body_stream = extract_brace_content(&trait_def.body);
-    if let Ok(content) = body_stream.into_token_iter().parse::<ModuleContent>() {
-        for item_delimited in &content.items.0 {
-            extractions.extend(find_item_paths(
-                &item_delimited.value,
-                new_context.clone(),
-                base_path,
-                source_file,
-            ));
-        }
+    let module_content = &trait_def.items.content;
+    for item_delimited in &module_content.items.0 {
+        extractions.extend(find_item_paths(
+            &item_delimited.value,
+            new_context.clone(),
+            base_path,
+            source_file,
+        ));
     }
 
     extractions
@@ -324,12 +315,9 @@ fn find_enum_paths(
         location,
     ));
 
-    let body_stream = extract_brace_content(&enum_sig.body);
-    if let Ok(variants) = body_stream
-        .into_token_iter()
-        .parse::<CommaDelimitedVec<EnumVariant>>()
-    {
-        for variant_delimited in &variants.0 {
+    // Access parsed variants directly
+    if let Some(variants_cdv) = enum_sig.variants.content.as_ref() {
+        for variant_delimited in &variants_cdv.0 {
             let variant = &variant_delimited.value;
             let path = build_path(
                 base_path,
@@ -345,6 +333,29 @@ fn find_enum_paths(
                     variant.name.span().start().line
                 ),
             ));
+
+            // Handle struct variant fields
+            if let Some(EnumVariantData::Struct(fields_containing)) = &variant.data {
+                if let Some(fields_cdv) = fields_containing.content.as_ref() {
+                    for field_delimited in &fields_cdv.0 {
+                        let field = &field_delimited.value;
+                        let path = build_path(
+                            base_path,
+                            &context,
+                            &format!("{}/{}/{}", enum_name, variant.name, field.name),
+                        );
+                        extractions.push(DocExtraction::new(
+                            PathBuf::from(path),
+                            String::new(),
+                            format!(
+                                "{}:{}",
+                                source_file.display(),
+                                field.name.span().start().line
+                            ),
+                        ));
+                    }
+                }
+            }
         }
     }
 
@@ -372,14 +383,9 @@ fn find_struct_paths(
         location,
     ));
 
-    if let syncdoc_core::parse::StructBody::Named(brace_group) = &struct_sig.body {
-        let body_stream = extract_brace_content(brace_group);
-
-        if let Ok(fields) = body_stream
-            .into_token_iter()
-            .parse::<CommaDelimitedVec<StructField>>()
-        {
-            for field_delimited in &fields.0 {
+    if let syncdoc_core::parse::StructBody::Named(fields_containing) = &struct_sig.body {
+        if let Some(fields_cdv) = fields_containing.content.as_ref() {
+            for field_delimited in &fields_cdv.0 {
                 let field = &field_delimited.value;
                 let path = build_path(
                     base_path,
@@ -407,16 +413,6 @@ fn build_path(base_path: &str, context: &[String], item_name: &str) -> String {
     parts.extend(context.iter().cloned());
     parts.push(format!("{}.md", item_name));
     parts.join("/")
-}
-
-fn extract_brace_content(brace_group: &BraceGroup) -> TokenStream {
-    let mut ts = TokenStream::new();
-    unsynn::ToTokens::to_tokens(brace_group, &mut ts);
-    if let Some(proc_macro2::TokenTree::Group(g)) = ts.into_iter().next() {
-        g.stream()
-    } else {
-        TokenStream::new()
-    }
 }
 
 #[cfg(test)]
