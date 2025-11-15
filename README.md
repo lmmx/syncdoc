@@ -139,11 +139,18 @@ syncdoc --cut --add # or `-c -a`
 syncdoc --cut --add --dry-run # or `-c -a -n`
 ```
 
-#### Note to `syncdoc-migrate` beta testers
+#### `syncdoc-migrate` (preview)
 
-It currently does **not** format your code, but should not render it non-functional either.
-After running, you should call `cargo fmt` to re-format the code and then inspect the git diff
-and `cargo check` output. Please send feedback on anything it gets wrong, ideally with a minimal
+The migration CLI uses a standard diffing algorithm used in git, and should be able to correctly
+identify how to migrate your code to the omnidoc macro. For best results, call `rustfmt` on your
+Rust files in advance (but it's not necessary). The CLI tries to avoid reformatting your code
+unless it has to.
+
+After running, you should inspect the git diff and `cargo check` the output to confirm the codegen builds.
+The most likely reason the check will fail is that you don't have the files it expects (see issue
+#35 for the plan to solve this!)
+
+Please send feedback on anything it gets wrong, ideally with a minimal
 repro following the `examples/migrate` example crate.
 
 ### Usage
