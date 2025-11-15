@@ -1,4 +1,4 @@
-# ! [doc = syncdoc :: module_doc ! (path = "docs")]
+#![doc = syncdoc::module_doc!(path = "docs")]
 
 use cli_demo_basic_migrated::TimeOfDay;
 

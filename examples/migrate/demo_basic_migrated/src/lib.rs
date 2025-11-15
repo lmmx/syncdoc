@@ -1,4 +1,4 @@
-# ! [doc = syncdoc :: module_doc ! (path = "docs")]
+#![doc = syncdoc::module_doc!(path = "docs")]
 
 #[syncdoc::omnidoc(path = "docs")]
 pub enum TimeOfDay {
