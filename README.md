@@ -113,8 +113,10 @@ Arguments:
 
 Options:
   -d, --docs <dir>   Path to docs directory (default: 'docs' or from Cargo.toml if set)
+  -m, --migrate      Swap doc comments for #[omnidoc] (cut + add + touch)
   -c, --cut          Cut out doc comments from source files
-  -r, --rewrite      Rewrite code with #[omnidoc] attributes
+  -a, --add          Rewrite code with #[omnidoc] attributes
+  -t, --touch        Touch empty markdown files for any that don't exist
   -n, --dry-run      Preview changes without writing files
   -v, --verbose      Show verbose output
   -h, --help         Show this help message
@@ -126,32 +128,36 @@ Options:
 ```sh
 syncdoc
 ```
+- Preview a full migration without running it
+```sh
+syncdoc --migrate --dry-run (or `-m -n` for short)
+```
+- Full migration: cut docs, add attributes, and touch missing files
+```sh
+syncdoc --migrate (or `-m` for short, equal to `--cut --add --touch`)
+```
 - 'Cut' docstrings out of src/ as well as creating in docs/
 ```sh
-syncdoc --cut # or `-c`
+syncdoc --cut (or `-c` for short)
 ```
 - 'Cut and paste' by replacing doc comments with omnidoc attributes
 ```sh
-syncdoc --cut --add # or `-c -a`
-```
-- Preview what would happen
-```sh
-syncdoc --cut --add --dry-run # or `-c -a -n`
+syncdoc --cut --add (or `-c -a` for short)
 ```
 
 #### `syncdoc-migrate` (preview)
 
-The migration CLI uses a standard diffing algorithm used in git, and should be able to correctly
+The migration CLI uses a standard diffing algorithm ([Myers][myers], as used git), and should be able to correctly
 identify how to migrate your code to the omnidoc macro. For best results, call `rustfmt` on your
 Rust files in advance (but it's not necessary). The CLI tries to avoid reformatting your code
 unless it has to.
 
-After running, you should inspect the git diff and `cargo check` the output to confirm the codegen builds.
-The most likely reason the check will fail is that you don't have the files it expects (see issue
-#35 for the plan to solve this!)
+[myers]: https://docs.rs/imara-diff/latest/imara_diff/
 
-Please send feedback on anything it gets wrong, ideally with a minimal
-repro following the `examples/migrate` example crate.
+After running, you should inspect the git diff and `cargo check` the output to confirm the codegen builds.
+If you run the `-m`/`--migrate` flag it should touch all the files it requires so the result still builds.
+
+Please send feedback on anything it gets wrong, ideally with a minimal repro (like the demo in `examples/migrate`).
 
 ### Usage
 

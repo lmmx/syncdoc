@@ -32,6 +32,10 @@ pub mod inner {
         #[facet(named, short = 'd', long, default)]
         docs: Option<String>,
 
+        /// Swap doc comments for #[omnidoc] attributes (implies cut and add)
+        #[facet(named, short = 'm', long, default)]
+        migrate: bool,
+
         /// Remove doc comments from source files
         #[facet(named, rename = "cut", short = 'c', long, default)]
         strip_docs: bool,
@@ -69,6 +73,7 @@ pub mod inner {
         println!(
             "  -d, --docs <dir>   Path to docs directory (default: 'docs' or from Cargo.toml if set)"
         );
+        println!("  -m, --migrate      Swap doc comments for #[omnidoc] (cut + add + touch)");
         println!("  -c, --cut          Cut out doc comments from source files");
         println!("  -a, --add          Rewrite code with #[omnidoc] attributes");
         println!("  -t, --touch        Touch empty markdown files for any that don't exist");
@@ -80,20 +85,17 @@ pub mod inner {
         println!("  # 'Sync' the docs dir with the docstrings in src/");
         println!("  syncdoc");
         println!();
-        println!("  # 'Cut' docstrings out of src/ as well as creating in docs/");
-        println!("  syncdoc --cut (or `-c`)");
-        println!();
-        println!("  # 'Cut and paste' by replacing doc comments with omnidoc attributes");
-        println!("  syncdoc --cut --add (or `-c -a`)");
-        println!();
-        println!("  # Preview what would happen if you ran a 'cut and paste'");
-        println!("  syncdoc --cut --add --dry-run (or `-c -a -n`)");
-        println!();
-        println!("  # Create empty markdown files for all items that would need docs");
-        println!("  syncdoc --add --touch (or `-a -t`)");
+        println!("  # Preview a full migration without running it");
+        println!("  syncdoc --migrate --dry-run (or `-m -n` for short)");
         println!();
         println!("  # Full migration: cut docs, add attributes, and touch missing files");
-        println!("  syncdoc --cut --add --touch (or `-c -a -t`)");
+        println!("  syncdoc --migrate (or `-m` for short, equal to `--cut --add --touch`)");
+        println!();
+        println!("  # 'Cut' docstrings out of src/ as well as creating in docs/");
+        println!("  syncdoc --cut (or `-c` for short)");
+        println!();
+        println!("  # 'Cut and paste' by replacing doc comments with omnidoc attributes");
+        println!("  syncdoc --cut --add (or `-c -a` for short)");
     }
 
     /// Entry point for the `syncdoc` command-line interface.
@@ -110,8 +112,13 @@ pub mod inner {
     ///
     /// The process will also exit with a non-zero status if migration fails.
     pub fn main() -> io::Result<()> {
-        let args: Args = facet_args::from_std_args()
+        let mut args: Args = facet_args::from_std_args()
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidInput, format!("{e}")))?;
+
+        // --migrate implies --cut + --add + --touch
+        args.strip_docs = args.strip_docs || args.migrate;
+        args.annotate = args.annotate || args.migrate;
+        args.touch = args.touch || args.migrate;
 
         if args.help {
             print_usage();
