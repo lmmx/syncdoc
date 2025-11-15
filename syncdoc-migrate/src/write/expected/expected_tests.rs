@@ -334,3 +334,128 @@ fn test_find_expected_only_functions_with_bodies() {
     assert!(!paths.contains(&"docs/MyTrait/required.md".to_string()));
     assert!(!paths.contains(&"docs/external_fn.md".to_string()));
 }
+
+#[test]
+fn test_find_expected_trait_impl_for_struct() {
+    let source = r#"
+        pub trait Format {
+            fn file_extension(&self) -> &str;
+            fn language(&self) -> String;
+        }
+
+        pub struct MarkdownFormat;
+
+        impl Format for MarkdownFormat {
+            fn file_extension(&self) -> &str {
+                "md"
+            }
+
+            fn language(&self) -> String {
+                "markdown".to_string()
+            }
+        }
+    "#;
+
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
+    let parsed = crate::discover::parse_file(&file_path).unwrap();
+    let expected = find_expected_doc_paths(&parsed, "docs");
+
+    let paths: Vec<String> = expected
+        .iter()
+        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .collect();
+
+    eprintln!("Paths found: {:#?}", paths);
+
+    // Should have: module, trait, struct, and 2 trait methods under the struct
+    assert!(paths.contains(&"docs/test.md".to_string()));
+    assert!(paths.contains(&"docs/Format.md".to_string()));
+    assert!(paths.contains(&"docs/MarkdownFormat.md".to_string()));
+
+    // Methods should be under the struct, not the trait
+    assert!(paths.contains(&"docs/MarkdownFormat/file_extension.md".to_string()));
+    assert!(paths.contains(&"docs/MarkdownFormat/language.md".to_string()));
+
+    // Should NOT be under the trait
+    assert!(!paths.contains(&"docs/Format/file_extension.md".to_string()));
+    assert!(!paths.contains(&"docs/Format/language.md".to_string()));
+}
+
+#[test]
+fn test_find_expected_trait_impl_in_submodule() {
+    let source = r#"
+        pub mod formats {
+            pub mod markdown {
+                pub trait Format {
+                    fn file_extension(&self) -> &str;
+                }
+
+                pub struct MarkdownFormat;
+
+                impl Format for MarkdownFormat {
+                    fn file_extension(&self) -> &str {
+                        "md"
+                    }
+                }
+            }
+        }
+    "#;
+
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
+    let parsed = crate::discover::parse_file(&file_path).unwrap();
+    let expected = find_expected_doc_paths(&parsed, "docs");
+
+    let paths: Vec<String> = expected
+        .iter()
+        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .collect();
+
+    eprintln!("Paths found: {:#?}", paths);
+
+    // Method should be at the correct nested path
+    assert!(paths.contains(&"docs/formats/markdown/MarkdownFormat/file_extension.md".to_string()));
+
+    // Should NOT be under trait
+    assert!(!paths.contains(&"docs/formats/markdown/Format/file_extension.md".to_string()));
+}
+
+#[test]
+fn test_find_expected_regular_impl_vs_trait_impl() {
+    let source = r#"
+        pub struct MyStruct;
+
+        // Regular impl
+        impl MyStruct {
+            pub fn new() -> Self {
+                Self
+            }
+        }
+
+        pub trait MyTrait {
+            fn trait_method(&self);
+        }
+
+        // Trait impl
+        impl MyTrait for MyStruct {
+            fn trait_method(&self) {}
+        }
+    "#;
+
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
+    let parsed = crate::discover::parse_file(&file_path).unwrap();
+    let expected = find_expected_doc_paths(&parsed, "docs");
+
+    let paths: Vec<String> = expected
+        .iter()
+        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .collect();
+
+    eprintln!("Paths found: {:#?}", paths);
+
+    // Both methods should be under MyStruct
+    assert!(paths.contains(&"docs/MyStruct/new.md".to_string()));
+    assert!(paths.contains(&"docs/MyStruct/trait_method.md".to_string()));
+
+    // Should NOT be under trait
+    assert!(!paths.contains(&"docs/MyTrait/trait_method.md".to_string()));
+}

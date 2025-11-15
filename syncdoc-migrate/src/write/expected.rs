@@ -166,14 +166,31 @@ fn find_impl_paths(
 ) -> Vec<DocExtraction> {
     let mut extractions = Vec::new();
 
-    let type_name = if let Some(first) = impl_block.target_type.0.first() {
-        if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
-            ident.to_string()
+    // Determine the type name for the impl block
+    // If this is `impl Trait for Type`, use Type (from for_trait.second)
+    // If this is `impl Type`, use Type (from target_type)
+    let type_name = if let Some(for_trait) = &impl_block.for_trait {
+        // This is `impl Trait for Type`, extract Type from for_trait.second
+        if let Some(first) = for_trait.second.0.first() {
+            if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
+                ident.to_string()
+            } else {
+                "Unknown".to_string()
+            }
         } else {
             "Unknown".to_string()
         }
     } else {
-        "Unknown".to_string()
+        // This is `impl Type`, extract Type from target_type
+        if let Some(first) = impl_block.target_type.0.first() {
+            if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
+                ident.to_string()
+            } else {
+                "Unknown".to_string()
+            }
+        } else {
+            "Unknown".to_string()
+        }
     };
 
     let mut new_context = context;
