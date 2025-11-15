@@ -109,174 +109,145 @@ impl TokenProcessor {
             vec![type_name]
         };
 
-        // Get the body content as TokenStream
-        let body_stream = {
-            let mut ts = TokenStream::new();
-            impl_block.body.to_tokens(&mut ts);
-            // Extract content from within braces
-            if let Some(proc_macro2::TokenTree::Group(group)) = ts.into_iter().next() {
-                group.stream()
-            } else {
-                TokenStream::new()
-            }
-        };
-
         // Create new processor with updated context
         let mut new_context = self.context.clone();
         new_context.extend(context_path);
+
+        // Access parsed items directly
+        let module_content = &impl_block.items.content;
+
         let new_processor = TokenProcessor {
-            input: body_stream,
+            input: TokenStream::new(),
             base_path: self.base_path.clone(),
             cfg_attr: self.cfg_attr.clone(),
             context: new_context,
         };
 
-        let processed_content = new_processor.process();
-        let processed_body = self.wrap_in_braces(processed_content);
+        let mut processed_content = TokenStream::new();
+        for item_delimited in &module_content.items.0 {
+            processed_content
+                .extend(new_processor.process_module_item(item_delimited.value.clone()));
+        }
 
-        // Reconstruct the impl block with processed body
+        // Reconstruct impl block
         let mut output = TokenStream::new();
-
         if let Some(attrs) = impl_block.attributes {
             for attr in attrs.0 {
                 attr.to_tokens(&mut output);
             }
         }
-
         impl_block._impl.to_tokens(&mut output);
         if let Some(generics) = impl_block.generics {
             generics.to_tokens(&mut output);
         }
-
         for item in impl_block.target_type.0 {
             item.value.second.to_tokens(&mut output);
         }
-
         if let Some(for_part) = impl_block.for_trait {
             for_part.to_tokens(&mut output);
         }
-
         if let Some(where_clause) = impl_block.where_clause {
             where_clause.to_tokens(&mut output);
         }
 
-        output.extend(processed_body);
+        // Wrap processed content in braces
+        let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, processed_content);
+        output.extend(std::iter::once(proc_macro2::TokenTree::Group(group)));
 
         output
     }
 
     fn process_module_block(&self, module: ModuleSig) -> TokenStream {
-        // Get the body content as TokenStream
-        let body_stream = {
-            let mut ts = TokenStream::new();
-            module.body.to_tokens(&mut ts);
-            // Extract content from within braces
-            if let Some(proc_macro2::TokenTree::Group(group)) = ts.into_iter().next() {
-                group.stream()
-            } else {
-                TokenStream::new()
-            }
-        };
-
-        // Create new processor with updated context
         let mut new_context = self.context.clone();
         new_context.push(module.name.to_string());
+
+        // Access parsed items directly
+        let module_content = &module.items.content;
+
         let new_processor = TokenProcessor {
-            input: body_stream,
+            input: TokenStream::new(),
             base_path: self.base_path.clone(),
             cfg_attr: self.cfg_attr.clone(),
             context: new_context,
         };
 
-        let processed_content = new_processor.process();
-        let processed_body = self.wrap_in_braces(processed_content);
+        let mut processed_content = TokenStream::new();
+        for item_delimited in &module_content.items.0 {
+            processed_content
+                .extend(new_processor.process_module_item(item_delimited.value.clone()));
+        }
 
-        // Reconstruct the module with processed body
+        // Reconstruct module
         let mut output = TokenStream::new();
-
         if let Some(attrs) = module.attributes {
             for attr in attrs.0 {
                 attr.to_tokens(&mut output);
             }
         }
-
         if let Some(vis) = module.visibility {
             vis.to_tokens(&mut output);
         }
-
         module._mod.to_tokens(&mut output);
         module.name.to_tokens(&mut output);
 
-        output.extend(processed_body);
+        let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, processed_content);
+        output.extend(std::iter::once(proc_macro2::TokenTree::Group(group)));
 
         output
     }
 
     fn process_trait_block(&self, trait_def: TraitSig) -> TokenStream {
-        // Get the body content as TokenStream
-        let body_stream = {
-            let mut ts = TokenStream::new();
-            trait_def.body.to_tokens(&mut ts);
-            // Extract content from within braces
-            if let Some(proc_macro2::TokenTree::Group(group)) = ts.into_iter().next() {
-                group.stream()
-            } else {
-                TokenStream::new()
-            }
-        };
-
-        // Create new processor with updated context (traits behave like modules)
         let mut new_context = self.context.clone();
         new_context.push(trait_def.name.to_string());
+
+        // Access parsed items directly
+        let trait_content = &trait_def.items.content;
+
         let new_processor = TokenProcessor {
-            input: body_stream,
+            input: TokenStream::new(),
             base_path: self.base_path.clone(),
             cfg_attr: self.cfg_attr.clone(),
             context: new_context,
         };
 
-        let processed_content = new_processor.process();
-        let processed_body = self.wrap_in_braces(processed_content);
+        let mut processed_content = TokenStream::new();
+        for item_delimited in &trait_content.items.0 {
+            processed_content
+                .extend(new_processor.process_module_item(item_delimited.value.clone()));
+        }
 
-        // Reconstruct the trait with processed body
+        // Inject doc for trait itself
         let mut output = TokenStream::new();
-
         if let Some(attrs) = trait_def.attributes {
             for attr in attrs.0 {
                 attr.to_tokens(&mut output);
             }
         }
-
         if let Some(vis) = trait_def.visibility {
             vis.to_tokens(&mut output);
         }
-
         if let Some(unsafe_kw) = trait_def.unsafe_kw {
             unsafe_kw.to_tokens(&mut output);
         }
-
         trait_def._trait.to_tokens(&mut output);
         trait_def.name.to_tokens(&mut output);
-
         if let Some(generics) = trait_def.generics {
             generics.to_tokens(&mut output);
         }
-
         if let Some(bounds) = trait_def.bounds {
             bounds.to_tokens(&mut output);
         }
-
         if let Some(where_clause) = trait_def.where_clause {
             where_clause.to_tokens(&mut output);
         }
 
-        // Inject doc for the trait itself
         let trait_name = trait_def.name.to_string();
         let trait_with_doc = self.inject_doc_into_simple_item(output, &trait_name);
 
         // Combine with processed body
         let mut final_output = trait_with_doc;
-        final_output.extend(processed_body);
+        let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, processed_content);
+        final_output.extend(std::iter::once(proc_macro2::TokenTree::Group(group)));
 
         final_output
     }
@@ -284,101 +255,74 @@ impl TokenProcessor {
     fn process_struct(&self, struct_sig: crate::parse::StructSig) -> TokenStream {
         let struct_name = struct_sig.name.to_string();
 
-        // Process the struct body to add docs to fields
+        // Process struct body for named fields
         let processed_body = match &struct_sig.body {
-            crate::parse::StructBody::Named(brace_group) => {
-                // Extract fields from brace group
-                let body_stream = {
+            crate::parse::StructBody::Named(fields_containing) => {
+                if let Some(fields_cdv) = fields_containing.content.as_ref() {
+                    let processed_fields = self.process_struct_fields(fields_cdv, &struct_name);
+                    let group =
+                        proc_macro2::Group::new(proc_macro2::Delimiter::Brace, processed_fields);
                     let mut ts = TokenStream::new();
-                    brace_group.to_tokens(&mut ts);
-                    // Extract content from within braces
-                    if let Some(proc_macro2::TokenTree::Group(group)) = ts.into_iter().next() {
-                        group.stream()
-                    } else {
-                        TokenStream::new()
-                    }
-                };
-
-                let processed_fields = self.process_struct_fields(body_stream, &struct_name);
-                self.wrap_in_braces(processed_fields)
+                    ts.extend(std::iter::once(proc_macro2::TokenTree::Group(group)));
+                    ts
+                } else {
+                    let mut ts = TokenStream::new();
+                    unsynn::ToTokens::to_tokens(fields_containing, &mut ts);
+                    ts
+                }
             }
-            crate::parse::StructBody::Tuple(tuple) => {
-                // For tuple structs, process tuple fields
+            other => {
                 let mut ts = TokenStream::new();
-                tuple.to_tokens(&mut ts);
-                ts
-            }
-            crate::parse::StructBody::Unit(semi) => {
-                // Unit structs have no fields
-                let mut ts = TokenStream::new();
-                semi.to_tokens(&mut ts);
+                quote::ToTokens::to_tokens(other, &mut ts);
                 ts
             }
         };
 
-        // Reconstruct the struct with doc attribute
+        // Reconstruct struct
         let mut output = TokenStream::new();
-
         if let Some(attrs) = struct_sig.attributes {
             for attr in attrs.0 {
                 attr.to_tokens(&mut output);
             }
         }
-
         if let Some(vis) = struct_sig.visibility {
             vis.to_tokens(&mut output);
         }
-
         struct_sig._struct.to_tokens(&mut output);
-
-        let name_ident = struct_sig.name;
-        name_ident.to_tokens(&mut output);
-
+        struct_sig.name.to_tokens(&mut output);
         if let Some(generics) = struct_sig.generics {
             generics.to_tokens(&mut output);
         }
-
         if let Some(where_clause) = struct_sig.where_clause {
             where_clause.to_tokens(&mut output);
         }
 
-        // Inject doc for the struct itself
         let struct_with_doc = self.inject_doc_into_simple_item(output, &struct_name);
-
-        // Combine struct declaration with processed body
         let mut final_output = struct_with_doc;
         final_output.extend(processed_body);
 
         final_output
     }
 
-    fn process_struct_fields(&self, fields_stream: TokenStream, struct_name: &str) -> TokenStream {
+    fn process_struct_fields(
+        &self,
+        fields_cdv: &CommaDelimitedVec<crate::parse::StructField>,
+        struct_name: &str,
+    ) -> TokenStream {
         let mut output = TokenStream::new();
 
-        // Parse using StructField parser
-        let fields = match fields_stream
-            .into_token_iter()
-            .parse::<unsynn::CommaDelimitedVec<crate::parse::StructField>>()
-        {
-            Ok(fields) => fields,
-            Err(_) => return output, // Return empty if parsing fails
-        };
-
-        for (idx, field_delimited) in fields.0.iter().enumerate() {
+        for (idx, field_delimited) in fields_cdv.0.iter().enumerate() {
             let field = &field_delimited.value;
             let field_name = field.name.to_string();
 
-            // Convert field back to tokens
             let mut field_tokens = TokenStream::new();
             quote::ToTokens::to_tokens(field, &mut field_tokens);
 
-            // Inject doc
             let documented =
                 self.inject_doc_for_struct_field(field_tokens, struct_name, &field_name);
             output.extend(documented);
 
-            // Add comma if not last field
-            if idx < fields.0.len() - 1 {
+            if idx < fields_cdv.0.len() - 1 {
                 output.extend(quote::quote! { , });
             }
         }
@@ -397,93 +341,65 @@ impl TokenProcessor {
         path_parts.push(format!("{}/{}.md", struct_name, field_name));
 
         let full_path = path_parts.join("/");
-
-        // Use simpler injection for fields
         inject_doc_attr(full_path, self.cfg_attr.clone(), field_tokens)
     }
 
     fn process_enum(&self, enum_sig: crate::parse::EnumSig) -> TokenStream {
         let enum_name = enum_sig.name.to_string();
 
-        // Get the body content as TokenStream
-        let body_stream = {
-            let mut ts = TokenStream::new();
-            enum_sig.body.to_tokens(&mut ts);
-            // Extract content from within braces
-            if let Some(proc_macro2::TokenTree::Group(group)) = ts.into_iter().next() {
-                group.stream()
-            } else {
-                TokenStream::new()
-            }
+        // Process enum variants
+        let processed_variants = if let Some(variants_cdv) = enum_sig.variants.content.as_ref() {
+            self.process_enum_variants(variants_cdv, &enum_name)
+        } else {
+            TokenStream::new()
         };
 
-        // Process enum variants
-        let processed_variants = self.process_enum_variants(body_stream, &enum_name);
-        let processed_body = self.wrap_in_braces(processed_variants);
-
-        // Reconstruct the enum with doc attribute
+        // Reconstruct enum
         let mut output = TokenStream::new();
-
         if let Some(attrs) = enum_sig.attributes {
             for attr in attrs.0 {
                 attr.to_tokens(&mut output);
             }
         }
-
         if let Some(vis) = enum_sig.visibility {
             vis.to_tokens(&mut output);
         }
-
         enum_sig._enum.to_tokens(&mut output);
-
-        let name_ident = enum_sig.name;
-        name_ident.to_tokens(&mut output);
-
+        enum_sig.name.to_tokens(&mut output);
         if let Some(generics) = enum_sig.generics {
             generics.to_tokens(&mut output);
         }
-
         if let Some(where_clause) = enum_sig.where_clause {
             where_clause.to_tokens(&mut output);
         }
 
-        // Inject doc for the enum itself using simpler method
         let enum_with_doc = self.inject_doc_into_simple_item(output, &enum_name);
-
-        // Combine enum declaration with processed body
         let mut final_output = enum_with_doc;
-        final_output.extend(processed_body);
+        let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, processed_variants);
+        final_output.extend(std::iter::once(proc_macro2::TokenTree::Group(group)));
 
         final_output
     }
 
-    fn process_enum_variants(&self, variants_stream: TokenStream, enum_name: &str) -> TokenStream {
+    fn process_enum_variants(
+        &self,
+        variants_cdv: &CommaDelimitedVec<crate::parse::EnumVariant>,
+        enum_name: &str,
+    ) -> TokenStream {
         let mut output = TokenStream::new();
 
-        // Parse using EnumVariant parser
-        let variants = match variants_stream
-            .into_token_iter()
-            .parse::<unsynn::CommaDelimitedVec<crate::parse::EnumVariant>>()
-        {
-            Ok(variants) => variants,
-            Err(_) => return output, // Return empty if parsing fails
-        };
-
-        for (idx, variant_delimited) in variants.0.iter().enumerate() {
+        for (idx, variant_delimited) in variants_cdv.0.iter().enumerate() {
             let variant = &variant_delimited.value;
             let variant_name = variant.name.to_string();
 
-            // Convert variant back to tokens
             let mut variant_tokens = TokenStream::new();
             quote::ToTokens::to_tokens(variant, &mut variant_tokens);
 
-            // Inject doc
             let documented =
                 self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name);
             output.extend(documented);
 
-            // Add comma if not last variant
-            if idx < variants.0.len() - 1 {
+            if idx < variants_cdv.0.len() - 1 {
                 output.extend(quote::quote! { , });
             }
         }
@@ -502,34 +418,22 @@ impl TokenProcessor {
         path_parts.push(format!("{}/{}.md", enum_name, variant_name));
 
         let full_path = path_parts.join("/");
-
-        // Use simpler injection for variants
         inject_doc_attr(full_path, self.cfg_attr.clone(), variant_tokens)
     }
 
-    fn wrap_in_braces(&self, content: TokenStream) -> TokenStream {
-        let mut output = TokenStream::new();
-        let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, content);
-        output.extend(std::iter::once(proc_macro2::TokenTree::Group(group)));
-        output
-    }
-
     fn inject_doc_into_item(&self, func_tokens: TokenStream, fn_name: &str) -> TokenStream {
-        // Construct the full path including context
         let mut path_parts = vec![self.base_path.clone()];
         path_parts.extend(self.context.iter().cloned());
         path_parts.push(format!("{}.md", fn_name));
 
         let full_path = path_parts.join("/");
-
-        // Create args token stream with the constructed path
         let args = quote::quote! { path = #full_path };
 
         match syncdoc_impl(args, func_tokens.clone()) {
             Ok(instrumented) => instrumented,
             Err(e) => {
                 eprintln!("syncdoc_impl failed: {}", e);
-                func_tokens // fallback to original
+                func_tokens
             }
         }
     }
@@ -539,14 +443,11 @@ impl TokenProcessor {
         item_tokens: TokenStream,
         item_name: &str,
     ) -> TokenStream {
-        // Construct the full path including context
         let mut path_parts = vec![self.base_path.clone()];
         path_parts.extend(self.context.iter().cloned());
         path_parts.push(format!("{}.md", item_name));
 
         let full_path = path_parts.join("/");
-
-        // Use the simpler injection that doesn't parse
         inject_doc_attr(full_path, self.cfg_attr.clone(), item_tokens)
     }
 }
@@ -559,8 +460,6 @@ fn extract_type_name(
         >,
     >,
 ) -> String {
-    // Extract just the type name from the target_type tokens
-    // This is a simplified version - for complex cases we might need more sophistication
     if let Some(first) = target_type.0.first() {
         if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
             return ident.to_string();

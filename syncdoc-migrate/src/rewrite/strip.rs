@@ -130,7 +130,7 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
             }
 
             // Process enum body - strip docs from variants
-            let body_stream = extract_brace_content(&enum_sig.body);
+            let body_stream = extract_brace_group_containing_content(&enum_sig.variants);
             if let Ok(variants) = body_stream
                 .into_token_iter()
                 .parse::<CommaDelimitedVec<syncdoc_core::parse::EnumVariant>>()
@@ -138,7 +138,7 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
                 let processed_variants = strip_doc_attrs_from_variants(&variants);
                 output.extend(wrap_in_braces(processed_variants));
             } else {
-                unsynn::ToTokens::to_tokens(&enum_sig.body, &mut output);
+                unsynn::ToTokens::to_tokens(&enum_sig.variants, &mut output);
             }
 
             output
@@ -167,7 +167,7 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
             // Process struct body - strip docs from fields
             match &struct_sig.body {
                 syncdoc_core::parse::StructBody::Named(brace) => {
-                    let body_stream = extract_brace_content(brace);
+                    let body_stream = extract_brace_group_containing_content(brace);
                     if let Ok(fields) = body_stream
                         .into_token_iter()
                         .parse::<CommaDelimitedVec<syncdoc_core::parse::StructField>>()
@@ -204,7 +204,7 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
             quote::ToTokens::to_tokens(&module.name, &mut output);
 
             // Recursively process module body
-            let body_stream = extract_brace_content(&module.body);
+            let body_stream = extract_brace_group_containing_content(&module.items);
             if let Ok(content) = body_stream
                 .into_token_iter()
                 .parse::<syncdoc_core::parse::ModuleContent>()
@@ -212,7 +212,7 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
                 let processed = strip_doc_attrs_from_items(&content);
                 output.extend(wrap_in_braces(processed));
             } else {
-                unsynn::ToTokens::to_tokens(&module.body, &mut output);
+                unsynn::ToTokens::to_tokens(&module.items, &mut output);
             }
 
             output
@@ -239,7 +239,7 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
             }
 
             // Recursively process impl body
-            let body_stream = extract_brace_content(&impl_block.body);
+            let body_stream = extract_brace_group_containing_content(&impl_block.items);
             if let Ok(content) = body_stream
                 .into_token_iter()
                 .parse::<syncdoc_core::parse::ModuleContent>()
@@ -247,7 +247,7 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
                 let processed = strip_doc_attrs_from_items(&content);
                 output.extend(wrap_in_braces(processed));
             } else {
-                unsynn::ToTokens::to_tokens(&impl_block.body, &mut output);
+                unsynn::ToTokens::to_tokens(&impl_block.items, &mut output);
             }
 
             output
@@ -280,7 +280,7 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
             }
 
             // Recursively process trait body
-            let body_stream = extract_brace_content(&trait_def.body);
+            let body_stream = extract_brace_group_containing_content(&trait_def.items);
             if let Ok(content) = body_stream
                 .into_token_iter()
                 .parse::<syncdoc_core::parse::ModuleContent>()
@@ -288,7 +288,7 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
                 let processed = strip_doc_attrs_from_items(&content);
                 output.extend(wrap_in_braces(processed));
             } else {
-                unsynn::ToTokens::to_tokens(&trait_def.body, &mut output);
+                unsynn::ToTokens::to_tokens(&trait_def.items, &mut output);
             }
 
             output
@@ -400,19 +400,32 @@ fn strip_doc_attrs_from_variants(
     for (idx, variant_delimited) in variants.0.iter().enumerate() {
         let variant = &variant_delimited.value;
 
-        // Strip variant attributes
-        let stripped_attrs = strip_doc_attrs_from_attr_list(&variant.attributes);
-        for attr in stripped_attrs {
-            quote::ToTokens::to_tokens(&attr, &mut output);
+        // Strip attributes from the variant itself
+        let mut variant_output = TokenStream::new();
+        quote::ToTokens::to_tokens(&variant.name, &mut variant_output);
+
+        // Handle variant data
+        if let Some(data) = &variant.data {
+            match data {
+                syncdoc_core::parse::EnumVariantData::Struct(fields_containing) => {
+                    // NEW: Handle struct variant fields
+                    if let Some(fields_cdv) = fields_containing.content.as_ref() {
+                        let processed_fields = strip_doc_attrs_from_fields(fields_cdv);
+                        variant_output.extend(wrap_in_braces(processed_fields));
+                    } else {
+                        unsynn::ToTokens::to_tokens(fields_containing, &mut variant_output);
+                    }
+                }
+                _ => {
+                    quote::ToTokens::to_tokens(data, &mut variant_output);
+                }
+            }
         }
 
-        quote::ToTokens::to_tokens(&variant.name, &mut output);
-        if let Some(data) = &variant.data {
-            quote::ToTokens::to_tokens(data, &mut output);
-        }
+        output.extend(variant_output);
 
         if idx < variants.0.len() - 1 {
-            output.extend(quote! { , });
+            output.extend(quote::quote! { , });
         }
     }
 
@@ -448,14 +461,12 @@ fn strip_doc_attrs_from_fields(
     output
 }
 
-fn extract_brace_content(brace_group: &unsynn::BraceGroup) -> TokenStream {
+fn extract_brace_group_containing_content<T: unsynn::ToTokens>(
+    brace_group_containing: &BraceGroupContaining<T>,
+) -> TokenStream {
     let mut ts = TokenStream::new();
-    unsynn::ToTokens::to_tokens(brace_group, &mut ts);
-    if let Some(proc_macro2::TokenTree::Group(g)) = ts.into_iter().next() {
-        g.stream()
-    } else {
-        TokenStream::new()
-    }
+    unsynn::ToTokens::to_tokens(&brace_group_containing.content, &mut ts);
+    ts
 }
 
 fn wrap_in_braces(content: TokenStream) -> TokenStream {

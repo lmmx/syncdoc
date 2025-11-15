@@ -104,6 +104,7 @@ unsynn! {
     }
 
     /// Complete function signature
+    #[derive(Clone)]
     pub struct FnSig {
         /// Optional attributes (#[...])
         pub attributes: Option<Many<Attribute>>,
@@ -159,6 +160,7 @@ unsynn! {
     }
 
     /// Extern specification with optional ABI
+    #[derive(Clone)]
     pub enum ExternSpec {
         /// "extern" with ABI string like extern "C"
         WithAbi(ExternWithAbi),
@@ -167,6 +169,7 @@ unsynn! {
     }
 
     /// Extern with ABI string
+    #[derive(Clone)]
     pub struct ExternWithAbi {
         /// The "extern" keyword
         pub _extern: KExtern,
@@ -175,6 +178,7 @@ unsynn! {
     }
 
     /// Simple visibility parsing
+    #[derive(Clone)]
     pub enum Visibility {
         /// "pub(crate)", "pub(super)", etc.
         Restricted(RestrictedVis),
@@ -183,6 +187,7 @@ unsynn! {
     }
 
     /// Restricted visibility like pub(crate)
+    #[derive(Clone)]
     pub struct RestrictedVis {
         /// The "pub" keyword
         pub _pub: KPub,
@@ -191,6 +196,7 @@ unsynn! {
     }
 
     /// Simple generics (treat as opaque for now)
+    #[derive(Clone)]
     pub struct Generics {
         /// Opening
         pub _lt: Lt,
@@ -201,6 +207,7 @@ unsynn! {
     }
 
     /// Return type: -> Type
+    #[derive(Clone)]
     pub struct ReturnType {
         /// Arrow
         pub _arrow: RArrow,
@@ -240,6 +247,7 @@ unsynn! {
     }
 
     /// Top-level item that can appear in a module
+    #[derive(Clone)]
     pub enum ModuleItem {
         /// A function definition
         Function(FnSig),
@@ -264,6 +272,7 @@ unsynn! {
     }
 
     /// impl Type { ... } block
+    #[derive(Clone)]
     pub struct ImplBlockSig {
         /// Optional attributes
         pub attributes: Option<Many<Attribute>>,
@@ -277,11 +286,12 @@ unsynn! {
         pub for_trait: Option<Cons<KFor, Many<Cons<Except<BraceGroup>, TokenTree>>>>,
         /// Optional where clause
         pub where_clause: Option<WhereClauses>,
-        /// Block body
-        pub body: BraceGroup,
+        /// Parsed impl block contents
+        pub items: BraceGroupContaining<ModuleContent>,
     }
 
     /// mod name { ... } block
+    #[derive(Clone)]
     pub struct ModuleSig {
         /// Optional attributes
         pub attributes: Option<Many<Attribute>>,
@@ -291,11 +301,12 @@ unsynn! {
         pub _mod: KMod,
         /// Module name
         pub name: Ident,
-        /// Module body
-        pub body: BraceGroup,
+        /// Parsed module contents
+        pub items: BraceGroupContaining<ModuleContent>,
     }
 
     /// trait Name { ... } block
+    #[derive(Clone)]
     pub struct TraitSig {
         /// Optional attributes
         pub attributes: Option<Many<Attribute>>,
@@ -313,11 +324,12 @@ unsynn! {
         pub bounds: Option<Cons<Colon, Many<Cons<Except<Either<KWhere, BraceGroup>>, TokenTree>>>>,
         /// Optional where clause
         pub where_clause: Option<WhereClauses>,
-        /// Trait body
-        pub body: BraceGroup,
+        /// Parsed trait body
+        pub items: BraceGroupContaining<ModuleContent>,
     }
 
     /// enum Name { ... } block
+    #[derive(Clone)]
     pub struct EnumSig {
         /// Optional attributes
         pub attributes: Option<Many<Attribute>>,
@@ -331,11 +343,12 @@ unsynn! {
         pub generics: Option<Generics>,
         /// Optional where clause
         pub where_clause: Option<WhereClauses>,
-        /// Enum body
-        pub body: BraceGroup,
+        /// Parsed enum variants
+        pub variants: BraceGroupContaining<Option<CommaDelimitedVec<EnumVariant>>>,
     }
 
     /// struct Name { ... } or struct Name;
+    #[derive(Clone)]
     pub struct StructSig {
         /// Optional attributes
         pub attributes: Option<Many<Attribute>>,
@@ -354,9 +367,10 @@ unsynn! {
     }
 
     /// Struct body variants
+    #[derive(Clone)]
     pub enum StructBody {
-        /// Named fields: { field: Type }
-        Named(BraceGroup),
+        /// Named fields with parsed field list
+        Named(BraceGroupContaining<Option<CommaDelimitedVec<StructField>>>),
         /// Tuple fields: (Type, Type)
         Tuple(Cons<ParenthesisGroup, Semicolon>),
         /// Unit struct: ;
@@ -364,6 +378,7 @@ unsynn! {
     }
 
     /// Named struct field: pub name: Type
+    #[derive(Clone)]
     pub struct StructField {
         /// Optional attributes
         pub attributes: Option<Many<Attribute>>,
@@ -378,6 +393,7 @@ unsynn! {
     }
 
     /// type Alias = Type;
+    #[derive(Clone)]
     pub struct TypeAliasSig {
         /// Optional attributes
         pub attributes: Option<Many<Attribute>>,
@@ -398,6 +414,7 @@ unsynn! {
     }
 
     /// const NAME: Type = value;
+    #[derive(Clone)]
     pub struct ConstSig {
         /// Optional attributes
         pub attributes: Option<Many<Attribute>>,
@@ -420,6 +437,7 @@ unsynn! {
     }
 
     /// static NAME: Type = value;
+    #[derive(Clone)]
     pub struct StaticSig {
         /// Optional attributes
         pub attributes: Option<Many<Attribute>>,
@@ -444,6 +462,7 @@ unsynn! {
     }
 
     /// Single enum variant
+    #[derive(Clone)]
     pub struct EnumVariant {
         /// Optional attributes
         pub attributes: Option<Many<Attribute>>,
@@ -454,16 +473,18 @@ unsynn! {
     }
 
     /// Enum variant data
+    #[derive(Clone)]
     pub enum EnumVariantData {
         /// Tuple variant: (Type, Type)
         Tuple(ParenthesisGroup),
         /// Struct variant: { field: Type }
-        Struct(BraceGroup),
+        Struct(BraceGroupContaining<Option<CommaDelimitedVec<StructField>>>),
         /// Discriminant: = value
         Discriminant(Cons<Eq, VerbatimUntil<Either<Comma, BraceGroup>>>),
     }
 
     /// A complete module/file content
+    #[derive(Clone)]
     pub struct ModuleContent {
         /// Inner attributes at the top of the module (#![...])
         pub inner_attrs: Option<Many<InnerAttribute>>,
@@ -472,6 +493,7 @@ unsynn! {
     }
 
     /// Function parameter: name: Type or self variants
+    #[derive(Clone)]
     pub enum FnParam {
         /// self parameter
         SelfParam(SelfParam),
@@ -482,6 +504,7 @@ unsynn! {
     }
 
     /// self, &self, &mut self, mut self
+    #[derive(Clone)]
     pub enum SelfParam {
         /// self
         Value(KSelf),
@@ -494,6 +517,7 @@ unsynn! {
     }
 
     /// name: Type parameter
+    #[derive(Clone)]
     pub struct NamedParam {
         /// Optional mut keyword
         pub mut_kw: Option<KMut>,
@@ -506,6 +530,7 @@ unsynn! {
     }
 
     /// Pattern parameter like (a, b): (i32, i32) or mut (x, y): Point
+    #[derive(Clone)]
     pub struct PatternParam {
         /// Optional mut keyword
         pub mut_kw: Option<KMut>,
@@ -517,7 +542,8 @@ unsynn! {
         pub param_type: VerbatimUntil<Either<Comma, ParenthesisGroup>>,
     }
 
-   /// Different types of patterns
+    /// Different types of patterns
+    #[derive(Clone)]
     pub enum Pattern {
         /// Simple identifier: value
         Ident(Ident),
@@ -528,12 +554,14 @@ unsynn! {
     }
 
     /// Tuple destructuring pattern: (a, b, c)
+    #[derive(Clone)]
     pub struct TuplePattern {
         /// Parentheses containing comma-separated identifiers
         pub fields: ParenthesisGroupContaining<Option<CommaDelimitedVec<PatternField>>>,
     }
 
     /// Field in a pattern
+    #[derive(Clone)]
     pub enum PatternField {
         /// Simple identifier
         Ident(Ident),
@@ -788,7 +816,7 @@ impl quote::ToTokens for ImplBlockSig {
         if let Some(where_clause) = &self.where_clause {
             unsynn::ToTokens::to_tokens(where_clause, tokens);
         }
-        unsynn::ToTokens::to_tokens(&self.body, tokens);
+        unsynn::ToTokens::to_tokens(&self.items, tokens);
     }
 }
 
@@ -804,7 +832,7 @@ impl quote::ToTokens for ModuleSig {
         }
         unsynn::ToTokens::to_tokens(&self._mod, tokens);
         quote::ToTokens::to_tokens(&self.name, tokens);
-        unsynn::ToTokens::to_tokens(&self.body, tokens);
+        unsynn::ToTokens::to_tokens(&self.items, tokens);
     }
 }
 
@@ -832,7 +860,7 @@ impl quote::ToTokens for TraitSig {
         if let Some(where_clause) = &self.where_clause {
             unsynn::ToTokens::to_tokens(where_clause, tokens);
         }
-        unsynn::ToTokens::to_tokens(&self.body, tokens);
+        unsynn::ToTokens::to_tokens(&self.items, tokens);
     }
 }
 
@@ -866,7 +894,7 @@ impl quote::ToTokens for EnumSig {
         if let Some(where_clause) = &self.where_clause {
             unsynn::ToTokens::to_tokens(where_clause, tokens);
         }
-        unsynn::ToTokens::to_tokens(&self.body, tokens);
+        unsynn::ToTokens::to_tokens(&self.variants, tokens);
     }
 }
 
@@ -895,7 +923,7 @@ impl quote::ToTokens for StructSig {
 impl quote::ToTokens for StructBody {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-            StructBody::Named(brace) => unsynn::ToTokens::to_tokens(brace, tokens),
+            StructBody::Named(fields) => unsynn::ToTokens::to_tokens(fields, tokens),
             StructBody::Tuple(tuple) => unsynn::ToTokens::to_tokens(tuple, tokens),
             StructBody::Unit(semi) => unsynn::ToTokens::to_tokens(semi, tokens),
         }
