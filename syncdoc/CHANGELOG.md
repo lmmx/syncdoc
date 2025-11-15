@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.2.2...syncdoc-v0.2.3) - 2025-11-15
+
+### <!-- 9 -->Other
+
+- touch missing files ([#36](https://github.com/lmmx/syncdoc/pull/36))
+
 ## [0.2.2](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.2.1...syncdoc-v0.2.2) - 2025-11-15
 
 ### <!-- 4 -->Documentation
