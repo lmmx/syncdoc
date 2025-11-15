@@ -10,6 +10,7 @@ use unsynn::*;
 
 use crate::config::DocsPathMode;
 use crate::discover::ParsedFile;
+use crate::rewrite::inject::has_module_doc_macro;
 use proc_macro2::TokenStream;
 use reformat::rewrite_preserving_format;
 use strip::strip_doc_attrs_from_items;
@@ -43,8 +44,19 @@ pub fn rewrite_file(
         {
             let mut annotated = TokenStream::new();
 
-            // Inject module_doc! for inner docs if any existed
-            if content.inner_attrs.is_some() || parsed.content.inner_attrs.is_some() {
+            // Check if module_doc already exists before injecting
+            let has_module_doc = if let Some(inner_attrs) = &content.inner_attrs {
+                let mut temp_ts = TokenStream::new();
+                unsynn::ToTokens::to_tokens(inner_attrs, &mut temp_ts);
+                has_module_doc_macro(&temp_ts)
+            } else {
+                false
+            };
+
+            // Inject module_doc! for inner docs if any existed AND not already present
+            if !has_module_doc
+                && (content.inner_attrs.is_some() || parsed.content.inner_attrs.is_some())
+            {
                 annotated.extend(inject_module_doc_attr(docs_root, docs_mode));
             }
 
@@ -67,6 +79,7 @@ pub fn rewrite_file(
                 );
 
                 if should_annotate {
+                    // inject_omnidoc_attr now handles idempotency internally
                     annotated.extend(inject_omnidoc_attr(item_ts, docs_root, docs_mode));
                 } else {
                     annotated.extend(item_ts);
