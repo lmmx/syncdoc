@@ -640,7 +640,7 @@ dependencies = [
 
 [[package]]
 name = "syncdoc"
-version = "0.3.4"
+version = "0.3.5"
 dependencies = [
  "assert_cmd",
  "facet",
@@ -672,7 +672,7 @@ dependencies = [
 
 [[package]]
 name = "syncdoc-migrate"
-version = "0.3.3"
+version = "0.3.4"
 dependencies = [
  "duct",
  "imara-diff",
