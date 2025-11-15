@@ -23,7 +23,7 @@ pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<St
 
     // 1. Format both strings with rustfmt
     let formatted_original = rustfmt(original)?;
-    let formatted_transformed = rustfmt(&transformed)?;
+    let formatted_transformed = rustfmt(transformed)?;
 
     #[cfg(debug_assertions)]
     {

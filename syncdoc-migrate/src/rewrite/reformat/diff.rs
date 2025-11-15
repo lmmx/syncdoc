@@ -77,7 +77,7 @@ pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> 
     let mut result = Vec::new();
     let mut orig_idx = 0;
 
-    for (_hunk_num, hunk) in split_hunks.iter().enumerate() {
+    for hunk in split_hunks.iter() {
         // ONLY apply doc-related hunks
         if !is_doc_related_hunk(hunk, &original_lines, &after_lines) {
             #[cfg(debug_assertions)]
@@ -123,9 +123,7 @@ pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> 
         // For module docstrings, preserve blank lines AFTER
         // For everything else, preserve blank lines BEFORE
         if removed_blank_lines > 0 && !is_module_doc {
-            for _ in 0..removed_blank_lines {
-                result.push("");
-            }
+            result.extend(std::iter::repeat_n("", removed_blank_lines))
         }
 
         // PRESERVE REGULAR COMMENT-ONLY LINES that would be deleted
@@ -160,9 +158,7 @@ pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> 
 
         // For module docstrings, preserve blank lines AFTER
         if removed_blank_lines > 0 && is_module_doc {
-            for _ in 0..removed_blank_lines {
-                result.push("");
-            }
+            result.extend(std::iter::repeat_n("", removed_blank_lines))
         }
     }
 
