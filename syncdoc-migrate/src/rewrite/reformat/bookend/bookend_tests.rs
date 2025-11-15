@@ -16,7 +16,7 @@ fn test_extract_bookend_content() {
     let content = extract_bookend_content(line);
     assert_eq!(
         content,
-        Some("doc = syncdoc :: module_doc ! ( path = \"docs\" )".to_string())
+        Some("doc=syncdoc::module_doc!(path=\"docs\")".to_string())
     );
 }
 

@@ -96,3 +96,24 @@ fn test_has_doc_attrs() {
     let attrs = parse_attrs(tokens);
     assert!(has_doc_attrs(&attrs));
 }
+
+#[test]
+fn test_extract_strips_leading_spaces() {
+    // Simulate what Rust actually does with doc comments
+    let tokens = quote! {
+        #[doc = " First line"]
+        #[doc = " Second line with  intentional indent"]
+        #[doc = "  Third line with more indent"]
+    };
+
+    let attrs = parse_attrs(tokens);
+    let result = extract_doc_content(&attrs);
+
+    assert_eq!(
+        result,
+        Some(
+            "First line\nSecond line with  intentional indent\n Third line with more indent"
+                .to_string()
+        )
+    );
+}

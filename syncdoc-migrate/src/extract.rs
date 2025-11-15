@@ -14,7 +14,9 @@ pub fn extract_doc_content(attrs: &Option<Many<Attribute>>) -> Option<String> {
     for attr_delimited in &attrs.0 {
         // Extract the actual Attribute from the Delimited wrapper
         if let Some(doc_content) = extract_from_single_attr(&attr_delimited.value) {
-            doc_strings.push(doc_content);
+            // Strip leading space that Rust adds to doc comments
+            let trimmed = doc_content.strip_prefix(' ').unwrap_or(&doc_content);
+            doc_strings.push(trimmed.to_string());
         }
     }
 
@@ -33,7 +35,9 @@ pub fn extract_inner_doc_content(attrs: &Option<Many<InnerAttribute>>) -> Option
 
     for attr_delimited in &attrs.0 {
         if let Some(doc_content) = extract_from_inner_attr(&attr_delimited.value) {
-            doc_strings.push(doc_content);
+            // Strip leading space that Rust adds to doc comments
+            let trimmed = doc_content.strip_prefix(' ').unwrap_or(&doc_content);
+            doc_strings.push(trimmed.to_string());
         }
     }
 

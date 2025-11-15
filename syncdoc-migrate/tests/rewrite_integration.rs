@@ -483,7 +483,7 @@ pub fn test() {
     // Doc comments replaced/removed
     assert!(!result.contains("//! Module doc"));
     assert!(!result.contains("/// Function doc"));
-    assert!(result.contains("module_doc !"));
+    assert!(result.contains("module_doc!"));
     assert!(result.contains("omnidoc"));
 }
 
