@@ -400,19 +400,32 @@ fn strip_doc_attrs_from_variants(
     for (idx, variant_delimited) in variants.0.iter().enumerate() {
         let variant = &variant_delimited.value;
 
-        // Strip variant attributes
-        let stripped_attrs = strip_doc_attrs_from_attr_list(&variant.attributes);
-        for attr in stripped_attrs {
-            quote::ToTokens::to_tokens(&attr, &mut output);
+        // Strip attributes from the variant itself
+        let mut variant_output = TokenStream::new();
+        quote::ToTokens::to_tokens(&variant.name, &mut variant_output);
+
+        // Handle variant data
+        if let Some(data) = &variant.data {
+            match data {
+                syncdoc_core::parse::EnumVariantData::Struct(fields_containing) => {
+                    // NEW: Handle struct variant fields
+                    if let Some(fields_cdv) = fields_containing.content.as_ref() {
+                        let processed_fields = strip_doc_attrs_from_fields(fields_cdv);
+                        variant_output.extend(wrap_in_braces(processed_fields));
+                    } else {
+                        unsynn::ToTokens::to_tokens(fields_containing, &mut variant_output);
+                    }
+                }
+                _ => {
+                    quote::ToTokens::to_tokens(data, &mut variant_output);
+                }
+            }
         }
 
-        quote::ToTokens::to_tokens(&variant.name, &mut output);
-        if let Some(data) = &variant.data {
-            quote::ToTokens::to_tokens(data, &mut output);
-        }
+        output.extend(variant_output);
 
         if idx < variants.0.len() - 1 {
-            output.extend(quote! { , });
+            output.extend(quote::quote! { , });
         }
     }
 
