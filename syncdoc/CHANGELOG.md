@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.3.1...syncdoc-v0.3.2) - 2025-11-15
+
+### <!-- 5 -->Refactor
+
+- tighten up Cargo manifest dir acquisition ([#41](https://github.com/lmmx/syncdoc/pull/41))
+
 ## [0.3.1](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.3.0...syncdoc-v0.3.1) - 2025-11-15
 
 ### <!-- 1 -->Features
