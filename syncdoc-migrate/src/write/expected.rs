@@ -166,12 +166,13 @@ fn find_impl_paths(
 ) -> Vec<DocExtraction> {
     let mut extractions = Vec::new();
 
-    // Determine the type name for the impl block
-    // If this is `impl Trait for Type`, use Type (from for_trait.second)
-    // If this is `impl Type`, use Type (from target_type)
-    let type_name = if let Some(for_trait) = &impl_block.for_trait {
-        // This is `impl Trait for Type`, extract Type from for_trait.second
-        if let Some(first) = for_trait.second.0.first() {
+    // Determine the context path for the impl block
+    // If this is `impl Trait for Type`, context is [Type, Trait]
+    // If this is `impl Type`, context is [Type]
+    let impl_context = if let Some(for_trait) = &impl_block.for_trait {
+        // This is `impl Trait for Type`
+        // target_type contains the TRAIT name (before "for")
+        let trait_name = if let Some(first) = impl_block.target_type.0.first() {
             if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
                 ident.to_string()
             } else {
@@ -179,10 +180,24 @@ fn find_impl_paths(
             }
         } else {
             "Unknown".to_string()
-        }
+        };
+
+        // for_trait.second contains the TYPE name (after "for")
+        let type_name = if let Some(first) = for_trait.second.0.first() {
+            if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
+                ident.to_string()
+            } else {
+                "Unknown".to_string()
+            }
+        } else {
+            "Unknown".to_string()
+        };
+
+        // Context is Type/Trait
+        vec![type_name, trait_name]
     } else {
         // This is `impl Type`, extract Type from target_type
-        if let Some(first) = impl_block.target_type.0.first() {
+        let type_name = if let Some(first) = impl_block.target_type.0.first() {
             if let proc_macro2::TokenTree::Ident(ident) = &first.value.second {
                 ident.to_string()
             } else {
@@ -190,11 +205,12 @@ fn find_impl_paths(
             }
         } else {
             "Unknown".to_string()
-        }
+        };
+        vec![type_name]
     };
 
     let mut new_context = context;
-    new_context.push(type_name);
+    new_context.extend(impl_context);
 
     let body_stream = extract_brace_content(&impl_block.body);
     if let Ok(content) = body_stream.into_token_iter().parse::<ModuleContent>() {

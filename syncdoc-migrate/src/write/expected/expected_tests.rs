@@ -367,16 +367,20 @@ fn test_find_expected_trait_impl_for_struct() {
 
     eprintln!("Paths found: {:#?}", paths);
 
-    // Should have: module, trait, struct, and 2 trait methods under the struct
+    // Should have: module, trait, struct, and 2 trait methods
     assert!(paths.contains(&"docs/test.md".to_string()));
     assert!(paths.contains(&"docs/Format.md".to_string()));
     assert!(paths.contains(&"docs/MarkdownFormat.md".to_string()));
 
-    // Methods should be under the struct, not the trait
-    assert!(paths.contains(&"docs/MarkdownFormat/file_extension.md".to_string()));
-    assert!(paths.contains(&"docs/MarkdownFormat/language.md".to_string()));
+    // Methods should be under MarkdownFormat/Format/ (Type/Trait pattern)
+    assert!(paths.contains(&"docs/MarkdownFormat/Format/file_extension.md".to_string()));
+    assert!(paths.contains(&"docs/MarkdownFormat/Format/language.md".to_string()));
 
-    // Should NOT be under the trait
+    // Should NOT be directly under the struct
+    assert!(!paths.contains(&"docs/MarkdownFormat/file_extension.md".to_string()));
+    assert!(!paths.contains(&"docs/MarkdownFormat/language.md".to_string()));
+
+    // Should NOT be under the trait alone
     assert!(!paths.contains(&"docs/Format/file_extension.md".to_string()));
     assert!(!paths.contains(&"docs/Format/language.md".to_string()));
 }
@@ -412,8 +416,12 @@ fn test_find_expected_trait_impl_in_submodule() {
 
     eprintln!("Paths found: {:#?}", paths);
 
-    // Method should be at the correct nested path
-    assert!(paths.contains(&"docs/formats/markdown/MarkdownFormat/file_extension.md".to_string()));
+    // Method should be at the correct nested path with Type/Trait pattern
+    assert!(paths
+        .contains(&"docs/formats/markdown/MarkdownFormat/Format/file_extension.md".to_string()));
+
+    // Should NOT be directly under the type
+    assert!(!paths.contains(&"docs/formats/markdown/MarkdownFormat/file_extension.md".to_string()));
 
     // Should NOT be under trait
     assert!(!paths.contains(&"docs/formats/markdown/Format/file_extension.md".to_string()));
@@ -452,9 +460,14 @@ fn test_find_expected_regular_impl_vs_trait_impl() {
 
     eprintln!("Paths found: {:#?}", paths);
 
-    // Both methods should be under MyStruct
+    // Regular impl method should be directly under MyStruct
     assert!(paths.contains(&"docs/MyStruct/new.md".to_string()));
-    assert!(paths.contains(&"docs/MyStruct/trait_method.md".to_string()));
+
+    // Trait impl method should be under MyStruct/MyTrait (Type/Trait pattern)
+    assert!(paths.contains(&"docs/MyStruct/MyTrait/trait_method.md".to_string()));
+
+    // Should NOT be directly under MyStruct
+    assert!(!paths.contains(&"docs/MyStruct/trait_method.md".to_string()));
 
     // Should NOT be under trait
     assert!(!paths.contains(&"docs/MyTrait/trait_method.md".to_string()));
