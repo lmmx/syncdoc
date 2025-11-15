@@ -1,16 +1,12 @@
-use std::fs;
+// syncdoc-migrate/tests/write_integration.rs
+
 use syncdoc_migrate::{
     discover::parse_file,
     write::{extract_all_docs, write_extractions},
 };
-use tempfile::TempDir;
 
-fn setup_test_file(source: &str) -> (TempDir, std::path::PathBuf) {
-    let temp_dir = TempDir::new().unwrap();
-    let file_path = temp_dir.path().join("test.rs");
-    fs::write(&file_path, source).unwrap();
-    (temp_dir, file_path)
-}
+mod helpers;
+use helpers::*;
 
 #[test]
 fn test_extract_and_write_function_docs() {
@@ -21,7 +17,7 @@ fn test_extract_and_write_function_docs() {
         }
     "#;
 
-    let (_temp_dir, file_path) = setup_test_file(source);
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, "docs");
 
@@ -43,7 +39,7 @@ fn test_extract_and_write_module_docs() {
         }
     "#;
 
-    let (_temp_dir, file_path) = setup_test_file(source);
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, "docs");
 
@@ -76,7 +72,7 @@ fn test_extract_and_write_impl_method_docs() {
         }
     "#;
 
-    let (_temp_dir, file_path) = setup_test_file(source);
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, "docs");
 
@@ -105,7 +101,7 @@ fn test_extract_and_write_struct_and_field_docs() {
         }
     "#;
 
-    let (_temp_dir, file_path) = setup_test_file(source);
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, "docs");
 
@@ -146,7 +142,7 @@ fn test_extract_and_write_enum_and_variant_docs() {
         }
     "#;
 
-    let (_temp_dir, file_path) = setup_test_file(source);
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, "docs");
 
@@ -185,7 +181,7 @@ fn test_extract_and_write_trait_method_docs() {
         }
     "#;
 
-    let (_temp_dir, file_path) = setup_test_file(source);
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, "docs");
 
@@ -213,7 +209,7 @@ fn test_extract_const_static_type_alias() {
         type MyType = Vec<String>;
     "#;
 
-    let (_temp_dir, file_path) = setup_test_file(source);
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, "docs");
 
@@ -246,7 +242,7 @@ fn test_nested_modules_create_correct_paths() {
         }
     "#;
 
-    let (_temp_dir, file_path) = setup_test_file(source);
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, "docs");
 
@@ -260,9 +256,6 @@ fn test_nested_modules_create_correct_paths() {
 
 #[test]
 fn test_write_extractions_creates_files() {
-    let temp_dir = TempDir::new().unwrap();
-    let docs_dir = temp_dir.path().join("docs");
-
     let source = r#"
         /// A function
         fn my_func() {}
@@ -273,42 +266,29 @@ fn test_write_extractions_creates_files() {
         }
     "#;
 
-    let file_path = temp_dir.path().join("test.rs");
-    fs::write(&file_path, source).unwrap();
+    let (temp_dir, file_path) = setup_test_file(source, "test.rs");
+    let docs_dir = temp_dir.path().join("docs");
 
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, docs_dir.to_str().unwrap());
 
     let report = write_extractions(&extractions, false).unwrap();
 
-    assert_eq!(report.files_written, 2);
-    assert_eq!(report.files_skipped, 0);
-    assert!(report.errors.is_empty());
+    assert_report(&report, 2);
 
-    // Verify files exist
-    assert!(docs_dir.join("my_func.md").exists());
-    assert!(docs_dir.join("submod/sub_func.md").exists());
-
-    // Verify content
-    let content = fs::read_to_string(docs_dir.join("my_func.md")).unwrap();
-    assert_eq!(content, "A function\n");
-
-    let sub_content = fs::read_to_string(docs_dir.join("submod/sub_func.md")).unwrap();
-    assert_eq!(sub_content, "Submodule function\n");
+    assert_file(docs_dir.join("my_func.md"), "A function\n");
+    assert_file(docs_dir.join("submod/sub_func.md"), "Submodule function\n");
 }
 
 #[test]
 fn test_dry_run_does_not_create_files() {
-    let temp_dir = TempDir::new().unwrap();
-    let docs_dir = temp_dir.path().join("docs");
-
     let source = r#"
         /// A function
         fn my_func() {}
     "#;
 
-    let file_path = temp_dir.path().join("test.rs");
-    fs::write(&file_path, source).unwrap();
+    let (temp_dir, file_path) = setup_test_file(source, "test.rs");
+    let docs_dir = temp_dir.path().join("docs");
 
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, docs_dir.to_str().unwrap());
