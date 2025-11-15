@@ -21,13 +21,7 @@ pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<St
         eprintln!("Transformed length: {}", transformed.len());
     }
 
-    // 1. Reformat bookended lines in transformed code
-    let transformed = reformat_bookended_lines(transformed);
-
-    #[cfg(debug_assertions)]
-    eprintln!("After bookending: {}", transformed.len());
-
-    // 2. Format both strings with rustfmt
+    // 1. Format both strings with rustfmt
     let formatted_original = rustfmt(original)?;
     let formatted_transformed = rustfmt(&transformed)?;
 
@@ -44,12 +38,18 @@ pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<St
         eprintln!("{}", formatted_transformed);
     }
 
-    // 3. Compute line-level diff
+    // 2. Compute line-level diff
     let diff_hunks = compute_line_diff(&formatted_original, &formatted_transformed);
 
-    // 4. Apply diff to FORMATTED original (not raw original)
+    // 3. Apply diff to FORMATTED original (not raw original)
     // This ensures line numbers match
-    let mut result = apply_diff(&formatted_original, &diff_hunks, &formatted_transformed);
+    let diff_result = apply_diff(&formatted_original, &diff_hunks, &formatted_transformed);
+
+    // 4. Reformat bookended lines in transformed code
+    let mut result = reformat_bookended_lines(&diff_result);
+
+    #[cfg(debug_assertions)]
+    eprintln!("After bookending: {}", transformed.len());
 
     // Ensure EOF newline
     if !result.ends_with('\n') {
