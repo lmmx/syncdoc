@@ -270,9 +270,15 @@ impl TokenProcessor {
             where_clause.to_tokens(&mut output);
         }
 
-        output.extend(processed_body);
+        // Inject doc for the trait itself
+        let trait_name = trait_def.name.to_string();
+        let trait_with_doc = self.inject_doc_into_simple_item(output, &trait_name);
 
-        output
+        // Combine with processed body
+        let mut final_output = trait_with_doc;
+        final_output.extend(processed_body);
+
+        final_output
     }
 
     fn process_struct(&self, struct_sig: crate::parse::StructSig) -> TokenStream {
