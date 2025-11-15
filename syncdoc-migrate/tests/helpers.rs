@@ -1,4 +1,5 @@
 #![cfg(test)]
+#![allow(dead_code)]
 
 use std::collections::HashSet;
 use std::fs;

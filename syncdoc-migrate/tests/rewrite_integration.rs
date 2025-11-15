@@ -2,34 +2,14 @@
 
 use insta::assert_snapshot;
 use proc_macro2::TokenStream;
-// use rust_format::{Formatter, RustFmt};
-use std::fs;
 use std::str::FromStr;
 use syncdoc_migrate::{parse_file, rewrite::rewrite_file};
-use tempfile::TempDir;
 
-fn setup_test_file(source: &str) -> (TempDir, std::path::PathBuf) {
-    let temp_dir = TempDir::new().unwrap();
-    let file_path = temp_dir.path().join("test.rs");
-    fs::write(&file_path, source).unwrap();
-    (temp_dir, file_path)
-}
-
-// fn format_code(code: &str) -> String {
-//     if let Ok(tokens) = TokenStream::from_str(code) {
-//         RustFmt::default()
-//             .format_tokens(tokens)
-//             .unwrap_or_else(|_| code.to_string())
-//     } else {
-//         code.to_string()
-//     }
-// }
+mod helpers;
+use helpers::*;
 
 fn test_rewrite(source: &str, strip: bool, annotate: bool) -> String {
-    let temp_dir = TempDir::new().unwrap();
-    let file_path = temp_dir.path().join("test.rs");
-    fs::write(&file_path, source).unwrap();
-
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
     let result = rewrite_file(&parsed, "docs", strip, annotate);
 
@@ -386,10 +366,7 @@ pub enum TimeOfDay {
 }
 "#;
 
-    let temp_dir = TempDir::new().unwrap();
-    let file_path = temp_dir.path().join("lib.rs");
-    fs::write(&file_path, source).unwrap();
-
+    let (_temp_dir, file_path) = setup_test_file(source, "lib.rs");
     let parsed = parse_file(&file_path).unwrap();
 
     // Test strip only
@@ -414,7 +391,7 @@ fn test_strip_enum_variant_docs_preserves_variants() {
         }
     "#;
 
-    let (_temp_dir, file_path) = setup_test_file(source);
+    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
     let parsed = parse_file(&file_path).unwrap();
     let stripped = rewrite_file(&parsed, "docs", true, false);
 

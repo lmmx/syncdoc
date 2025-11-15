@@ -117,7 +117,7 @@ impl MarkdownFormat {
     pub fn new() -> Self {
         Self
     }
-    
+
     pub fn undocumented_method(&self) {
         // No docs
     }
