@@ -2,7 +2,7 @@
 edition = "2021"
 name = "demo_double_doc"
 publish = false
-version = "0.1.7"
+version = "0.2.1"
 
 [dependencies]
 syncdoc.workspace = true
