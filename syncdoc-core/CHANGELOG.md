@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3](https://github.com/lmmx/syncdoc/compare/syncdoc-core-v0.3.2...syncdoc-core-v0.3.3) - 2025-11-16
+
+### <!-- 2 -->Bug Fixes
+
+- prevent pushing with unstaged changes post-prepush (would cause release to fail)
+
+### <!-- 9 -->Other
+
+- parse trait methods ([#46](https://github.com/lmmx/syncdoc/pull/46))
+
 ## [0.3.2](https://github.com/lmmx/syncdoc/compare/syncdoc-core-v0.3.1...syncdoc-core-v0.3.2) - 2025-11-15
 
 ### <!-- 9 -->Other
