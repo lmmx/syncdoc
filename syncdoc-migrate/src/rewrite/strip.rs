@@ -66,23 +66,26 @@ pub fn strip_doc_attrs_from_items(content: &syncdoc_core::parse::ModuleContent) 
 
 /// Strip doc attributes from a single item recursively
 fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
-	// DEBUG: Print what kind of item this is
-    syncdoc_debug!("Processing item type: {}", match item {
-        ModuleItem::TraitMethod(_) => "TraitMethod",
-        ModuleItem::Function(_) => "Function",
-        ModuleItem::Enum(_) => "Enum",
-        ModuleItem::Struct(_) => "Struct",
-        ModuleItem::Module(_) => "Module",
-        ModuleItem::ImplBlock(_) => "ImplBlock",
-        ModuleItem::Trait(_) => "Trait",
-        ModuleItem::TypeAlias(_) => "TypeAlias",
-        ModuleItem::Const(_) => "Const",
-        ModuleItem::Static(_) => "Static",
-        ModuleItem::Other(_) => "Other",
-    });
+    // DEBUG: Print what kind of item this is
+    syncdoc_debug!(
+        "Processing item type: {}",
+        match item {
+            ModuleItem::TraitMethod(_) => "TraitMethod",
+            ModuleItem::Function(_) => "Function",
+            ModuleItem::Enum(_) => "Enum",
+            ModuleItem::Struct(_) => "Struct",
+            ModuleItem::Module(_) => "Module",
+            ModuleItem::ImplBlock(_) => "ImplBlock",
+            ModuleItem::Trait(_) => "Trait",
+            ModuleItem::TypeAlias(_) => "TypeAlias",
+            ModuleItem::Const(_) => "Const",
+            ModuleItem::Static(_) => "Static",
+            ModuleItem::Other(_) => "Other",
+        }
+    );
     syncdoc_debug!("Processing item: {:?}", item);
     match item {
-		ModuleItem::TraitMethod(method) => {
+        ModuleItem::TraitMethod(method) => {
             let stripped_attrs = strip_doc_attrs_from_attr_list(&method.attributes);
             let mut output = TokenStream::new();
 

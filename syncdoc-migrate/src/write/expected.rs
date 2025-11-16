@@ -68,7 +68,7 @@ fn find_item_paths(
     let mut extractions = Vec::new();
 
     match item {
-		ModuleItem::TraitMethod(method_sig) => {
+        ModuleItem::TraitMethod(method_sig) => {
             let path = build_path(base_path, &context, &method_sig.name.to_string());
             let location = format!(
                 "{}:{}",

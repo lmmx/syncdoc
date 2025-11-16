@@ -59,6 +59,14 @@ ship version="auto":
 
     # 🦀 Run prepush only for the Rust crates we are releasing
     just prepush
+
+    # Check for unstaged changes
+    if [[ -n $(git status --porcelain) ]]; then
+        # Unstaged changes detected. Rolling back the crate version bump commit
+        git reset --soft HEAD~1
+        exit 1
+    fi
+
     # 🚀 Push the version bump commit
     git push --no-verify
 
