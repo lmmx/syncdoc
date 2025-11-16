@@ -1,6 +1,7 @@
 // syncdoc-migrate/src/rewrite/strip.rs
 
 use crate::extract::{is_inner_doc_attr, is_outer_doc_attr};
+use crate::syncdoc_debug;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syncdoc_core::parse::{Attribute, InnerAttribute, ModuleItem};
@@ -65,6 +66,19 @@ pub fn strip_doc_attrs_from_items(content: &syncdoc_core::parse::ModuleContent) 
 
 /// Strip doc attributes from a single item recursively
 fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
+	// DEBUG: Print what kind of item this is
+    syncdoc_debug!("Processing item type: {}", match item {
+        ModuleItem::Function(_) => "Function",
+        ModuleItem::Enum(_) => "Enum",
+        ModuleItem::Struct(_) => "Struct",
+        ModuleItem::Module(_) => "Module",
+        ModuleItem::ImplBlock(_) => "ImplBlock",
+        ModuleItem::Trait(_) => "Trait",
+        ModuleItem::TypeAlias(_) => "TypeAlias",
+        ModuleItem::Const(_) => "Const",
+        ModuleItem::Static(_) => "Static",
+        ModuleItem::Other(_) => "Other",
+    });
     match item {
         ModuleItem::Function(func) => {
             let stripped_attrs = strip_doc_attrs_from_attr_list(&func.attributes);
