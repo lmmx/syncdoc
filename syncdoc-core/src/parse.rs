@@ -127,7 +127,7 @@ unsynn! {
         /// Parameters in parentheses
         pub params: ParenthesisGroupContaining<Option<CommaDelimitedVec<FnParam>>>,
         /// Optional return type
-        pub return_type: Option<ReturnType>,
+        pub return_type: Option<ReturnTypeFn>,
         /// Optional where clause
         pub where_clause: Option<WhereClauses>,
         pub body: BraceGroup,
@@ -206,13 +206,22 @@ unsynn! {
         pub _gt: Gt,
     }
 
-    /// Return type: -> Type
+    /// Trait return type: -> Type (stops at ;)
     #[derive(Clone)]
-    pub struct ReturnType {
+    pub struct ReturnTypeTrait {
+        /// Arrow
+        pub _arrow: RArrow,
+        /// Everything until semicolon (opaque)
+        pub return_type: VerbatimUntil<Either<BraceGroup, Semicolon>>,
+    }
+
+    /// Function return type: -> Type (stops at {)
+    #[derive(Clone)]
+    pub struct ReturnTypeFn {
         /// Arrow
         pub _arrow: RArrow,
         /// Everything until brace (opaque)
-        pub return_type: VerbatimUntil<Either<BraceGroup, KWhere, Semicolon>>,
+        pub return_type: VerbatimUntil<BraceGroup>,
     }
 
     /// Represents a single predicate within a `where` clause.
@@ -352,7 +361,7 @@ unsynn! {
 		/// Parameters in parentheses
 		pub params: ParenthesisGroupContaining<Option<CommaDelimitedVec<FnParam>>>,
 		/// Optional return type
-		pub return_type: Option<ReturnType>,
+		pub return_type: Option<ReturnTypeTrait>,
 		/// Optional where clause
 		pub where_clause: Option<WhereClauses>,
 		/// Semicolon (trait methods end with ;, not {})
@@ -795,7 +804,14 @@ impl quote::ToTokens for ExternSpec {
     }
 }
 
-impl quote::ToTokens for ReturnType {
+impl quote::ToTokens for ReturnTypeTrait {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        unsynn::ToTokens::to_tokens(&self._arrow, tokens);
+        unsynn::ToTokens::to_tokens(&self.return_type, tokens);
+    }
+}
+
+impl quote::ToTokens for ReturnTypeFn {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         unsynn::ToTokens::to_tokens(&self._arrow, tokens);
         unsynn::ToTokens::to_tokens(&self.return_type, tokens);
