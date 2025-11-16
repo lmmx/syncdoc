@@ -249,10 +249,10 @@ unsynn! {
     /// Top-level item that can appear in a module
     #[derive(Clone)]
     pub enum ModuleItem {
-        /// A function definition
-        Function(FnSig),
 		/// A trait method signature (no body)
 		TraitMethod(TraitMethodSig),
+        /// A function definition
+        Function(FnSig),
         /// An impl block
         ImplBlock(ImplBlockSig),
         /// A module definition
@@ -866,8 +866,8 @@ impl quote::ToTokens for ExternWithAbi {
 impl quote::ToTokens for ModuleItem {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-            ModuleItem::Function(func) => quote::ToTokens::to_tokens(func, tokens),
             ModuleItem::TraitMethod(method) => quote::ToTokens::to_tokens(method, tokens),
+            ModuleItem::Function(func) => quote::ToTokens::to_tokens(func, tokens),
             ModuleItem::ImplBlock(impl_block) => quote::ToTokens::to_tokens(impl_block, tokens),
             ModuleItem::Module(module) => quote::ToTokens::to_tokens(module, tokens),
             ModuleItem::Trait(trait_def) => quote::ToTokens::to_tokens(trait_def, tokens),

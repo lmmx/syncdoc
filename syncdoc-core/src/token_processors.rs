@@ -59,15 +59,15 @@ impl TokenProcessor {
 
 	fn process_module_item(&self, item: ModuleItem) -> TokenStream {
 		match item {
-			ModuleItem::Function(func_sig) => {
-				let mut func_tokens = TokenStream::new();
-				quote::ToTokens::to_tokens(&func_sig, &mut func_tokens);
-				self.inject_doc_into_item(func_tokens, &func_sig.name.to_string())
-			}
 			ModuleItem::TraitMethod(method_sig) => {
 				let mut method_tokens = TokenStream::new();
 				quote::ToTokens::to_tokens(&method_sig, &mut method_tokens);
 				self.inject_doc_into_item(method_tokens, &method_sig.name.to_string())
+			}
+			ModuleItem::Function(func_sig) => {
+				let mut func_tokens = TokenStream::new();
+				quote::ToTokens::to_tokens(&func_sig, &mut func_tokens);
+				self.inject_doc_into_item(func_tokens, &func_sig.name.to_string())
 			}
 			ModuleItem::ImplBlock(impl_block) => self.process_impl_block(impl_block),
 			ModuleItem::Module(module) => self.process_module_block(module),

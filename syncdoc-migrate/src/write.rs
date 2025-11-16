@@ -107,18 +107,6 @@ fn extract_item_docs(
     let mut extractions = Vec::new();
 
     match item {
-        ModuleItem::Function(func_sig) => {
-            if let Some(content) = extract_doc_content(&func_sig.attributes) {
-                let path = build_path(base_path, &context, &func_sig.name.to_string());
-                let location = format!(
-                    "{}:{}",
-                    source_file.display(),
-                    func_sig.name.span().start().line
-                );
-                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
-            }
-        }
-
 		ModuleItem::TraitMethod(method_sig) => {
             if let Some(content) = extract_doc_content(&method_sig.attributes) {
                 let path = build_path(base_path, &context, &method_sig.name.to_string());
@@ -126,6 +114,18 @@ fn extract_item_docs(
                     "{}:{}",
                     source_file.display(),
                     method_sig.name.span().start().line
+                );
+                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
+            }
+        }
+
+        ModuleItem::Function(func_sig) => {
+            if let Some(content) = extract_doc_content(&func_sig.attributes) {
+                let path = build_path(base_path, &context, &func_sig.name.to_string());
+                let location = format!(
+                    "{}:{}",
+                    source_file.display(),
+                    func_sig.name.span().start().line
                 );
                 extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
             }
