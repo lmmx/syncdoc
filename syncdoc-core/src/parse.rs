@@ -212,7 +212,7 @@ unsynn! {
         /// Arrow
         pub _arrow: RArrow,
         /// Everything until brace (opaque)
-        pub return_type: VerbatimUntil<BraceGroup>,
+        pub return_type: VerbatimUntil<Either<BraceGroup, KWhere, Semicolon>>,
     }
 
     /// Represents a single predicate within a `where` clause.
