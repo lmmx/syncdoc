@@ -2,6 +2,7 @@
 use super::*;
 use proc_macro2::TokenStream;
 use quote::quote;
+use std::str::FromStr;
 
 fn parse_fn_sig(input: TokenStream) -> Result<FnSig> {
     let mut iter = input.into_token_iter();
@@ -124,4 +125,24 @@ fn test_const_function() {
 
     assert!(parsed.const_kw.is_some());
     assert_eq!(parsed.name.to_string(), "hello");
+}
+
+#[test]
+fn test_parse_trait_method() {
+    let code = r#"
+        #[doc = "Test method"]
+        fn test(&self) -> Result<(), Error>;
+    "#;
+
+    let tokens = TokenStream::from_str(code).unwrap();
+    let result = tokens.into_token_iter().parse::<TraitMethodSig>();
+    assert!(result.is_ok(), "Failed to parse trait method: {:?}", result.err());
+}
+
+#[test]
+fn test_parse_simple_trait_method() {
+    let code = "fn test(&self);";
+    let tokens = TokenStream::from_str(code).unwrap();
+    let result = tokens.into_token_iter().parse::<TraitMethodSig>();
+    assert!(result.is_ok(), "Failed to parse simple trait method: {:?}", result.err());
 }
