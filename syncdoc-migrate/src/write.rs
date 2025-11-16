@@ -119,6 +119,18 @@ fn extract_item_docs(
             }
         }
 
+		ModuleItem::TraitMethod(method_sig) => {
+            if let Some(content) = extract_doc_content(&method_sig.attributes) {
+                let path = build_path(base_path, &context, &method_sig.name.to_string());
+                let location = format!(
+                    "{}:{}",
+                    source_file.display(),
+                    method_sig.name.span().start().line
+                );
+                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
+            }
+        }
+
         ModuleItem::ImplBlock(impl_block) => {
             extractions.extend(extract_impl_docs(
                 impl_block,

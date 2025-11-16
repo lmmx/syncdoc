@@ -82,6 +82,20 @@ fn find_item_paths(
             ));
         }
 
+		ModuleItem::TraitMethod(method_sig) => {
+            let path = build_path(base_path, &context, &method_sig.name.to_string());
+            let location = format!(
+                "{}:{}",
+                source_file.display(),
+                method_sig.name.span().start().line
+            );
+            extractions.push(DocExtraction::new(
+                PathBuf::from(path),
+                String::new(),
+                location,
+            ));
+        }
+
         ModuleItem::ImplBlock(impl_block) => {
             extractions.extend(find_impl_paths(impl_block, context, base_path, source_file));
         }

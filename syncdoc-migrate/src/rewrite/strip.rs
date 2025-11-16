@@ -69,6 +69,7 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
 	// DEBUG: Print what kind of item this is
     syncdoc_debug!("Processing item type: {}", match item {
         ModuleItem::Function(_) => "Function",
+        ModuleItem::TraitMethod(_) => "TraitMethod",
         ModuleItem::Enum(_) => "Enum",
         ModuleItem::Struct(_) => "Struct",
         ModuleItem::Module(_) => "Module",
@@ -118,6 +119,45 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
                 unsynn::ToTokens::to_tokens(where_clause, &mut output);
             }
             unsynn::ToTokens::to_tokens(&func.body, &mut output);
+
+            output
+        }
+
+		ModuleItem::TraitMethod(method) => {
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&method.attributes);
+            let mut output = TokenStream::new();
+
+            // Add non-doc attributes
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            // Add rest of method signature
+            if let Some(const_kw) = &method.const_kw {
+                unsynn::ToTokens::to_tokens(const_kw, &mut output);
+            }
+            if let Some(async_kw) = &method.async_kw {
+                unsynn::ToTokens::to_tokens(async_kw, &mut output);
+            }
+            if let Some(unsafe_kw) = &method.unsafe_kw {
+                unsynn::ToTokens::to_tokens(unsafe_kw, &mut output);
+            }
+            if let Some(extern_kw) = &method.extern_kw {
+                unsynn::ToTokens::to_tokens(extern_kw, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&method._fn, &mut output);
+            quote::ToTokens::to_tokens(&method.name, &mut output);
+            if let Some(generics) = &method.generics {
+                unsynn::ToTokens::to_tokens(generics, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&method.params, &mut output);
+            if let Some(ret_type) = &method.return_type {
+                unsynn::ToTokens::to_tokens(ret_type, &mut output);
+            }
+            if let Some(where_clause) = &method.where_clause {
+                unsynn::ToTokens::to_tokens(where_clause, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&method._semi, &mut output);
 
             output
         }

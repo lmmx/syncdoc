@@ -251,6 +251,8 @@ unsynn! {
     pub enum ModuleItem {
         /// A function definition
         Function(FnSig),
+		/// A trait method signature (no body)
+		TraitMethod(TraitMethodSig),
         /// An impl block
         ImplBlock(ImplBlockSig),
         /// A module definition
@@ -327,6 +329,35 @@ unsynn! {
         /// Parsed trait body
         pub items: BraceGroupContaining<ModuleContent>,
     }
+
+	/// Trait method signature (no body)
+	#[derive(Clone)]
+	pub struct TraitMethodSig {
+		/// Optional attributes
+		pub attributes: Option<Many<Attribute>>,
+		/// Optional const modifier
+		pub const_kw: Option<KConst>,
+		/// Optional async modifier
+		pub async_kw: Option<KAsync>,
+		/// Optional unsafe modifier
+		pub unsafe_kw: Option<KUnsafe>,
+		/// Optional extern with optional ABI
+		pub extern_kw: Option<ExternSpec>,
+		/// The "fn" keyword
+		pub _fn: KFn,
+		/// Method name
+		pub name: Ident,
+		/// Optional generic parameters
+		pub generics: Option<Generics>,
+		/// Parameters in parentheses
+		pub params: ParenthesisGroupContaining<Option<CommaDelimitedVec<FnParam>>>,
+		/// Optional return type
+		pub return_type: Option<ReturnType>,
+		/// Optional where clause
+		pub where_clause: Option<WhereClauses>,
+		/// Semicolon (trait methods end with ;, not {})
+		pub _semi: Semicolon,
+	}
 
     /// enum Name { ... } block
     #[derive(Clone)]
@@ -627,6 +658,57 @@ impl quote::ToTokens for FnSig {
     }
 }
 
+impl quote::ToTokens for TraitMethodSig {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        // Add attributes
+        if let Some(attrs) = &self.attributes {
+            for attr in &attrs.0 {
+                unsynn::ToTokens::to_tokens(attr, tokens);
+            }
+        }
+
+        // Add const keyword
+        if let Some(const_kw) = &self.const_kw {
+            unsynn::ToTokens::to_tokens(const_kw, tokens);
+        }
+
+        // Add async keyword
+        if let Some(async_kw) = &self.async_kw {
+            unsynn::ToTokens::to_tokens(async_kw, tokens);
+        }
+
+        // Add unsafe keyword
+        if let Some(unsafe_kw) = &self.unsafe_kw {
+            unsynn::ToTokens::to_tokens(unsafe_kw, tokens);
+        }
+
+        // Add extern specification
+        if let Some(extern_kw) = &self.extern_kw {
+            unsynn::ToTokens::to_tokens(extern_kw, tokens);
+        }
+
+        // Add fn keyword and the rest
+        unsynn::ToTokens::to_tokens(&self._fn, tokens);
+        quote::ToTokens::to_tokens(&self.name, tokens);
+
+        if let Some(generics) = &self.generics {
+            unsynn::ToTokens::to_tokens(generics, tokens);
+        }
+
+        unsynn::ToTokens::to_tokens(&self.params, tokens);
+
+        if let Some(ret_type) = &self.return_type {
+            unsynn::ToTokens::to_tokens(ret_type, tokens);
+        }
+
+        if let Some(where_clause) = &self.where_clause {
+            unsynn::ToTokens::to_tokens(where_clause, tokens);
+        }
+
+        unsynn::ToTokens::to_tokens(&self._semi, tokens);
+    }
+}
+
 impl quote::ToTokens for FnParam {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
@@ -785,6 +867,7 @@ impl quote::ToTokens for ModuleItem {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
             ModuleItem::Function(func) => quote::ToTokens::to_tokens(func, tokens),
+            ModuleItem::TraitMethod(method) => quote::ToTokens::to_tokens(method, tokens),
             ModuleItem::ImplBlock(impl_block) => quote::ToTokens::to_tokens(impl_block, tokens),
             ModuleItem::Module(module) => quote::ToTokens::to_tokens(module, tokens),
             ModuleItem::Trait(trait_def) => quote::ToTokens::to_tokens(trait_def, tokens),
