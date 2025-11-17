@@ -13,41 +13,9 @@
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 
-/// Injects documentation from an external file into a function.
+/// Injects documentation from external files.
 ///
-/// # Examples
-///
-/// Document a single function:
-/// ```ignore
-/// # use syncdoc::syncdoc;
-/// #[syncdoc(path = "../docs/my_function.md")]
-/// pub fn my_function(my_arg: usize) {
-///     println!("inside my_function!");
-/// }
-/// ```
-///
-/// With a custom name:
-/// ```ignore
-/// # use syncdoc::syncdoc;
-/// #[syncdoc(path = "docs", name = "custom_name")]
-/// pub fn my_function() {
-///     // Will look for ../docs/custom_name.md
-/// }
-/// ```
-#[proc_macro_attribute]
-pub fn syncdoc(args: TokenStream, item: TokenStream) -> TokenStream {
-    let args2: TokenStream2 = args.into();
-    let item2: TokenStream2 = item.into();
-
-    match syncdoc_core::syncdoc_impl(args2, item2) {
-        Ok(tokens) => tokens.into(),
-        Err(error_tokens) => error_tokens.into(),
-    }
-}
-
-/// Injects documentation from external files for all functions within a module or impl block.
-///
-/// This macro applies documentation injection to every function found within
+/// This macro applies documentation injection to every documentable element found within
 /// the annotated module or impl block, automatically reading documentation from
 /// external markdown files based on a hierarchical path structure.
 ///

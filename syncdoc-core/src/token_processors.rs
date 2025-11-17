@@ -1,4 +1,4 @@
-use crate::{inject_doc_attr, syncdoc_impl};
+use crate::inject_doc_attr;
 use proc_macro2::TokenStream;
 use unsynn::*;
 
@@ -424,23 +424,6 @@ impl TokenProcessor {
 
         let full_path = path_parts.join("/");
         inject_doc_attr(full_path, self.cfg_attr.clone(), variant_tokens)
-    }
-
-    fn inject_doc_into_item(&self, func_tokens: TokenStream, fn_name: &str) -> TokenStream {
-        let mut path_parts = vec![self.base_path.clone()];
-        path_parts.extend(self.context.iter().cloned());
-        path_parts.push(format!("{}.md", fn_name));
-
-        let full_path = path_parts.join("/");
-        let args = quote::quote! { path = #full_path };
-
-        match syncdoc_impl(args, func_tokens.clone()) {
-            Ok(instrumented) => instrumented,
-            Err(e) => {
-                eprintln!("syncdoc_impl failed: {}", e);
-                func_tokens
-            }
-        }
     }
 
     fn inject_doc_into_simple_item(
