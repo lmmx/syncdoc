@@ -397,11 +397,24 @@ impl TokenProcessor {
             let variant = &variant_delimited.value;
             let variant_name = variant.name.to_string();
 
-            let mut variant_tokens = TokenStream::new();
-            quote::ToTokens::to_tokens(variant, &mut variant_tokens);
+            // Check if this is a struct-valued variant
+            let documented = if let Some(crate::parse::EnumVariantData::Struct(fields_containing)) =
+                &variant.data
+            {
+                // Process struct-valued variant with fields
+                self.process_struct_valued_variant(
+                    variant,
+                    enum_name,
+                    &variant_name,
+                    fields_containing,
+                )
+            } else {
+                // Process simple variant (unit, tuple, or discriminant)
+                let mut variant_tokens = TokenStream::new();
+                quote::ToTokens::to_tokens(variant, &mut variant_tokens);
+                self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name)
+            };
 
-            let documented =
-                self.inject_doc_for_enum_variant(variant_tokens, enum_name, &variant_name);
             output.extend(documented);
 
             if idx < variants_cdv.0.len() - 1 {
@@ -410,6 +423,94 @@ impl TokenProcessor {
         }
 
         output
+    }
+
+    fn process_struct_valued_variant(
+        &self,
+        variant: &crate::parse::EnumVariant,
+        enum_name: &str,
+        variant_name: &str,
+        fields_containing: &BraceGroupContaining<
+            Option<CommaDelimitedVec<crate::parse::StructField>>,
+        >,
+    ) -> TokenStream {
+        // First, inject doc for the variant itself
+        let mut variant_header = TokenStream::new();
+
+        // Add variant attributes
+        if let Some(attrs) = &variant.attributes {
+            for attr in &attrs.0 {
+                attr.to_tokens(&mut variant_header);
+            }
+        }
+
+        // Add variant name
+        variant.name.to_tokens(&mut variant_header);
+
+        // Inject doc for variant name
+        let variant_with_doc =
+            self.inject_doc_for_enum_variant(variant_header, enum_name, variant_name);
+
+        // Now process the fields
+        let processed_fields = if let Some(fields_cdv) = fields_containing.content.as_ref() {
+            self.process_enum_variant_fields(fields_cdv, enum_name, variant_name)
+        } else {
+            TokenStream::new()
+        };
+
+        // Combine: variant_name { fields }
+        let mut output = variant_with_doc;
+        let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, processed_fields);
+        output.extend(std::iter::once(proc_macro2::TokenTree::Group(group)));
+
+        output
+    }
+
+    fn process_enum_variant_fields(
+        &self,
+        fields_cdv: &CommaDelimitedVec<crate::parse::StructField>,
+        enum_name: &str,
+        variant_name: &str,
+    ) -> TokenStream {
+        let mut output = TokenStream::new();
+
+        for (idx, field_delimited) in fields_cdv.0.iter().enumerate() {
+            let field = &field_delimited.value;
+            let field_name = field.name.to_string();
+
+            let mut field_tokens = TokenStream::new();
+            quote::ToTokens::to_tokens(field, &mut field_tokens);
+
+            let documented = self.inject_doc_for_enum_variant_field(
+                field_tokens,
+                enum_name,
+                variant_name,
+                &field_name,
+            );
+            output.extend(documented);
+
+            if idx < fields_cdv.0.len() - 1 {
+                output.extend(quote::quote! { , });
+            }
+        }
+
+        output
+    }
+
+    fn inject_doc_for_enum_variant_field(
+        &self,
+        field_tokens: TokenStream,
+        enum_name: &str,
+        variant_name: &str,
+        field_name: &str,
+    ) -> TokenStream {
+        let mut path_parts = vec![self.base_path.clone()];
+        path_parts.extend(self.context.iter().cloned());
+        // Path structure: EnumName/VariantName/field_name.md
+        path_parts.push(format!("{}/{}/{}.md", enum_name, variant_name, field_name));
+
+        let full_path = path_parts.join("/");
+        omnidoc_impl(full_path, self.cfg_attr.clone(), field_tokens)
     }
 
     fn inject_doc_for_enum_variant(
@@ -466,3 +567,6 @@ fn extract_first_ident_from_tokens(
     }
     "Unknown".to_string()
 }
+
+#[cfg(test)]
+mod tok_proc_tests;
