@@ -327,21 +327,19 @@ pub mod inner {
                     eprintln!("Would rewrite {} file(s)", files_rewritten);
                 }
             }
+        } else if args.restore {
+            eprintln!("=== Restore Summary ===");
+            eprintln!("Processed {} file(s)", files_processed);
+            eprintln!("Restored {} file(s)", files_rewritten);
         } else {
-            if args.restore {
-                eprintln!("=== Restore Summary ===");
-                eprintln!("Processed {} file(s)", files_processed);
-                eprintln!("Restored {} file(s)", files_rewritten);
-            } else {
-                eprintln!("=== Migration Summary ===");
-                eprintln!("Processed {} file(s)", files_processed);
-                eprintln!("Extracted {} documentation(s)", total_extractions);
-                if args.touch {
-                    eprintln!("Touched {} missing file(s)", files_touched);
-                }
-                if args.strip_docs || args.annotate {
-                    eprintln!("Rewrote {} file(s)", files_rewritten);
-                }
+            eprintln!("=== Migration Summary ===");
+            eprintln!("Processed {} file(s)", files_processed);
+            eprintln!("Extracted {} documentation(s)", total_extractions);
+            if args.touch {
+                eprintln!("Touched {} missing file(s)", files_touched);
+            }
+            if args.strip_docs || args.annotate {
+                eprintln!("Rewrote {} file(s)", files_rewritten);
             }
         }
 

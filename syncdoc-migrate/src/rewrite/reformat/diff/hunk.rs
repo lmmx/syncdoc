@@ -110,3 +110,27 @@ pub fn split_hunk_if_mixed(hunk: &DiffHunk, after_lines: &[&str]) -> Vec<DiffHun
         vec![hunk.clone()]
     }
 }
+
+/// Checks if a hunk is related to restore operations (removing omnidoc, adding doc comments)
+pub fn is_restore_related_hunk(
+    hunk: &DiffHunk,
+    original_lines: &[&str],
+    after_lines: &[&str],
+) -> bool {
+    let removes_omnidoc = (0..hunk.before_count).any(|i| {
+        let idx = hunk.before_start + i;
+        idx < original_lines.len() && {
+            let line = original_lines[idx].replace(" ", "");
+            line.contains("#[omnidoc") || line.contains("#![doc=syncdoc::module_doc!")
+        }
+    });
+
+    let adds_docs = (hunk.after_start..hunk.after_start + hunk.after_count).any(|i| {
+        i < after_lines.len() && {
+            let line = after_lines[i].trim();
+            line.starts_with("///") || line.starts_with("//!")
+        }
+    });
+
+    removes_omnidoc || adds_docs
+}
