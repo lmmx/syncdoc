@@ -136,7 +136,11 @@ fn test_parse_trait_method() {
 
     let tokens = TokenStream::from_str(code).unwrap();
     let result = tokens.into_token_iter().parse::<TraitMethodSig>();
-    assert!(result.is_ok(), "Failed to parse trait method: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Failed to parse trait method: {:?}",
+        result.err()
+    );
 }
 
 #[test]
@@ -144,5 +148,9 @@ fn test_parse_simple_trait_method() {
     let code = "fn test(&self);";
     let tokens = TokenStream::from_str(code).unwrap();
     let result = tokens.into_token_iter().parse::<TraitMethodSig>();
-    assert!(result.is_ok(), "Failed to parse simple trait method: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Failed to parse simple trait method: {:?}",
+        result.err()
+    );
 }

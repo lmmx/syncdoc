@@ -57,45 +57,45 @@ impl TokenProcessor {
         output
     }
 
-	fn process_module_item(&self, item: ModuleItem) -> TokenStream {
-		match item {
-			ModuleItem::TraitMethod(method_sig) => {
-				let mut method_tokens = TokenStream::new();
-				quote::ToTokens::to_tokens(&method_sig, &mut method_tokens);
-				self.inject_doc_into_item(method_tokens, &method_sig.name.to_string())
-			}
-			ModuleItem::Function(func_sig) => {
-				let mut func_tokens = TokenStream::new();
-				quote::ToTokens::to_tokens(&func_sig, &mut func_tokens);
-				self.inject_doc_into_item(func_tokens, &func_sig.name.to_string())
-			}
-			ModuleItem::ImplBlock(impl_block) => self.process_impl_block(impl_block),
-			ModuleItem::Module(module) => self.process_module_block(module),
-			ModuleItem::Trait(trait_def) => self.process_trait_block(trait_def),
-			ModuleItem::Enum(enum_sig) => self.process_enum(enum_sig),
-			ModuleItem::Struct(struct_sig) => self.process_struct(struct_sig),
-			ModuleItem::TypeAlias(type_alias) => {
-				let mut alias_tokens = TokenStream::new();
-				quote::ToTokens::to_tokens(&type_alias, &mut alias_tokens);
-				self.inject_doc_into_simple_item(alias_tokens, &type_alias.name.to_string())
-			}
-			ModuleItem::Const(const_sig) => {
-				let mut const_tokens = TokenStream::new();
-				quote::ToTokens::to_tokens(&const_sig, &mut const_tokens);
-				self.inject_doc_into_simple_item(const_tokens, &const_sig.name.to_string())
-			}
-			ModuleItem::Static(static_sig) => {
-				let mut static_tokens = TokenStream::new();
-				quote::ToTokens::to_tokens(&static_sig, &mut static_tokens);
-				self.inject_doc_into_simple_item(static_tokens, &static_sig.name.to_string())
-			}
-			ModuleItem::Other(token) => {
-				let mut tokens = TokenStream::new();
-				token.to_tokens(&mut tokens);
-				tokens
-			}
-		}
-	}
+    fn process_module_item(&self, item: ModuleItem) -> TokenStream {
+        match item {
+            ModuleItem::TraitMethod(method_sig) => {
+                let mut method_tokens = TokenStream::new();
+                quote::ToTokens::to_tokens(&method_sig, &mut method_tokens);
+                self.inject_doc_into_item(method_tokens, &method_sig.name.to_string())
+            }
+            ModuleItem::Function(func_sig) => {
+                let mut func_tokens = TokenStream::new();
+                quote::ToTokens::to_tokens(&func_sig, &mut func_tokens);
+                self.inject_doc_into_item(func_tokens, &func_sig.name.to_string())
+            }
+            ModuleItem::ImplBlock(impl_block) => self.process_impl_block(impl_block),
+            ModuleItem::Module(module) => self.process_module_block(module),
+            ModuleItem::Trait(trait_def) => self.process_trait_block(trait_def),
+            ModuleItem::Enum(enum_sig) => self.process_enum(enum_sig),
+            ModuleItem::Struct(struct_sig) => self.process_struct(struct_sig),
+            ModuleItem::TypeAlias(type_alias) => {
+                let mut alias_tokens = TokenStream::new();
+                quote::ToTokens::to_tokens(&type_alias, &mut alias_tokens);
+                self.inject_doc_into_simple_item(alias_tokens, &type_alias.name.to_string())
+            }
+            ModuleItem::Const(const_sig) => {
+                let mut const_tokens = TokenStream::new();
+                quote::ToTokens::to_tokens(&const_sig, &mut const_tokens);
+                self.inject_doc_into_simple_item(const_tokens, &const_sig.name.to_string())
+            }
+            ModuleItem::Static(static_sig) => {
+                let mut static_tokens = TokenStream::new();
+                quote::ToTokens::to_tokens(&static_sig, &mut static_tokens);
+                self.inject_doc_into_simple_item(static_tokens, &static_sig.name.to_string())
+            }
+            ModuleItem::Other(token) => {
+                let mut tokens = TokenStream::new();
+                token.to_tokens(&mut tokens);
+                tokens
+            }
+        }
+    }
 
     fn process_impl_block(&self, impl_block: ImplBlockSig) -> TokenStream {
         // Check if this is a trait impl (has "for" clause)

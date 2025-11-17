@@ -258,8 +258,8 @@ unsynn! {
     /// Top-level item that can appear in a module
     #[derive(Clone)]
     pub enum ModuleItem {
-		/// A trait method signature (no body)
-		TraitMethod(TraitMethodSig),
+        /// A trait method signature (no body)
+        TraitMethod(TraitMethodSig),
         /// A function definition
         Function(FnSig),
         /// An impl block
@@ -339,34 +339,34 @@ unsynn! {
         pub items: BraceGroupContaining<ModuleContent>,
     }
 
-	/// Trait method signature (no body)
-	#[derive(Clone)]
-	pub struct TraitMethodSig {
-		/// Optional attributes
-		pub attributes: Option<Many<Attribute>>,
-		/// Optional const modifier
-		pub const_kw: Option<KConst>,
-		/// Optional async modifier
-		pub async_kw: Option<KAsync>,
-		/// Optional unsafe modifier
-		pub unsafe_kw: Option<KUnsafe>,
-		/// Optional extern with optional ABI
-		pub extern_kw: Option<ExternSpec>,
-		/// The "fn" keyword
-		pub _fn: KFn,
-		/// Method name
-		pub name: Ident,
-		/// Optional generic parameters
-		pub generics: Option<Generics>,
-		/// Parameters in parentheses
-		pub params: ParenthesisGroupContaining<Option<CommaDelimitedVec<FnParam>>>,
-		/// Optional return type
-		pub return_type: Option<ReturnTypeTrait>,
-		/// Optional where clause
-		pub where_clause: Option<WhereClauses>,
-		/// Semicolon (trait methods end with ;, not {})
-		pub _semi: Semicolon,
-	}
+    /// Trait method signature (no body)
+    #[derive(Clone)]
+    pub struct TraitMethodSig {
+        /// Optional attributes
+        pub attributes: Option<Many<Attribute>>,
+        /// Optional const modifier
+        pub const_kw: Option<KConst>,
+        /// Optional async modifier
+        pub async_kw: Option<KAsync>,
+        /// Optional unsafe modifier
+        pub unsafe_kw: Option<KUnsafe>,
+        /// Optional extern with optional ABI
+        pub extern_kw: Option<ExternSpec>,
+        /// The "fn" keyword
+        pub _fn: KFn,
+        /// Method name
+        pub name: Ident,
+        /// Optional generic parameters
+        pub generics: Option<Generics>,
+        /// Parameters in parentheses
+        pub params: ParenthesisGroupContaining<Option<CommaDelimitedVec<FnParam>>>,
+        /// Optional return type
+        pub return_type: Option<ReturnTypeTrait>,
+        /// Optional where clause
+        pub where_clause: Option<WhereClauses>,
+        /// Semicolon (trait methods end with ;, not {})
+        pub _semi: Semicolon,
+    }
 
     /// enum Name { ... } block
     #[derive(Clone)]

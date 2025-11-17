@@ -107,7 +107,7 @@ fn extract_item_docs(
     let mut extractions = Vec::new();
 
     match item {
-		ModuleItem::TraitMethod(method_sig) => {
+        ModuleItem::TraitMethod(method_sig) => {
             if let Some(content) = extract_doc_content(&method_sig.attributes) {
                 let path = build_path(base_path, &context, &method_sig.name.to_string());
                 let location = format!(
