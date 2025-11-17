@@ -39,6 +39,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
+name = "braces"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27391058afa36b3e857c44e4078727bb5e12108186270036e0fc9b93dd8eba9d"
+
+[[package]]
 name = "bstr"
 version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -674,9 +680,11 @@ dependencies = [
 name = "syncdoc-migrate"
 version = "0.3.5"
 dependencies = [
+ "braces",
  "duct",
  "imara-diff",
  "insta",
+ "itertools",
  "proc-macro2",
  "quote",
  "rust-format",

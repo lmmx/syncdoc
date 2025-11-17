@@ -1,4 +1,7 @@
 use super::*;
+use braces::{brace_paths, BraceConfig};
+use insta::assert_snapshot;
+use itertools::Itertools;
 use std::fs;
 use tempfile::TempDir;
 
@@ -7,6 +10,11 @@ fn setup_test_file(source: &str, filename: &str) -> (TempDir, PathBuf) {
     let file_path = temp_dir.path().join(filename);
     fs::write(&file_path, source).unwrap();
     (temp_dir, file_path)
+}
+
+fn to_braces(paths: &[&str]) -> String {
+    let braces_config = BraceConfig::default();
+    brace_paths(paths, &braces_config).expect("Brace error")
 }
 
 #[test]
@@ -26,16 +34,16 @@ fn test_find_expected_simple_function() {
     // Should find module file + function
     assert_eq!(expected.len(), 2);
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
-    assert!(paths.contains(&"docs/test.md".to_string()));
-    assert!(paths.contains(&"docs/my_function.md".to_string()));
+    assert_snapshot!(to_braces(&paths), @"docs/{test,my_function}.md");
 
     // Content should be empty (just a newline from DocExtraction::new)
-    assert!(expected.iter().all(|e| e.content == "\n"));
+    let contents: Vec<&str> = expected.iter().map(|e| e.content.as_str()).collect();
+    assert_snapshot!(to_braces(&contents), @"\n");
 }
 
 #[test]
