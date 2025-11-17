@@ -1,6 +1,13 @@
 use super::*;
+use braces::{brace_paths, BraceConfig};
+use insta::assert_snapshot;
 use std::fs;
 use tempfile::TempDir;
+
+fn to_braces(paths: &[&str]) -> String {
+    let braces_config = BraceConfig::default();
+    brace_paths(paths, &braces_config).expect("Brace error")
+}
 
 #[test]
 fn test_discover_finds_rs_files() {
@@ -22,13 +29,15 @@ fn test_discover_finds_rs_files() {
 
     let rust_files = discover_rust_files(base).unwrap();
 
-    // Should find exactly 3 .rs files
-    assert_eq!(rust_files.len(), 3);
+    // Collect relative paths for snapshot
+    let mut paths: Vec<String> = rust_files
+        .iter()
+        .map(|p| p.strip_prefix(base).unwrap().to_str().unwrap().to_string())
+        .collect();
+    paths.sort();
 
-    // Verify all are .rs files
-    for file in &rust_files {
-        assert_eq!(file.extension(), Some(std::ffi::OsStr::new("rs")));
-    }
+    let path_refs: Vec<&str> = paths.iter().map(|s| s.as_str()).collect();
+    assert_snapshot!(to_braces(&path_refs), @"{lib,main,module/mod}.rs");
 }
 
 #[test]

@@ -1,5 +1,5 @@
-// syncdoc-migrate/tests/write_integration.rs
-
+use braces::{brace_paths, BraceConfig};
+use insta::assert_snapshot;
 use syncdoc_migrate::{
     discover::parse_file,
     write::{extract_all_docs, write_extractions},
@@ -8,42 +8,84 @@ use syncdoc_migrate::{
 mod helpers;
 use helpers::*;
 
+fn to_braces(paths: &[&str]) -> String {
+    let braces_config = BraceConfig::default();
+    brace_paths(paths, &braces_config).expect("Brace error")
+}
+
+fn parse_and_get_paths(source: &str, filename: &str, docs_dir: &str) -> Vec<String> {
+    let (_temp_dir, file_path) = setup_test_file(source, filename);
+    let parsed = parse_file(&file_path).unwrap();
+    let extractions = extract_all_docs(&parsed, docs_dir);
+    extractions
+        .iter()
+        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .collect()
+}
+
+fn get_path_refs(paths: &[String]) -> Vec<&str> {
+    paths.iter().map(|s| s.as_str()).collect()
+}
+
 #[test]
 fn test_extract_and_write_function_docs() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         /// A simple function
         pub fn my_function() {
             println!("Hello");
         }
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/my_function.md");
+
+    // Verify content separately
+    let (_temp_dir, file_path) = setup_test_file(
+        r#"
+        /// A simple function
+        pub fn my_function() {
+            println!("Hello");
+        }
+        "#,
+        "test.rs",
+    );
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, "docs");
-
-    assert_eq!(extractions.len(), 1);
-    assert_eq!(
-        extractions[0].markdown_path.to_str().unwrap(),
-        "docs/my_function.md"
-    );
     assert_eq!(extractions[0].content, "A simple function\n");
 }
 
 #[test]
 fn test_extract_and_write_module_docs() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         /// Module documentation
         pub mod my_module {
             /// Inner function
             pub fn inner_func() {}
         }
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/my_module/{inner_func,}.md");
+
+    // Verify content
+    let (_temp_dir, file_path) = setup_test_file(
+        r#"
+        /// Module documentation
+        pub mod my_module {
+            /// Inner function
+            pub fn inner_func() {}
+        }
+        "#,
+        "test.rs",
+    );
     let parsed = parse_file(&file_path).unwrap();
     let extractions = extract_all_docs(&parsed, "docs");
-
-    assert_eq!(extractions.len(), 2);
 
     let module_doc = extractions
         .iter()
@@ -60,7 +102,8 @@ fn test_extract_and_write_module_docs() {
 
 #[test]
 fn test_extract_and_write_impl_method_docs() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         struct MyType;
 
         impl MyType {
@@ -70,108 +113,64 @@ fn test_extract_and_write_impl_method_docs() {
             /// Another method
             fn another_method() {}
         }
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, "docs");
-
-    assert_eq!(extractions.len(), 2);
-
-    assert!(extractions.iter().any(|e| e.markdown_path.to_str().unwrap()
-        == "docs/MyType/my_method.md"
-        && e.content == "A method\n"));
-
-    assert!(extractions.iter().any(|e| e.markdown_path.to_str().unwrap()
-        == "docs/MyType/another_method.md"
-        && e.content == "Another method\n"));
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/MyType/{my,another}_method.md");
 }
 
 #[test]
 fn test_extract_and_write_struct_and_field_docs() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         /// A documented struct
         pub struct MyStruct {
             /// First field
             pub field1: String,
+
             /// Second field
             field2: i32,
+
             /// Third field
             pub field3: bool,
         }
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, "docs");
-
-    assert_eq!(extractions.len(), 4, "Should extract struct + 3 fields");
-
-    let struct_doc = extractions
-        .iter()
-        .find(|e| e.markdown_path.to_str().unwrap() == "docs/MyStruct.md")
-        .expect("Should find struct doc");
-    assert_eq!(struct_doc.content, "A documented struct\n");
-
-    for (field_name, expected_content) in [
-        ("field1", "First field\n"),
-        ("field2", "Second field\n"),
-        ("field3", "Third field\n"),
-    ] {
-        let field_doc = extractions
-            .iter()
-            .find(|e| {
-                e.markdown_path.to_str().unwrap() == format!("docs/MyStruct/{}.md", field_name)
-            })
-            .unwrap_or_else(|| panic!("Should find {} doc", field_name));
-        assert_eq!(field_doc.content, expected_content);
-    }
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/MyStruct/{field1,field2,field3,}.md");
 }
 
 #[test]
 fn test_extract_and_write_enum_and_variant_docs() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         /// An enum
         pub enum MyEnum {
             /// First variant
             Variant1,
+
             /// Second variant
             Variant2(i32),
+
             /// Third variant
             Variant3 { field: String },
         }
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, "docs");
-
-    assert_eq!(extractions.len(), 4, "Should extract enum + 3 variants");
-
-    let enum_doc = extractions
-        .iter()
-        .find(|e| e.markdown_path.to_str().unwrap() == "docs/MyEnum.md")
-        .expect("Should find enum doc");
-    assert_eq!(enum_doc.content, "An enum\n");
-
-    for (variant_name, expected_content) in [
-        ("Variant1", "First variant\n"),
-        ("Variant2", "Second variant\n"),
-        ("Variant3", "Third variant\n"),
-    ] {
-        let variant_doc = extractions
-            .iter()
-            .find(|e| {
-                e.markdown_path.to_str().unwrap() == format!("docs/MyEnum/{}.md", variant_name)
-            })
-            .unwrap_or_else(|| panic!("Should find {} doc", variant_name));
-        assert_eq!(variant_doc.content, expected_content);
-    }
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/MyEnum/{Variant1,Variant2,Variant3,}.md");
 }
 
 #[test]
 fn test_extract_and_write_trait_method_docs() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         /// A trait
         pub trait MyTrait {
             /// Default method with body
@@ -179,26 +178,18 @@ fn test_extract_and_write_trait_method_docs() {
                 println!("default");
             }
         }
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, "docs");
-
-    assert_eq!(extractions.len(), 2);
-
-    assert!(extractions.iter().any(
-        |e| e.markdown_path.to_str().unwrap() == "docs/MyTrait.md" && e.content == "A trait\n"
-    ));
-
-    assert!(extractions.iter().any(|e| e.markdown_path.to_str().unwrap()
-        == "docs/MyTrait/default_method.md"
-        && e.content == "Default method with body\n"));
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/MyTrait/{default_method,}.md");
 }
 
 #[test]
 fn test_extract_const_static_type_alias() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         /// A constant
         const MY_CONST: i32 = 42;
 
@@ -207,51 +198,30 @@ fn test_extract_const_static_type_alias() {
 
         /// A type alias
         type MyType = Vec<String>;
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, "docs");
-
-    assert_eq!(extractions.len(), 3);
-
-    assert!(extractions
-        .iter()
-        .any(|e| e.markdown_path.to_str().unwrap() == "docs/MY_CONST.md"
-            && e.content == "A constant\n"));
-
-    assert!(extractions
-        .iter()
-        .any(|e| e.markdown_path.to_str().unwrap() == "docs/MY_STATIC.md"
-            && e.content == "A static\n"));
-
-    assert!(extractions
-        .iter()
-        .any(|e| e.markdown_path.to_str().unwrap() == "docs/MyType.md"
-            && e.content == "A type alias\n"));
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/{MY_CONST.md,MY_STATIC.md,MyType.md}");
 }
 
 #[test]
 fn test_nested_modules_create_correct_paths() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         pub mod outer {
             pub mod inner {
                 /// Deeply nested function
                 pub fn deep_func() {}
             }
         }
-    "#;
-
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, "docs");
-
-    assert_eq!(extractions.len(), 1);
-    assert_eq!(
-        extractions[0].markdown_path.to_str().unwrap(),
-        "docs/outer/inner/deep_func.md"
+        "#,
+        "test.rs",
+        "docs",
     );
-    assert_eq!(extractions[0].content, "Deeply nested function\n");
+
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/outer/inner/deep_func.md");
 }
 
 #[test]
@@ -273,7 +243,6 @@ fn test_write_extractions_creates_files() {
     let extractions = extract_all_docs(&parsed, docs_dir.to_str().unwrap());
 
     let report = write_extractions(&extractions, false).unwrap();
-
     assert_report(&report, 2);
 
     assert_file(docs_dir.join("my_func.md"), "A function\n");
