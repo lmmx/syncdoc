@@ -40,9 +40,9 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
 name = "braces"
-version = "0.2.1"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "27391058afa36b3e857c44e4078727bb5e12108186270036e0fc9b93dd8eba9d"
+checksum = "45da70b2216569402fa455cd019dbeda8866fee05eb76f90fa0a2b1100449cf6"
 
 [[package]]
 name = "bstr"
@@ -649,6 +649,7 @@ name = "syncdoc"
 version = "0.3.6"
 dependencies = [
  "assert_cmd",
+ "braces",
  "facet",
  "facet-args",
  "insta",
