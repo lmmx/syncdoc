@@ -23,6 +23,5 @@ unsynn.workspace = true
 [dev-dependencies]
 braces = "0.2.1"
 insta.workspace = true
-itertools = "0.14.0"
 rust-format.workspace = true
 tempfile.workspace = true

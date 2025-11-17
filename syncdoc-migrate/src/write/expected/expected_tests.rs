@@ -1,7 +1,6 @@
 use super::*;
 use braces::{brace_paths, BraceConfig};
 use insta::assert_snapshot;
-use itertools::Itertools;
 use std::fs;
 use tempfile::TempDir;
 
