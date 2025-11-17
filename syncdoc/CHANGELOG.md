@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.8](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.3.7...syncdoc-v0.3.8) - 2025-11-17
+
+### <!-- 9 -->Other
+
+- updated the following local packages: syncdoc-core, syncdoc-migrate
+
 ## [0.3.7](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.3.6...syncdoc-v0.3.7) - 2025-11-17
 
 ### <!-- 1 -->Features

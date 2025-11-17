@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.4](https://github.com/lmmx/syncdoc/compare/syncdoc-core-v0.3.3...syncdoc-core-v0.3.4) - 2025-11-17
+
+### <!-- 2 -->Bug Fixes
+
+- handle docs-path set via relative path from a source file
+
 ## [0.3.3](https://github.com/lmmx/syncdoc/compare/syncdoc-core-v0.3.2...syncdoc-core-v0.3.3) - 2025-11-16
 
 ### <!-- 2 -->Bug Fixes
