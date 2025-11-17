@@ -646,7 +646,7 @@ dependencies = [
 
 [[package]]
 name = "syncdoc"
-version = "0.3.6"
+version = "0.3.7"
 dependencies = [
  "assert_cmd",
  "braces",
@@ -679,7 +679,7 @@ dependencies = [
 
 [[package]]
 name = "syncdoc-migrate"
-version = "0.3.5"
+version = "0.3.6"
 dependencies = [
  "braces",
  "duct",

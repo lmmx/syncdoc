@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.6](https://github.com/lmmx/syncdoc/compare/syncdoc-migrate-v0.3.5...syncdoc-migrate-v0.3.6) - 2025-11-17
+
+### <!-- 1 -->Features
+
+- set up braces ([#48](https://github.com/lmmx/syncdoc/pull/48))
+
+### <!-- 4 -->Documentation
+
+- backtick escape the casual use of syntax
+
 ## [0.3.5](https://github.com/lmmx/syncdoc/compare/syncdoc-migrate-v0.3.4...syncdoc-migrate-v0.3.5) - 2025-11-16
 
 ### <!-- 2 -->Bug Fixes
