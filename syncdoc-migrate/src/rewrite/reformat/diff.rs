@@ -171,6 +171,54 @@ pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> 
     result.join("\n")
 }
 
+/// Strips doc attribute bookends from a line if present
+/// Converts `#[doc = "//! text"]` -> `//! text`
+/// Converts `#[doc = "/// text"]` -> `/// text`
+fn strip_doc_attr_bookends(line: &str) -> String {
+    let trimmed = line.trim();
+
+    // Check for #[doc = "//! ..."] pattern
+    if let Some(start) = trimmed.find(r#"#[doc = "//!"#) {
+        if let Some(end) = trimmed.rfind(r#""]"#) {
+            let content_start = start + r#"#[doc = ""#.len();
+            if content_start < end {
+                let content = &trimmed[content_start..end];
+                let indent = &line[..line.len() - line.trim_start().len()];
+                // If content is just a space after //!, output just //!
+                if content == "//! " {
+                    return format!("{}//!", indent);
+                }
+                return format!("{}{}", indent, content);
+            }
+        }
+    }
+
+    // Check for #[doc = "/// ..."] pattern
+    if let Some(start) = trimmed.find(r#"#[doc = "///"#) {
+        if let Some(end) = trimmed.rfind(r#""]"#) {
+            let content_start = start + r#"#[doc = ""#.len();
+            if content_start < end {
+                let content = &trimmed[content_start..end];
+                let indent = &line[..line.len() - line.trim_start().len()];
+                // If content is just a space after ///, output just ///
+                if content == "/// " {
+                    return format!("{}///", indent);
+                }
+                return format!("{}{}", indent, content);
+            }
+        }
+    }
+
+    line.to_string()
+}
+
+fn strip_all_doc_attr_bookends(code: &str) -> String {
+    code.lines()
+        .map(|line| strip_doc_attr_bookends(line))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 /// Applies diff hunks to original source for restore operations
 pub fn apply_diff_restore(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> String {
     let original_lines: Vec<&str> = original.lines().collect();
@@ -276,7 +324,8 @@ pub fn apply_diff_restore(original: &str, hunks: &[DiffHunk], formatted_after: &
         orig_idx += 1;
     }
 
-    result.join("\n")
+    let joined = result.join("\n");
+    strip_all_doc_attr_bookends(&joined)
 }
 
 #[cfg(test)]
