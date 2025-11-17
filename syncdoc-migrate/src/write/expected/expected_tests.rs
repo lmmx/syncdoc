@@ -16,6 +16,20 @@ fn to_braces(paths: &[&str]) -> String {
     brace_paths(paths, &braces_config).expect("Brace error")
 }
 
+fn parse_and_get_paths(source: &str, filename: &str, docs_dir: &str) -> Vec<String> {
+    let (_temp_dir, file_path) = setup_test_file(source, filename);
+    let parsed = crate::discover::parse_file(&file_path).unwrap();
+    let expected = find_expected_doc_paths(&parsed, docs_dir);
+    expected
+        .iter()
+        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .collect()
+}
+
+fn get_path_refs(paths: &[String]) -> Vec<&str> {
+    paths.iter().map(|s| s.as_str()).collect()
+}
+
 #[test]
 fn test_find_expected_simple_function() {
     let source = r#"
@@ -28,16 +42,10 @@ fn test_find_expected_simple_function() {
     let parsed = crate::discover::parse_file(&file_path).unwrap();
     let expected = find_expected_doc_paths(&parsed, "docs");
 
-    eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
-
-    // Should find module file + function
-    assert_eq!(expected.len(), 2);
-
     let paths: Vec<&str> = expected
         .iter()
         .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
-
     assert_snapshot!(to_braces(&paths), @"docs/{test,my_function}.md");
 
     // Content should be empty (just a newline from DocExtraction::new)
@@ -47,61 +55,42 @@ fn test_find_expected_simple_function() {
 
 #[test]
 fn test_find_expected_struct_with_fields() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         pub struct Config {
             pub port: u16,
             host: String,
             timeout: u64,
         }
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
-
-    // Module + struct + 3 fields
-    assert_eq!(expected.len(), 5);
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
-
-    assert_snapshot!(to_braces(&paths), @"docs/{test,Config/{port,host,timeout,}}.md");
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/{test,Config/{port,host,timeout,}}.md");
 }
 
 #[test]
 fn test_find_expected_enum_with_variants() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         pub enum Status {
             Active,
             Inactive,
             Error(String),
         }
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
-
-    // Module + enum + 3 variants
-    assert_eq!(expected.len(), 5);
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
-
-    assert_snapshot!(to_braces(&paths), @"docs/{test,Status/{Active,Inactive,Error,}}.md");
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/{test,Status/{Active,Inactive,Error,}}.md");
 }
 
 #[test]
 fn test_find_expected_impl_block() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         struct Calculator;
 
         impl Calculator {
@@ -117,28 +106,18 @@ fn test_find_expected_impl_block() {
                 a - b
             }
         }
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
-
-    // Module + struct + 3 methods
-    assert_eq!(expected.len(), 5);
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
-
-    assert_snapshot!(to_braces(&paths), @"docs/{test,Calculator/{new,add,subtract,}}.md");
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/{test,Calculator/{new,add,subtract,}}.md");
 }
 
 #[test]
 fn test_find_expected_nested_module() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         pub mod outer {
             pub mod inner {
                 pub fn nested_func() {}
@@ -146,28 +125,18 @@ fn test_find_expected_nested_module() {
 
             pub fn outer_func() {}
         }
-    "#;
-
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
-
-    assert_snapshot!(
-        to_braces(&paths),
-        @"docs/{test,outer/{inner/{nested_func,},outer_func,}}.md"
+        "#,
+        "test.rs",
+        "docs",
     );
+
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/{test,outer/{inner/{nested_func,},outer_func,}}.md");
 }
 
 #[test]
 fn test_find_expected_trait_with_methods() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         pub trait MyTrait {
             fn required_method(&self);
 
@@ -175,56 +144,33 @@ fn test_find_expected_trait_with_methods() {
                 println!("default");
             }
         }
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
-
-    eprintln!("EXPECTED DOC PATHS:\n{:#?}", expected);
-
-    assert_snapshot!(to_braces(&paths), @"docs/{test,MyTrait/{required_method,default_method,}}.md");
-
-    // Note: trait methods without bodies (required methods) don't have
-    // function signatures in the parsed AST the same way, so we only
-    // expect the default method
-    // This is actually correct behavior - required methods are just
-    // declarations, not function items, so they wouldn't get omnidoc
-    // attributes in practice
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/{test,MyTrait/{required_method,default_method,}}.md");
 }
 
 #[test]
 fn test_find_expected_const_static_type_alias() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         const MY_CONST: i32 = 42;
         static MY_STATIC: &str = "hello";
         type MyType = Vec<String>;
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
-
-    assert_snapshot!(to_braces(&paths), @"docs/{test,MY_CONST,MY_STATIC,MyType}.md");
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/{test,MY_CONST,MY_STATIC,MyType}.md");
 }
 
 #[test]
 fn test_find_expected_complex_structure() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         pub mod api {
             pub struct Config {
                 pub port: u16,
@@ -241,51 +187,37 @@ fn test_find_expected_complex_structure() {
                 Error,
             }
         }
-    "#;
-
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
+        "#,
+        "test.rs",
+        "docs",
+    );
 
     assert_snapshot!(
-        to_braces(&paths),
+        to_braces(&get_path_refs(&paths)),
         @"docs/{test.md,api.md,api/{Config.md,Config/{port.md,new.md},Status.md,Status/{Ok.md,Error.md}}}"
     );
 }
 
 #[test]
 fn test_find_expected_lib_rs() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         pub enum TimeOfDay {
             Day,
             Night,
         }
-    "#;
+        "#,
+        "lib.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "lib.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
-
-    assert_snapshot!(to_braces(&paths), @"docs/{lib,TimeOfDay/{Day,Night,}}.md");
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/{lib,TimeOfDay/{Day,Night,}}.md");
 }
 
 #[test]
 fn test_find_expected_only_functions_with_bodies() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         trait MyTrait {
             fn required();
             fn with_default() {}
@@ -294,25 +226,18 @@ fn test_find_expected_only_functions_with_bodies() {
         extern "C" {
             fn external_fn();
         }
-    "#;
+        "#,
+        "test.rs",
+        "docs",
+    );
 
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
-
-    assert_snapshot!(to_braces(&paths), @"docs/{test,MyTrait/{required,with_default,}}.md");
-
-    // Required methods and extern declarations shouldn't be in the list
+    assert_snapshot!(to_braces(&get_path_refs(&paths)), @"docs/{test,MyTrait/{required,with_default,}}.md");
 }
 
 #[test]
 fn test_find_expected_trait_impl_for_struct() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         pub trait Format {
             fn file_extension(&self) -> &str;
             fn language(&self) -> String;
@@ -329,28 +254,21 @@ fn test_find_expected_trait_impl_for_struct() {
                 "markdown".to_string()
             }
         }
-    "#;
-
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
-
-    eprintln!("Paths found: {:#?}", paths);
+        "#,
+        "test.rs",
+        "docs",
+    );
 
     assert_snapshot!(
-        to_braces(&paths),
+        to_braces(&get_path_refs(&paths)),
         @"docs/{test,Format/{file_extension,language,},MarkdownFormat/{Format/{file_extension,language},}}.md"
     );
 }
 
 #[test]
 fn test_find_expected_trait_impl_in_submodule() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         pub mod formats {
             pub mod markdown {
                 pub trait Format {
@@ -366,28 +284,21 @@ fn test_find_expected_trait_impl_in_submodule() {
                 }
             }
         }
-    "#;
-
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
-
-    eprintln!("Paths found: {:#?}", paths);
+        "#,
+        "test.rs",
+        "docs",
+    );
 
     assert_snapshot!(
-        to_braces(&paths),
+        to_braces(&get_path_refs(&paths)),
         @"docs/{test,formats/{markdown/{Format/{file_extension,},MarkdownFormat/{Format/file_extension,},},}}.md"
     );
 }
 
 #[test]
 fn test_find_expected_regular_impl_vs_trait_impl() {
-    let source = r#"
+    let paths = parse_and_get_paths(
+        r#"
         pub struct MyStruct;
 
         // Regular impl
@@ -405,21 +316,13 @@ fn test_find_expected_regular_impl_vs_trait_impl() {
         impl MyTrait for MyStruct {
             fn trait_method(&self) {}
         }
-    "#;
-
-    let (_temp_dir, file_path) = setup_test_file(source, "test.rs");
-    let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let expected = find_expected_doc_paths(&parsed, "docs");
-
-    let paths: Vec<&str> = expected
-        .iter()
-        .map(|e| e.markdown_path.to_str().unwrap())
-        .collect();
-
-    eprintln!("Paths found: {:#?}", paths);
+        "#,
+        "test.rs",
+        "docs",
+    );
 
     assert_snapshot!(
-        to_braces(&paths),
+        to_braces(&get_path_refs(&paths)),
         @"docs/{test,MyStruct/{new,MyTrait/trait_method,},MyTrait/{trait_method,}}.md"
     );
 }
