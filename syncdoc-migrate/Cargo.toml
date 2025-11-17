@@ -21,6 +21,7 @@ syncdoc-core.workspace = true
 unsynn.workspace = true
 
 [dev-dependencies]
+braces = "0.2.1"
 insta.workspace = true
 rust-format.workspace = true
 tempfile.workspace = true
