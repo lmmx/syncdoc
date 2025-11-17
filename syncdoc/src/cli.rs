@@ -19,7 +19,7 @@ pub mod inner {
     use std::path::Path;
     use syncdoc_migrate::{
         discover_rust_files, extract_all_docs, find_expected_doc_paths, get_or_create_docs_path,
-        parse_file, rewrite_file, write_extractions, DocsPathMode,
+        parse_file, restore_file, rewrite_file, write_extractions, DocsPathMode,
     };
 
     #[derive(Facet)]
@@ -47,6 +47,10 @@ pub mod inner {
         /// Add #[omnidoc] attributes to items
         #[facet(named, short = 't', long, default)]
         touch: bool,
+
+        /// Restore inline doc comments from markdown files (opposite of migrate)
+        #[facet(named, short = 'r', long, default)]
+        restore: bool,
 
         /// Preview changes without writing files
         #[facet(named, short = 'n', long, default)]
@@ -82,6 +86,7 @@ pub mod inner {
         println!("  -a, --add          Rewrite code with #[omnidoc] attributes");
         println!("  -t, --touch        Touch empty markdown files for any that don't exist");
         println!("      --inline-paths Use inline path= parameters instead of Cargo.toml");
+        println!("  -r, --restore      Restore inline doc comments from markdown files");
         println!("  -n, --dry-run      Preview changes without writing files");
         println!("  -v, --verbose      Show verbose output");
         println!("  -h, --help         Show this help message");
@@ -98,6 +103,9 @@ pub mod inner {
         println!();
         println!("  # Migrate with inline paths instead of Cargo.toml config");
         println!("  syncdoc --migrate --inline-paths");
+        println!();
+        println!("  # Restore documentation from markdown back to source");
+        println!("  syncdoc --restore");
     }
 
     /// Entry point for the `syncdoc` command-line interface.
@@ -125,6 +133,12 @@ pub mod inner {
         if args.help {
             print_usage();
             std::process::exit(0);
+        }
+
+        // Restore is a mutually exclusive operation with migrate/cut/add
+        if args.restore && (args.migrate || args.strip_docs || args.annotate) {
+            eprintln!("Error: --restore cannot be used with --migrate, --cut, or --add");
+            std::process::exit(1);
         }
 
         let source_path = Path::new(&args.source);
@@ -156,6 +170,7 @@ pub mod inner {
             eprintln!("Docs mode: {:?}", docs_mode);
             eprintln!("Strip docs: {}", args.strip_docs);
             eprintln!("Annotate: {}", args.annotate);
+            eprintln!("Restore: {}", args.restore);
             eprintln!();
         }
 
@@ -194,6 +209,25 @@ pub mod inner {
 
             files_processed += 1;
 
+            // RESTORE MODE: early exit from loop iteration
+            if args.restore {
+                if let Some(restored) = restore_file(&parsed, &docs_root) {
+                    if args.dry_run {
+                        if args.verbose {
+                            eprintln!("  Would restore: {}", file_path.display());
+                        }
+                    } else {
+                        fs::write(file_path, restored)?;
+                        if args.verbose {
+                            eprintln!("  Restored: {}", file_path.display());
+                        }
+                    }
+                    files_rewritten += 1;
+                }
+                continue; // Skip the rest of the loop for this file
+            }
+
+            // MIGRATION MODE: existing code continues from here
             // Extract documentation
             let extractions = extract_all_docs(&parsed, &docs_root);
             total_extractions += extractions.len();
@@ -282,22 +316,32 @@ pub mod inner {
         if args.dry_run {
             eprintln!("=== Dry Run Summary ===");
             eprintln!("Would process {} file(s)", files_processed);
-            eprintln!("Would extract {} documentation(s)", total_extractions);
-            if args.touch {
-                eprintln!("Would touch {} missing file(s)", files_touched);
-            }
-            if args.strip_docs || args.annotate {
-                eprintln!("Would rewrite {} file(s)", files_rewritten);
+            if args.restore {
+                eprintln!("Would restore {} file(s)", files_rewritten);
+            } else {
+                eprintln!("Would extract {} documentation(s)", total_extractions);
+                if args.touch {
+                    eprintln!("Would touch {} missing file(s)", files_touched);
+                }
+                if args.strip_docs || args.annotate {
+                    eprintln!("Would rewrite {} file(s)", files_rewritten);
+                }
             }
         } else {
-            eprintln!("=== Migration Summary ===");
-            eprintln!("Processed {} file(s)", files_processed);
-            eprintln!("Extracted {} documentation(s)", total_extractions);
-            if args.touch {
-                eprintln!("Touched {} missing file(s)", files_touched);
-            }
-            if args.strip_docs || args.annotate {
-                eprintln!("Rewrote {} file(s)", files_rewritten);
+            if args.restore {
+                eprintln!("=== Restore Summary ===");
+                eprintln!("Processed {} file(s)", files_processed);
+                eprintln!("Restored {} file(s)", files_rewritten);
+            } else {
+                eprintln!("=== Migration Summary ===");
+                eprintln!("Processed {} file(s)", files_processed);
+                eprintln!("Extracted {} documentation(s)", total_extractions);
+                if args.touch {
+                    eprintln!("Touched {} missing file(s)", files_touched);
+                }
+                if args.strip_docs || args.annotate {
+                    eprintln!("Rewrote {} file(s)", files_rewritten);
+                }
             }
         }
 
