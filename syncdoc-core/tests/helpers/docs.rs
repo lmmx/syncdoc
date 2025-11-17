@@ -40,22 +40,59 @@ pub fn auto_create_docs(test_crate: &TestCrate, code: &str) {
         },
     );
 
-    // Handle trait methods
-    handle_braced_blocks(
-        test_crate,
-        code,
-        &TRAIT_RE,
-        &FN_RE,
-        true,
-        |tc, parent, item| {
-            tc.write_doc(
-                &format!("lib/{}/{}.md", parent, item),
-                &format!("Documentation for {}::{}", parent, item),
-            );
-        },
-    );
+    // Handle trait methods - special case to handle both declarations and implementations
+    handle_trait_methods(test_crate, code);
 
     handle_impl_and_modules(test_crate, code, Vec::new());
+}
+
+fn handle_trait_methods(test_crate: &TestCrate, code: &str) {
+    let mut in_trait = false;
+    let mut trait_name = String::new();
+    let mut brace_depth = 0;
+
+    for line in code.lines() {
+        let trimmed = line.trim();
+
+        if !in_trait && TRAIT_RE.is_match(trimmed) && trimmed.contains('{') {
+            if let Some(name) = TRAIT_RE
+                .captures(trimmed)
+                .and_then(|cap| cap.get(1))
+                .map(|m| m.as_str())
+            {
+                trait_name = name.to_string();
+                in_trait = true;
+                brace_depth = 0;
+            }
+        }
+
+        if in_trait {
+            brace_depth += trimmed.matches('{').count();
+            brace_depth -= trimmed.matches('}').count();
+
+            if !trimmed.starts_with("//") {
+                if let Some(method_name) = FN_RE
+                    .captures(trimmed)
+                    .and_then(|cap| cap.get(1))
+                    .map(|m| m.as_str())
+                    .filter(|s| !s.is_empty())
+                {
+                    // Accept both declarations (with ;) and implementations (with {)
+                    if trimmed.contains('{') || trimmed.contains(';') {
+                        test_crate.write_doc(
+                            &format!("lib/{}/{}.md", trait_name, method_name),
+                            &format!("Documentation for {}::{}", trait_name, method_name),
+                        );
+                    }
+                }
+            }
+
+            if brace_depth == 0 {
+                in_trait = false;
+                trait_name.clear();
+            }
+        }
+    }
 }
 
 fn handle_braced_blocks<F>(

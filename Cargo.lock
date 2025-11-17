@@ -664,6 +664,7 @@ dependencies = [
 name = "syncdoc-core"
 version = "0.3.4"
 dependencies = [
+ "braces",
  "duct",
  "insta",
  "itertools",
