@@ -25,13 +25,10 @@ impl PathCollector {
     }
 
     fn collect_paths(mut self, input: TokenStream) -> Vec<String> {
-        match input.into_token_iter().parse::<ModuleContent>() {
-            Ok(content) => {
-                for item in content.items.0 {
-                    self.collect_from_item(item.value);
-                }
+        if let Ok(content) = input.into_token_iter().parse::<ModuleContent>() {
+            for item in content.items.0 {
+                self.collect_from_item(item.value);
             }
-            Err(_) => {}
         }
         self.collected_paths.sort();
         self.collected_paths
