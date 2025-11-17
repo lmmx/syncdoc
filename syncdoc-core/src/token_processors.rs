@@ -1,4 +1,4 @@
-use crate::inject_doc_attr;
+use crate::omnidoc_impl;
 use proc_macro2::TokenStream;
 use unsynn::*;
 
@@ -346,7 +346,7 @@ impl TokenProcessor {
         path_parts.push(format!("{}/{}.md", struct_name, field_name));
 
         let full_path = path_parts.join("/");
-        inject_doc_attr(full_path, self.cfg_attr.clone(), field_tokens)
+        omnidoc_impl(full_path, self.cfg_attr.clone(), field_tokens)
     }
 
     fn process_enum(&self, enum_sig: crate::parse::EnumSig) -> TokenStream {
@@ -423,7 +423,7 @@ impl TokenProcessor {
         path_parts.push(format!("{}/{}.md", enum_name, variant_name));
 
         let full_path = path_parts.join("/");
-        inject_doc_attr(full_path, self.cfg_attr.clone(), variant_tokens)
+        omnidoc_impl(full_path, self.cfg_attr.clone(), variant_tokens)
     }
 
     fn inject_doc_into_simple_item(
@@ -436,7 +436,7 @@ impl TokenProcessor {
         path_parts.push(format!("{}.md", item_name));
 
         let full_path = path_parts.join("/");
-        inject_doc_attr(full_path, self.cfg_attr.clone(), item_tokens)
+        omnidoc_impl(full_path, self.cfg_attr.clone(), item_tokens)
     }
 }
 

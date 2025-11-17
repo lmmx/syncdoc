@@ -6,7 +6,7 @@ pub mod parse;
 pub mod path_utils;
 pub mod token_processors;
 
-pub use doc_injector::{inject_doc_attr, module_doc_impl};
+pub use doc_injector::{module_doc_impl, omnidoc_impl};
 pub use omnibus::inject_all_docs_impl;
 
 #[macro_export]

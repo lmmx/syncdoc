@@ -8,11 +8,7 @@ use crate::parse::{SyncDocArg, SyncDocInner};
 use crate::path_utils::make_manifest_relative_path;
 
 /// Injects a doc attribute without parsing the item structure
-pub fn inject_doc_attr(
-    doc_path: String,
-    cfg_attr: Option<String>,
-    item: TokenStream,
-) -> TokenStream {
+pub fn omnidoc_impl(doc_path: String, cfg_attr: Option<String>, item: TokenStream) -> TokenStream {
     // Get the call site's file path if there might be config we could use there
     let call_site = proc_macro2::Span::call_site();
     let local_file = call_site.local_file().expect("Could not find local file");
