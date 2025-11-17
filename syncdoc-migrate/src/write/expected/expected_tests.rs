@@ -64,16 +64,12 @@ fn test_find_expected_struct_with_fields() {
     // Module + struct + 3 fields
     assert_eq!(expected.len(), 5);
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
-    assert!(paths.contains(&"docs/test.md".to_string()));
-    assert!(paths.contains(&"docs/Config.md".to_string()));
-    assert!(paths.contains(&"docs/Config/port.md".to_string()));
-    assert!(paths.contains(&"docs/Config/host.md".to_string()));
-    assert!(paths.contains(&"docs/Config/timeout.md".to_string()));
+    assert_snapshot!(to_braces(&paths), @"docs/{test,Config/{port,host,timeout,}}.md");
 }
 
 #[test]
@@ -95,15 +91,12 @@ fn test_find_expected_enum_with_variants() {
     // Module + enum + 3 variants
     assert_eq!(expected.len(), 5);
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
-    assert!(paths.contains(&"docs/Status.md".to_string()));
-    assert!(paths.contains(&"docs/Status/Active.md".to_string()));
-    assert!(paths.contains(&"docs/Status/Inactive.md".to_string()));
-    assert!(paths.contains(&"docs/Status/Error.md".to_string()));
+    assert_snapshot!(to_braces(&paths), @"docs/{test,Status/{Active,Inactive,Error,}}.md");
 }
 
 #[test]
@@ -135,16 +128,12 @@ fn test_find_expected_impl_block() {
     // Module + struct + 3 methods
     assert_eq!(expected.len(), 5);
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
-    assert!(paths.contains(&"docs/test.md".to_string()));
-    assert!(paths.contains(&"docs/Calculator.md".to_string()));
-    assert!(paths.contains(&"docs/Calculator/new.md".to_string()));
-    assert!(paths.contains(&"docs/Calculator/add.md".to_string()));
-    assert!(paths.contains(&"docs/Calculator/subtract.md".to_string()));
+    assert_snapshot!(to_braces(&paths), @"docs/{test,Calculator/{new,add,subtract,}}.md");
 }
 
 #[test]
@@ -165,17 +154,15 @@ fn test_find_expected_nested_module() {
 
     eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
-    // Should have proper nested paths
-    assert!(paths.contains(&"docs/test.md".to_string()));
-    assert!(paths.contains(&"docs/outer.md".to_string()));
-    assert!(paths.contains(&"docs/outer/inner.md".to_string()));
-    assert!(paths.contains(&"docs/outer/inner/nested_func.md".to_string()));
-    assert!(paths.contains(&"docs/outer/outer_func.md".to_string()));
+    assert_snapshot!(
+        to_braces(&paths),
+        @"docs/{test,outer/{inner/{nested_func,},outer_func,}}.md"
+    );
 }
 
 #[test]
@@ -196,21 +183,18 @@ fn test_find_expected_trait_with_methods() {
 
     eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
     eprintln!("EXPECTED DOC PATHS:\n{:#?}", expected);
 
-    assert!(paths.contains(&"docs/test.md".to_string()));
-    assert!(paths.contains(&"docs/MyTrait.md".to_string()));
+    assert_snapshot!(to_braces(&paths), @"docs/{test,MyTrait/{required_method,default_method,}}.md");
 
     // Note: trait methods without bodies (required methods) don't have
     // function signatures in the parsed AST the same way, so we only
     // expect the default method
-    assert!(paths.contains(&"docs/MyTrait/default_method.md".to_string()));
-
     // This is actually correct behavior - required methods are just
     // declarations, not function items, so they wouldn't get omnidoc
     // attributes in practice
@@ -230,14 +214,12 @@ fn test_find_expected_const_static_type_alias() {
 
     eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
-    assert!(paths.contains(&"docs/MY_CONST.md".to_string()));
-    assert!(paths.contains(&"docs/MY_STATIC.md".to_string()));
-    assert!(paths.contains(&"docs/MyType.md".to_string()));
+    assert_snapshot!(to_braces(&paths), @"docs/{test,MY_CONST,MY_STATIC,MyType}.md");
 }
 
 #[test]
@@ -267,20 +249,15 @@ fn test_find_expected_complex_structure() {
 
     eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
-    // Check all expected paths exist
-    assert!(paths.contains(&"docs/test.md".to_string()));
-    assert!(paths.contains(&"docs/api.md".to_string()));
-    assert!(paths.contains(&"docs/api/Config.md".to_string()));
-    assert!(paths.contains(&"docs/api/Config/port.md".to_string()));
-    assert!(paths.contains(&"docs/api/Config/new.md".to_string()));
-    assert!(paths.contains(&"docs/api/Status.md".to_string()));
-    assert!(paths.contains(&"docs/api/Status/Ok.md".to_string()));
-    assert!(paths.contains(&"docs/api/Status/Error.md".to_string()));
+    assert_snapshot!(
+        to_braces(&paths),
+        @"docs/{test.md,api.md,api/{Config.md,Config/{port.md,new.md},Status.md,Status/{Ok.md,Error.md}}}"
+    );
 }
 
 #[test]
@@ -298,16 +275,12 @@ fn test_find_expected_lib_rs() {
 
     eprintln!("EXPECTED DOC PATHS:\n{:?}", expected);
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
-    // lib.rs should map to docs/lib.md
-    assert!(paths.contains(&"docs/lib.md".to_string()));
-    assert!(paths.contains(&"docs/TimeOfDay.md".to_string()));
-    assert!(paths.contains(&"docs/TimeOfDay/Day.md".to_string()));
-    assert!(paths.contains(&"docs/TimeOfDay/Night.md".to_string()));
+    assert_snapshot!(to_braces(&paths), @"docs/{lib,TimeOfDay/{Day,Night,}}.md");
 }
 
 #[test]
@@ -327,19 +300,14 @@ fn test_find_expected_only_functions_with_bodies() {
     let parsed = crate::discover::parse_file(&file_path).unwrap();
     let expected = find_expected_doc_paths(&parsed, "docs");
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
-    // Should only find items that would actually get #[omnidoc]
-    assert!(paths.contains(&"docs/test.md".to_string()));
-    assert!(paths.contains(&"docs/MyTrait.md".to_string()));
-    assert!(paths.contains(&"docs/MyTrait/with_default.md".to_string()));
+    assert_snapshot!(to_braces(&paths), @"docs/{test,MyTrait/{required,with_default,}}.md");
 
     // Required methods and extern declarations shouldn't be in the list
-    assert!(!paths.contains(&"docs/MyTrait/required.md".to_string()));
-    assert!(!paths.contains(&"docs/external_fn.md".to_string()));
 }
 
 #[test]
@@ -367,29 +335,17 @@ fn test_find_expected_trait_impl_for_struct() {
     let parsed = crate::discover::parse_file(&file_path).unwrap();
     let expected = find_expected_doc_paths(&parsed, "docs");
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
     eprintln!("Paths found: {:#?}", paths);
 
-    // Should have: module, trait, struct, and 2 trait methods
-    assert!(paths.contains(&"docs/test.md".to_string()));
-    assert!(paths.contains(&"docs/Format.md".to_string()));
-    assert!(paths.contains(&"docs/MarkdownFormat.md".to_string()));
-
-    // Methods should be under MarkdownFormat/Format/ (Type/Trait pattern)
-    assert!(paths.contains(&"docs/MarkdownFormat/Format/file_extension.md".to_string()));
-    assert!(paths.contains(&"docs/MarkdownFormat/Format/language.md".to_string()));
-
-    // Should NOT be directly under the struct
-    assert!(!paths.contains(&"docs/MarkdownFormat/file_extension.md".to_string()));
-    assert!(!paths.contains(&"docs/MarkdownFormat/language.md".to_string()));
-
-    // Should NOT be under the trait alone
-    assert!(!paths.contains(&"docs/Format/file_extension.md".to_string()));
-    assert!(!paths.contains(&"docs/Format/language.md".to_string()));
+    assert_snapshot!(
+        to_braces(&paths),
+        @"docs/{test,Format/{file_extension,language,},MarkdownFormat/{Format/{file_extension,language},}}.md"
+    );
 }
 
 #[test]
@@ -416,22 +372,17 @@ fn test_find_expected_trait_impl_in_submodule() {
     let parsed = crate::discover::parse_file(&file_path).unwrap();
     let expected = find_expected_doc_paths(&parsed, "docs");
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
     eprintln!("Paths found: {:#?}", paths);
 
-    // Method should be at the correct nested path with Type/Trait pattern
-    assert!(paths
-        .contains(&"docs/formats/markdown/MarkdownFormat/Format/file_extension.md".to_string()));
-
-    // Should NOT be directly under the type
-    assert!(!paths.contains(&"docs/formats/markdown/MarkdownFormat/file_extension.md".to_string()));
-
-    // Should NOT be under trait
-    assert!(!paths.contains(&"docs/formats/markdown/Format/file_extension.md".to_string()));
+    assert_snapshot!(
+        to_braces(&paths),
+        @"docs/{test,formats/{markdown/{Format/{file_extension,},MarkdownFormat/{Format/file_extension,},},}}.md"
+    );
 }
 
 #[test]
@@ -460,22 +411,15 @@ fn test_find_expected_regular_impl_vs_trait_impl() {
     let parsed = crate::discover::parse_file(&file_path).unwrap();
     let expected = find_expected_doc_paths(&parsed, "docs");
 
-    let paths: Vec<String> = expected
+    let paths: Vec<&str> = expected
         .iter()
-        .map(|e| e.markdown_path.to_str().unwrap().to_string())
+        .map(|e| e.markdown_path.to_str().unwrap())
         .collect();
 
     eprintln!("Paths found: {:#?}", paths);
 
-    // Regular impl method should be directly under MyStruct
-    assert!(paths.contains(&"docs/MyStruct/new.md".to_string()));
-
-    // Trait impl method should be under MyStruct/MyTrait (Type/Trait pattern)
-    assert!(paths.contains(&"docs/MyStruct/MyTrait/trait_method.md".to_string()));
-
-    // Should NOT be directly under MyStruct
-    assert!(!paths.contains(&"docs/MyStruct/trait_method.md".to_string()));
-
-    // Should NOT be under trait
-    assert!(!paths.contains(&"docs/MyTrait/trait_method.md".to_string()));
+    assert_snapshot!(
+        to_braces(&paths),
+        @"docs/{test,MyStruct/{new,MyTrait/trait_method,},MyTrait/{trait_method,}}.md"
+    );
 }
