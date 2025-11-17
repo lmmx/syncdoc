@@ -62,7 +62,7 @@ impl TokenProcessor {
             ModuleItem::TraitMethod(method_sig) => {
                 let mut method_tokens = TokenStream::new();
                 quote::ToTokens::to_tokens(&method_sig, &mut method_tokens);
-                self.inject_doc_into_item(method_tokens, &method_sig.name.to_string())
+                self.inject_doc_into_simple_item(method_tokens, &method_sig.name.to_string())
             }
             ModuleItem::Function(func_sig) => {
                 let mut func_tokens = TokenStream::new();

@@ -280,7 +280,7 @@ fn parse_simple_function(input: &mut TokenIter) -> core::result::Result<SimpleFu
                 body,
             })
         }
-        Err(e) => Err(format!("Failed to parse function: {}", e)),
+        Err(e) => Err(format!("Failed to parse simple function: {}", e)),
     }
 }
 
