@@ -1,4 +1,4 @@
-use crate::{inject_doc_attr, syncdoc_impl};
+use crate::omnidoc_impl;
 use proc_macro2::TokenStream;
 use unsynn::*;
 
@@ -62,12 +62,12 @@ impl TokenProcessor {
             ModuleItem::TraitMethod(method_sig) => {
                 let mut method_tokens = TokenStream::new();
                 quote::ToTokens::to_tokens(&method_sig, &mut method_tokens);
-                self.inject_doc_into_item(method_tokens, &method_sig.name.to_string())
+                self.inject_doc_into_simple_item(method_tokens, &method_sig.name.to_string())
             }
             ModuleItem::Function(func_sig) => {
                 let mut func_tokens = TokenStream::new();
                 quote::ToTokens::to_tokens(&func_sig, &mut func_tokens);
-                self.inject_doc_into_item(func_tokens, &func_sig.name.to_string())
+                self.inject_doc_into_simple_item(func_tokens, &func_sig.name.to_string())
             }
             ModuleItem::ImplBlock(impl_block) => self.process_impl_block(impl_block),
             ModuleItem::Module(module) => self.process_module_block(module),
@@ -346,7 +346,7 @@ impl TokenProcessor {
         path_parts.push(format!("{}/{}.md", struct_name, field_name));
 
         let full_path = path_parts.join("/");
-        inject_doc_attr(full_path, self.cfg_attr.clone(), field_tokens)
+        omnidoc_impl(full_path, self.cfg_attr.clone(), field_tokens)
     }
 
     fn process_enum(&self, enum_sig: crate::parse::EnumSig) -> TokenStream {
@@ -423,24 +423,7 @@ impl TokenProcessor {
         path_parts.push(format!("{}/{}.md", enum_name, variant_name));
 
         let full_path = path_parts.join("/");
-        inject_doc_attr(full_path, self.cfg_attr.clone(), variant_tokens)
-    }
-
-    fn inject_doc_into_item(&self, func_tokens: TokenStream, fn_name: &str) -> TokenStream {
-        let mut path_parts = vec![self.base_path.clone()];
-        path_parts.extend(self.context.iter().cloned());
-        path_parts.push(format!("{}.md", fn_name));
-
-        let full_path = path_parts.join("/");
-        let args = quote::quote! { path = #full_path };
-
-        match syncdoc_impl(args, func_tokens.clone()) {
-            Ok(instrumented) => instrumented,
-            Err(e) => {
-                eprintln!("syncdoc_impl failed: {}", e);
-                func_tokens
-            }
-        }
+        omnidoc_impl(full_path, self.cfg_attr.clone(), variant_tokens)
     }
 
     fn inject_doc_into_simple_item(
@@ -453,7 +436,7 @@ impl TokenProcessor {
         path_parts.push(format!("{}.md", item_name));
 
         let full_path = path_parts.join("/");
-        inject_doc_attr(full_path, self.cfg_attr.clone(), item_tokens)
+        omnidoc_impl(full_path, self.cfg_attr.clone(), item_tokens)
     }
 }
 

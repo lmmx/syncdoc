@@ -218,22 +218,15 @@ Documentation files:
 
 ### Single Function Documentation
 
-You can also document individual functions. The difference between the syncdoc and omnidoc macros
-comes down to whether or not you want to specify the exact path (typically you don't, so use omnidoc).
+You can also document individual functions.
 
 ```rust
-use syncdoc::{omnidoc, syncdoc};
+use syncdoc::omnidoc;
 
 #[omnidoc]
 fn func1() {
     // -> docs/func1.md
     // = omnidoc(path) to root docs dir + submodule + fn name + .md
-}
-
-#[syncdoc(path = "docs/new_func_name.md")]
-fn func2() {
-    // -> docs/new_func_name.md
-    // = syncdoc(path) to single documentation file
 }
 ```
 
