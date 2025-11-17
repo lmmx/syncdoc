@@ -69,11 +69,11 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
 name = "cli_demo_basic"
-version = "0.3.0"
+version = "0.4.0"
 
 [[package]]
 name = "cli_demo_basic_migrated"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "syncdoc",
 ]
@@ -92,70 +92,70 @@ dependencies = [
 
 [[package]]
 name = "demo_cfg_attr_call"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_cfg_attr_toml"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_double_doc"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_enum"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_fn"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_impl"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_module"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_struct"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_submodule"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "syncdoc",
 ]
 
 [[package]]
 name = "demo_toml_path"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "syncdoc",
 ]
@@ -646,7 +646,7 @@ dependencies = [
 
 [[package]]
 name = "syncdoc"
-version = "0.3.8"
+version = "0.4.0"
 dependencies = [
  "assert_cmd",
  "braces",
@@ -662,7 +662,7 @@ dependencies = [
 
 [[package]]
 name = "syncdoc-core"
-version = "0.3.4"
+version = "0.4.0"
 dependencies = [
  "braces",
  "duct",
@@ -680,7 +680,7 @@ dependencies = [
 
 [[package]]
 name = "syncdoc-migrate"
-version = "0.3.7"
+version = "0.4.0"
 dependencies = [
  "braces",
  "duct",
