@@ -49,9 +49,23 @@ fn get_attribute_from_cargo_toml(
     Ok(None) // Attribute not found, return None
 }
 
+/// Resolve a source file path to an absolute path, handling both absolute and relative paths
+fn resolve_source_path(source_file: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
+    let source_path = Path::new(source_file);
+
+    // Make it absolute if it's not already
+    let source_path = if source_path.is_absolute() {
+        source_path.to_path_buf()
+    } else {
+        std::env::current_dir()?.join(source_path)
+    };
+
+    Ok(source_path)
+}
+
 /// Get the cfg-attr from the current crate's Cargo.toml, relative to the source file
 pub fn get_cfg_attr(source_file: &str) -> Result<Option<String>, Box<dyn std::error::Error>> {
-    let source_path = Path::new(source_file);
+    let source_path = resolve_source_path(source_file)?;
     let source_dir = source_path
         .parent()
         .ok_or("Source file has no parent directory")?;
@@ -67,7 +81,8 @@ pub fn get_docs_path(source_file: &str) -> Result<String, Box<dyn std::error::Er
     syncdoc_debug!("get_docs_path called:");
     syncdoc_debug!("  source_file: {}", source_file);
 
-    let source_path = Path::new(source_file);
+    let source_path = resolve_source_path(source_file)?;
+
     let source_dir = source_path
         .parent()
         .ok_or("Source file has no parent directory")?;
@@ -242,6 +257,107 @@ output-format = "markdown"
 
         let result = get_docs_path_from_file(temp.path().to_str().unwrap()).unwrap();
         assert_eq!(result, "api-docs");
+    }
+}
+
+#[cfg(test)]
+mod relative_path_tests {
+    use super::*;
+    use std::fs;
+    use std::io::Write;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_get_docs_path_with_relative_source_file() {
+        // Create a temporary directory structure that mimics a Rust project
+        let temp_dir = TempDir::new().unwrap();
+        let project_root = temp_dir.path();
+
+        // Create Cargo.toml with syncdoc config
+        let cargo_toml_path = project_root.join("Cargo.toml");
+        let mut cargo_toml = fs::File::create(&cargo_toml_path).unwrap();
+        write!(
+            cargo_toml,
+            r#"
+[package]
+name = "test-project"
+
+[package.metadata.syncdoc]
+docs-path = "docs"
+"#
+        )
+        .unwrap();
+        cargo_toml.flush().unwrap();
+
+        // Create src directory
+        let src_dir = project_root.join("src");
+        fs::create_dir(&src_dir).unwrap();
+
+        // Create a dummy source file
+        let lib_rs = src_dir.join("lib.rs");
+        fs::File::create(&lib_rs).unwrap();
+
+        // Change to the project directory so relative paths work
+        let original_dir = std::env::current_dir().unwrap();
+        std::env::set_current_dir(project_root).unwrap();
+
+        // Test with a RELATIVE path (this is what proc macros give us)
+        let result = get_docs_path("src/lib.rs");
+
+        // Restore original directory
+        std::env::set_current_dir(original_dir).unwrap();
+
+        // This should succeed with the fix, fail without it
+        assert!(
+            result.is_ok(),
+            "Should handle relative source file paths. Error: {:?}",
+            result.err()
+        );
+
+        let docs_path = result.unwrap();
+        assert_eq!(docs_path, "../docs");
+    }
+
+    #[test]
+    fn test_get_docs_path_with_nested_relative_source_file() {
+        let temp_dir = TempDir::new().unwrap();
+        let project_root = temp_dir.path();
+
+        let cargo_toml_path = project_root.join("Cargo.toml");
+        let mut cargo_toml = fs::File::create(&cargo_toml_path).unwrap();
+        write!(
+            cargo_toml,
+            r#"
+[package]
+name = "test-project"
+
+[package.metadata.syncdoc]
+docs-path = "documentation"
+"#
+        )
+        .unwrap();
+        cargo_toml.flush().unwrap();
+
+        let src_dir = project_root.join("src");
+        fs::create_dir(&src_dir).unwrap();
+
+        let nested_dir = src_dir.join("nested");
+        fs::create_dir(&nested_dir).unwrap();
+
+        let nested_file = nested_dir.join("module.rs");
+        fs::File::create(&nested_file).unwrap();
+
+        let original_dir = std::env::current_dir().unwrap();
+        std::env::set_current_dir(project_root).unwrap();
+
+        // Test with nested relative path
+        let result = get_docs_path("src/nested/module.rs");
+
+        std::env::set_current_dir(original_dir).unwrap();
+
+        assert!(result.is_ok(), "Should handle nested relative paths");
+        let docs_path = result.unwrap();
+        assert_eq!(docs_path, "../../documentation");
     }
 }
 
