@@ -1,8 +1,8 @@
+#![cfg(debug_assertions)]
 use super::hunk::DiffHunk;
 use crate::syncdoc_debug;
 
 /// Debug a list of hunks, showing before and after snippets.
-#[cfg(debug_assertions)]
 pub fn debug_hunk_lines(before: &str, after: &str, hunks: &[DiffHunk]) {
     let before_lines: Vec<&str> = before.lines().collect();
     let after_lines: Vec<&str> = after.lines().collect();
