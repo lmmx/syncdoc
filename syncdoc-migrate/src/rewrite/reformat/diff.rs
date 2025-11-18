@@ -332,8 +332,21 @@ pub fn apply_diff_restore(original: &str, hunks: &[DiffHunk], formatted_after: &
             if idx < original_lines.len() {
                 let line = original_lines[idx];
                 let trimmed = line.trim_start();
+                let no_spaces = trimmed.replace(" ", "");
 
-                if trimmed.starts_with("//")
+                // Preserve any OUTER attribute line that's NOT a doc attribute
+                if trimmed.starts_with("#[")
+                    && !no_spaces.starts_with("#[doc")
+                    && !no_spaces.contains("omnidoc")
+                {
+                    result.push(line);
+                }
+                // Preserve any INNER attribute line that's NOT a doc attribute
+                else if no_spaces.starts_with("#![") && !no_spaces.starts_with("#![doc") {
+                    result.push(line);
+                }
+                // Also preserve regular comments (not doc comments)
+                else if trimmed.starts_with("//")
                     && !trimmed.starts_with("///")
                     && !trimmed.starts_with("//!")
                 {
