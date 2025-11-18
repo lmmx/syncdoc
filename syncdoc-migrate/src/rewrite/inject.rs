@@ -64,4 +64,5 @@ pub fn inject_module_doc_attr(docs_root: &str, mode: DocsPathMode) -> TokenStrea
 }
 
 #[cfg(test)]
+#[path = "../tests/inject.rs"]
 mod inject_tests;

@@ -537,4 +537,5 @@ fn wrap_in_braces(content: TokenStream) -> TokenStream {
 }
 
 #[cfg(test)]
+#[path = "../tests/strip.rs"]
 mod strip_tests;

@@ -160,4 +160,5 @@ pub fn get_or_create_docs_path(
 }
 
 #[cfg(test)]
+#[path = "tests/discover.rs"]
 mod tests;

@@ -430,4 +430,5 @@ fn build_path(base_path: &str, context: &[String], item_name: &str) -> String {
 }
 
 #[cfg(test)]
+#[path = "../tests/expected.rs"]
 mod expected_tests;

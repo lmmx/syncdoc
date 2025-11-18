@@ -199,4 +199,5 @@ fn find_closing_quote(s: &str, start: usize) -> Option<usize> {
 }
 
 #[cfg(test)]
+#[path = "tests/extract.rs"]
 mod extract_tests;

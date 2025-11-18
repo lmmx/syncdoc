@@ -141,4 +141,5 @@ fn reconstruct_inner_attr(content: &str) -> String {
 }
 
 #[cfg(test)]
+#[path = "../../tests/bookend.rs"]
 mod bookend_tests;

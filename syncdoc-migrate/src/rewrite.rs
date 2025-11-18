@@ -96,4 +96,5 @@ pub fn rewrite_file(
 }
 
 #[cfg(test)]
+#[path = "tests/rewrite.rs"]
 mod rewrite_tests;
