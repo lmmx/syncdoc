@@ -5,7 +5,7 @@ pub mod reformat;
 mod strip;
 
 pub use inject::{inject_module_doc_attr, inject_omnidoc_attr};
-pub use strip::strip_doc_attrs;
+pub use strip::{strip_doc_attrs, strip_inner_doc_attrs};
 use unsynn::*;
 
 use crate::config::DocsPathMode;
@@ -44,7 +44,7 @@ pub fn rewrite_file(
         {
             let mut annotated = TokenStream::new();
 
-            // Check if module_doc already exists before injecting
+            // Check if module_doc already exists
             let has_module_doc = if let Some(inner_attrs) = &content.inner_attrs {
                 let mut temp_ts = TokenStream::new();
                 unsynn::ToTokens::to_tokens(inner_attrs, &mut temp_ts);
@@ -53,11 +53,17 @@ pub fn rewrite_file(
                 false
             };
 
-            // Inject module_doc! for inner docs if any existed AND not already present
+            // Inject module_doc first, if needed (for inner docs if any existed AND not already present)
             if !has_module_doc
                 && (content.inner_attrs.is_some() || parsed.content.inner_attrs.is_some())
             {
                 annotated.extend(inject_module_doc_attr(docs_root, docs_mode));
+            }
+
+            // Then add any remaining non-doc inner attributes
+            let stripped_inner = strip_inner_doc_attrs(&content.inner_attrs);
+            for attr in stripped_inner {
+                quote::ToTokens::to_tokens(&attr, &mut annotated);
             }
 
             // Then handle regular items
