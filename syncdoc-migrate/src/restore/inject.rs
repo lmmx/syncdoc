@@ -3,6 +3,7 @@
 //! Injects inline doc comments by reading from markdown files, removing omnidoc attributes.
 
 use crate::discover::ParsedFile;
+use crate::syncdoc_debug;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syncdoc_core::parse::*;
@@ -27,10 +28,17 @@ pub fn inject_all_doc_comments(
         }
     }
 
+    // Build initial context from the file's module path
+    let module_path = syncdoc_core::path_utils::extract_module_path(&parsed.path.to_string_lossy());
+    let mut context = Vec::new();
+    if !module_path.is_empty() {
+        context.push(module_path);
+    }
+
     for item_delimited in &content.items.0 {
         output.extend(inject_item_docs(
             &item_delimited.value,
-            Vec::new(),
+            context.clone(),
             docs_root,
         ));
     }
@@ -329,7 +337,20 @@ fn inject_trait_docs(trait_def: &TraitSig, context: Vec<String>, docs_root: &str
     let mut output = TokenStream::new();
     let trait_name = trait_def.name.to_string();
 
-    if let Some(content) = super::read_item_markdown(&context, &trait_name, docs_root) {
+    syncdoc_debug!("\n=== INJECT TRAIT DEBUG ===");
+    syncdoc_debug!("Trait name: {}", trait_name);
+    syncdoc_debug!("Context: {:?}", context);
+    syncdoc_debug!("Docs root: {}", docs_root);
+
+    let md_content = super::read_item_markdown(&context, &trait_name, docs_root);
+    syncdoc_debug!("Found markdown: {}", md_content.is_some());
+    if let Some(ref content) = md_content {
+        syncdoc_debug!("Content length: {}", content.len());
+        syncdoc_debug!("Content: {:?}", &content[..content.len().min(100)]);
+    }
+    syncdoc_debug!("========================\n");
+
+    if let Some(content) = md_content {
         output.extend(super::generate_doc_comments(&content));
     }
 

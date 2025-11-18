@@ -2,6 +2,7 @@
 
 mod hunk;
 
+use crate::syncdoc_debug;
 pub use hunk::{is_doc_related_hunk, split_hunk_if_mixed, DiffHunk}; // is_restore_related_hunk,
 
 use imara_diff::{Algorithm, Diff, InternedInput};
@@ -251,9 +252,34 @@ pub fn apply_diff_restore(original: &str, hunks: &[DiffHunk], formatted_after: &
     let mut orig_idx = 0;
 
     for hunk in split_hunks.iter() {
-        if !hunk::is_restore_related_hunk(hunk, &original_lines, &after_lines) {
-            #[cfg(debug_assertions)]
-            eprintln!(
+        let is_restore = hunk::is_restore_related_hunk(hunk, &original_lines, &after_lines);
+
+        syncdoc_debug!("\n=== HUNK DEBUG ===");
+        syncdoc_debug!(
+            "Hunk: before[{}..{}] -> after[{}..{}]",
+            hunk.before_start,
+            hunk.before_start + hunk.before_count,
+            hunk.after_start,
+            hunk.after_start + hunk.after_count
+        );
+        syncdoc_debug!("Is restore related: {}", is_restore);
+        syncdoc_debug!("\nBEFORE lines:");
+        for i in 0..hunk.before_count {
+            let idx = hunk.before_start + i;
+            if idx < original_lines.len() {
+                syncdoc_debug!("  [{}]: {:?}", idx, original_lines[idx]);
+            }
+        }
+        syncdoc_debug!("\nAFTER lines:");
+        for i in hunk.after_start..hunk.after_start + hunk.after_count {
+            if i < after_lines.len() {
+                syncdoc_debug!("  [{}]: {:?}", i, after_lines[i]);
+            }
+        }
+        syncdoc_debug!("==================\n");
+
+        if !is_restore {
+            syncdoc_debug!(
                 "Skipping non-restore hunk at lines {}..{}",
                 hunk.before_start,
                 hunk.before_start + hunk.before_count

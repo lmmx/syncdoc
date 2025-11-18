@@ -121,14 +121,20 @@ pub fn is_restore_related_hunk(
         let idx = hunk.before_start + i;
         idx < original_lines.len() && {
             let line = original_lines[idx].replace(" ", "");
-            line.contains("#[omnidoc") || line.contains("#![doc=syncdoc::module_doc!")
+            line.contains("#[omnidoc")
+                || line.contains("#[syncdoc::omnidoc")
+                || line.contains("#![doc=syncdoc::module_doc!")
         }
     });
 
     let adds_docs = (hunk.after_start..hunk.after_start + hunk.after_count).any(|i| {
         i < after_lines.len() && {
             let line = after_lines[i].trim();
-            line.starts_with("///") || line.starts_with("//!")
+            // Check for both direct doc comments AND doc attributes from restore
+            line.starts_with("///")
+                || line.starts_with("//!")
+                || line.contains(r#"#[doc = "///"#)
+                || line.contains(r#"#[doc = "//!"#)
         }
     });
 
