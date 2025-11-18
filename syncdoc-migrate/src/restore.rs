@@ -80,19 +80,6 @@ fn is_omnidoc_attr(attr: &syncdoc_core::parse::Attribute) -> bool {
     s.contains("omnidoc") || s.contains("syncdoc::omnidoc")
 }
 
-fn is_module_doc_macro(inner_attrs: &unsynn::Many<syncdoc_core::parse::InnerAttribute>) -> bool {
-    use unsynn::ToTokens;
-    for attr in &inner_attrs.0 {
-        let mut ts = TokenStream::new();
-        attr.value.to_tokens(&mut ts);
-        let s = ts.to_string().replace(' ', "");
-        if s.contains("module_doc!") {
-            return true;
-        }
-    }
-    false
-}
-
 #[cfg(test)]
 #[path = "tests/restore.rs"]
 mod tests;

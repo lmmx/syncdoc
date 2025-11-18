@@ -16,15 +16,26 @@ pub fn inject_all_doc_comments(
 ) -> TokenStream {
     let mut output = TokenStream::new();
 
+    // ALWAYS inject module doc FIRST if it exists
+    if let Some(doc_content) = super::read_module_doc(parsed, docs_root) {
+        output.extend(super::generate_module_doc_comments(&doc_content));
+    }
+
+    // THEN add non-doc inner attributes (strip out any existing doc attributes)
     if let Some(inner_attrs) = &content.inner_attrs {
-        if super::is_module_doc_macro(inner_attrs) {
-            if let Some(doc_content) = super::read_module_doc(parsed, docs_root) {
-                output.extend(super::generate_module_doc_comments(&doc_content));
+        for attr in &inner_attrs.0 {
+            // Check if this specific attribute is a module_doc macro or doc attribute
+            let mut attr_ts = TokenStream::new();
+            unsynn::ToTokens::to_tokens(&attr.value, &mut attr_ts);
+            let attr_str = attr_ts.to_string().replace(" ", "");
+
+            // Skip module_doc! macros and doc attributes
+            if attr_str.contains("module_doc!") || attr_str.contains("#![doc=") {
+                continue;
             }
-        } else {
-            for attr in &inner_attrs.0 {
-                quote::ToTokens::to_tokens(&attr.value, &mut output);
-            }
+
+            // Keep all other inner attributes
+            quote::ToTokens::to_tokens(&attr.value, &mut output);
         }
     }
 
