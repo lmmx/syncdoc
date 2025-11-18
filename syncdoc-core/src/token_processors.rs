@@ -569,4 +569,5 @@ fn extract_first_ident_from_tokens(
 }
 
 #[cfg(test)]
+#[path = "tests/tok_proc.rs"]
 mod tok_proc_tests;
