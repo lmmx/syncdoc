@@ -1,10 +1,12 @@
 mod apply;
+mod debug;
 mod hunk;
 
-use crate::syncdoc_debug;
 pub use apply::{apply_diff, apply_diff_restore};
 pub use hunk::DiffHunk;
 
+#[cfg(debug_assertions)]
+use debug::debug_hunk_lines;
 use imara_diff::{Algorithm, Diff, InternedInput};
 
 /// Computes line-level diff between before and after
@@ -24,42 +26,7 @@ pub fn compute_line_diff(before: &str, after: &str) -> Vec<DiffHunk> {
         .collect();
 
     #[cfg(debug_assertions)]
-    {
-        syncdoc_debug!("=== DIFF DEBUG ===");
-        syncdoc_debug!("Before lines: {}", before.lines().count());
-        syncdoc_debug!("After lines: {}", after.lines().count());
-        syncdoc_debug!("Hunks: {}", hunks.len());
-
-        let before_lines: Vec<&str> = before.lines().collect();
-        let after_lines: Vec<&str> = after.lines().collect();
-
-        for (i, hunk) in hunks.iter().enumerate() {
-            syncdoc_debug!(
-                "Hunk {}: before[{}..{}] -> after[{}..{}]",
-                i,
-                hunk.before_start,
-                hunk.before_start + hunk.before_count,
-                hunk.after_start,
-                hunk.after_start + hunk.after_count
-            );
-
-            syncdoc_debug!("  Before snippet:");
-            for j in hunk.before_start..hunk.before_start + hunk.before_count {
-                if j < before_lines.len() {
-                    syncdoc_debug!("    [{}]: {:?}", j, before_lines[j]);
-                }
-            }
-
-            syncdoc_debug!("  After snippet:");
-            for j in hunk.after_start..hunk.after_start + hunk.after_count {
-                if j < after_lines.len() {
-                    syncdoc_debug!("    [{}]: {:?}", j, after_lines[j]);
-                }
-            }
-        }
-
-        syncdoc_debug!("==================");
-    }
+    debug_hunk_lines(before, after, &hunks);
 
     hunks
 }

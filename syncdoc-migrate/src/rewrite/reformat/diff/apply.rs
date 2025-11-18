@@ -1,3 +1,5 @@
+#[cfg(debug_assertions)]
+use super::debug::debug_hunk_lines;
 use super::hunk::{self, is_doc_related_hunk, split_hunk_if_mixed, DiffHunk};
 use super::strip_all_doc_attr_bookends;
 
@@ -23,33 +25,22 @@ where
         split_hunks.extend(split_hunk_if_mixed(h, &after_lines));
     }
 
+    #[cfg(debug_assertions)]
+    debug_hunk_lines(original, formatted_after, &split_hunks);
+
     let mut result: Vec<&'a str> = Vec::new();
     let mut orig_idx = 0;
 
     for h in &split_hunks {
-        // Debug info for each hunk
-        #[cfg(debug_assertions)]
-        {
-            syncdoc_debug!("\n=== HUNK DEBUG ===");
-            syncdoc_debug!(
-                "Hunk: before[{}..{}] -> after[{}..{}]",
-                h.before_start,
-                h.before_start + h.before_count,
-                h.after_start,
-                h.after_start + h.after_count
-            );
-        }
-
         // ONLY apply relevant hunks (doc-related or restore-related)
         if !is_relevant(h, &original_lines, &after_lines) {
             #[cfg(debug_assertions)]
-            syncdoc_debug!(
+            crate::syncdoc_debug!(
                 "Skipping irrelevant hunk at lines {}..{}",
                 h.before_start,
                 h.before_start + h.before_count
             );
 
-            // Skip this hunk - copy original lines unchanged
             copy_original_lines(
                 &original_lines,
                 &mut result,
@@ -68,26 +59,6 @@ where
             h.before_start,
             0,
         );
-
-        // Debug BEFORE and AFTER lines
-        #[cfg(debug_assertions)]
-        {
-            syncdoc_debug!("Applying hunk...");
-            syncdoc_debug!("BEFORE lines:");
-            for i in 0..h.before_count {
-                let idx = h.before_start + i;
-                if idx < original_lines.len() {
-                    syncdoc_debug!("  [{}]: {:?}", idx, original_lines[idx]);
-                }
-            }
-            syncdoc_debug!("AFTER lines:");
-            for i in h.after_start..h.after_start + h.after_count {
-                if i < after_lines.len() {
-                    syncdoc_debug!("  [{}]: {:?}", i, after_lines[i]);
-                }
-            }
-            syncdoc_debug!("==================\n");
-        }
 
         // Check if we're removing blank lines
         let removed_blank_lines =
