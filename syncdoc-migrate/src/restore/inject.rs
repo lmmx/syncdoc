@@ -30,7 +30,10 @@ pub fn inject_all_doc_comments(
             let attr_str = attr_ts.to_string().replace(" ", "");
 
             // Skip module_doc! macros and doc attributes
-            if attr_str.contains("module_doc!") || attr_str.contains("#![doc=") {
+            if attr_str.contains("module_doc!")
+                || attr_str.contains("#[doc=")
+                || attr_str.contains("#![doc=")
+            {
                 continue;
             }
 

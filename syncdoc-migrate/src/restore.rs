@@ -66,7 +66,7 @@ fn generate_module_doc_comments(content: &str) -> TokenStream {
 
     for line in lines {
         let comment = format!("//! {}", line);
-        output.extend(quote! { #[doc = #comment] });
+        output.extend(quote! { #![doc = #comment] });
     }
 
     output

@@ -16,9 +16,9 @@ use duct::cmd;
 pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<String, String> {
     #[cfg(debug_assertions)]
     {
-        eprintln!("\n=== REFORMAT START ===");
-        eprintln!("Original length: {}", original.len());
-        eprintln!("Transformed length: {}", transformed.len());
+        crate::syncdoc_debug!("\n=== REFORMAT START ===");
+        crate::syncdoc_debug!("Original length: {}", original.len());
+        crate::syncdoc_debug!("Transformed length: {}", transformed.len());
     }
 
     // 1. Format both strings with rustfmt
@@ -27,29 +27,52 @@ pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<St
 
     #[cfg(debug_assertions)]
     {
-        eprintln!("Formatted original length: {}", formatted_original.len());
-        eprintln!(
+        crate::syncdoc_debug!("Formatted original length: {}", formatted_original.len());
+        crate::syncdoc_debug!(
             "Formatted transformed length: {}",
             formatted_transformed.len()
         );
-        eprintln!("\n--- Formatted Original ---");
-        eprintln!("{}", formatted_original);
-        eprintln!("\n--- Formatted Transformed ---");
-        eprintln!("{}", formatted_transformed);
+        crate::syncdoc_debug!("\n--- Formatted Original ---");
+        crate::syncdoc_debug!("{}", formatted_original);
+        crate::syncdoc_debug!("\n--- Formatted Transformed ---");
+        crate::syncdoc_debug!("{}", formatted_transformed);
     }
 
     // 2. Compute line-level diff
     let diff_hunks = compute_line_diff(&formatted_original, &formatted_transformed);
 
+    #[cfg(debug_assertions)]
+    {
+        crate::syncdoc_debug!("DEBUG restore: Found {} hunks", diff_hunks.len());
+        for (i, h) in diff_hunks.iter().enumerate() {
+            crate::syncdoc_debug!(
+                "  Hunk {}: before[{}..{}] after[{}..{}]",
+                i,
+                h.before_start,
+                h.before_start + h.before_count,
+                h.after_start,
+                h.after_start + h.after_count
+            );
+        }
+    }
+
     // 3. Apply diff to FORMATTED original (not raw original)
     // This ensures line numbers match
     let diff_result = apply_diff(&formatted_original, &diff_hunks, &formatted_transformed);
+
+    #[cfg(debug_assertions)]
+    {
+        crate::syncdoc_debug!("Original != Result: {}", original != diff_result);
+        if original == diff_result {
+            crate::syncdoc_debug!("WARNING: Restore produced no changes for this file!");
+        }
+    }
 
     // 4. Reformat bookended lines in transformed code
     let mut result = reformat_bookended_lines(&diff_result);
 
     #[cfg(debug_assertions)]
-    eprintln!("After bookending: {}", transformed.len());
+    crate::syncdoc_debug!("After bookending: {}", transformed.len());
 
     // Ensure EOF newline
     if !result.ends_with('\n') {
@@ -58,9 +81,9 @@ pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<St
 
     #[cfg(debug_assertions)]
     {
-        eprintln!("\n--- Final Result ---");
-        eprintln!("{}", result);
-        eprintln!("=== REFORMAT END ===\n");
+        crate::syncdoc_debug!("\n--- Final Result ---");
+        crate::syncdoc_debug!("{}", result);
+        crate::syncdoc_debug!("=== REFORMAT END ===\n");
     }
 
     Ok(result)
@@ -89,24 +112,48 @@ pub fn rewrite_preserving_format_restore(
 ) -> Result<String, String> {
     #[cfg(debug_assertions)]
     {
-        eprintln!("\n=== RESTORE REFORMAT START ===");
-        eprintln!("Original length: {}", original.len());
-        eprintln!("Transformed length: {}", transformed.len());
+        crate::syncdoc_debug!("\n=== RESTORE REFORMAT START ===");
+        crate::syncdoc_debug!("Original length: {}", original.len());
+        crate::syncdoc_debug!("Transformed length: {}", transformed.len());
     }
 
-    let formatted_original = rustfmt(original)?;
-    let formatted_transformed = rustfmt(transformed)?;
+    let formatted_original = rustfmt(original).map_err(|e| {
+        eprintln!("ERROR: rustfmt failed on original: {}", e);
+        e
+    })?;
+    let formatted_transformed = rustfmt(transformed).map_err(|e| {
+        eprintln!("ERROR: rustfmt failed on transformed: {}", e);
+        eprintln!("Transformed code was:");
+        eprintln!("{}", transformed);
+        e
+    })?;
 
     #[cfg(debug_assertions)]
     {
-        eprintln!("Formatted original length: {}", formatted_original.len());
-        eprintln!(
+        crate::syncdoc_debug!("Formatted original length: {}", formatted_original.len());
+        crate::syncdoc_debug!(
             "Formatted transformed length: {}",
             formatted_transformed.len()
         );
     }
 
     let diff_hunks = compute_line_diff(&formatted_original, &formatted_transformed);
+
+    #[cfg(debug_assertions)]
+    {
+        crate::syncdoc_debug!("DEBUG restore: Found {} hunks", diff_hunks.len());
+        for (i, h) in diff_hunks.iter().enumerate() {
+            crate::syncdoc_debug!(
+                "  Hunk {}: before[{}..{}] after[{}..{}]",
+                i,
+                h.before_start,
+                h.before_start + h.before_count,
+                h.after_start,
+                h.after_start + h.after_count
+            );
+        }
+    }
+
     let diff_result =
         diff::apply_diff_restore(&formatted_original, &diff_hunks, &formatted_transformed);
 
@@ -118,7 +165,7 @@ pub fn rewrite_preserving_format_restore(
 
     #[cfg(debug_assertions)]
     {
-        eprintln!("=== RESTORE REFORMAT END ===\n");
+        crate::syncdoc_debug!("=== RESTORE REFORMAT END ===\n");
     }
 
     Ok(result)
