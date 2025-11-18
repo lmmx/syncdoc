@@ -127,17 +127,20 @@ pub fn apply_diff(original: &str, hunks: &[DiffHunk], formatted_after: &str) -> 
             result.extend(std::iter::repeat_n("", removed_blank_lines))
         }
 
-        // PRESERVE REGULAR COMMENT-ONLY LINES that would be deleted
-        // But NOT doc comments (/// or //!)
+        // PRESERVE ALL NON-DOC ATTRIBUTE LINES that would be deleted
+        // This includes #[derive], #[cfg], #[facet], etc.
         for i in 0..hunk.before_count {
             let idx = hunk.before_start + i;
             if idx < original_lines.len() {
                 let line = original_lines[idx];
                 let trimmed = line.trim_start();
 
-                // Check if this is a REGULAR comment line (not doc comment)
-                // Must start with // but NOT /// or //!
-                if trimmed.starts_with("//")
+                // Preserve any attribute line that's NOT a doc attribute
+                if trimmed.starts_with("#[") && !trimmed.starts_with("#[doc") {
+                    result.push(line);
+                }
+                // Also preserve regular comments (not doc comments)
+                else if trimmed.starts_with("//")
                     && !trimmed.starts_with("///")
                     && !trimmed.starts_with("//!")
                 {

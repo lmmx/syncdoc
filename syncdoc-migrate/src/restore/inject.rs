@@ -56,13 +56,89 @@ fn inject_item_docs(item: &ModuleItem, context: Vec<String>, docs_root: &str) ->
         ModuleItem::Trait(t) => inject_trait_docs(t, context, docs_root),
         ModuleItem::ImplBlock(i) => inject_impl_docs(i, context, docs_root),
         ModuleItem::TypeAlias(ta) => {
-            inject_simple_item_docs(ta, &ta.name.to_string(), &context, docs_root)
+            let mut output = TokenStream::new();
+
+            if let Some(content) =
+                super::read_item_markdown(&context, &ta.name.to_string(), docs_root)
+            {
+                output.extend(super::generate_doc_comments(&content));
+            }
+
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&ta.attributes);
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            if let Some(vis) = &ta.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&ta._type, &mut output);
+            quote::ToTokens::to_tokens(&ta.name, &mut output);
+            if let Some(generics) = &ta.generics {
+                unsynn::ToTokens::to_tokens(generics, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&ta._eq, &mut output);
+            unsynn::ToTokens::to_tokens(&ta.target, &mut output);
+            unsynn::ToTokens::to_tokens(&ta._semi, &mut output);
+
+            output
         }
         ModuleItem::Const(c) => {
-            inject_simple_item_docs(c, &c.name.to_string(), &context, docs_root)
+            let mut output = TokenStream::new();
+
+            if let Some(content) =
+                super::read_item_markdown(&context, &c.name.to_string(), docs_root)
+            {
+                output.extend(super::generate_doc_comments(&content));
+            }
+
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&c.attributes);
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            if let Some(vis) = &c.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&c._const, &mut output);
+            quote::ToTokens::to_tokens(&c.name, &mut output);
+            unsynn::ToTokens::to_tokens(&c._colon, &mut output);
+            unsynn::ToTokens::to_tokens(&c.const_type, &mut output);
+            unsynn::ToTokens::to_tokens(&c._eq, &mut output);
+            unsynn::ToTokens::to_tokens(&c.value, &mut output);
+            unsynn::ToTokens::to_tokens(&c._semi, &mut output);
+
+            output
         }
         ModuleItem::Static(s) => {
-            inject_simple_item_docs(s, &s.name.to_string(), &context, docs_root)
+            let mut output = TokenStream::new();
+
+            if let Some(content) =
+                super::read_item_markdown(&context, &s.name.to_string(), docs_root)
+            {
+                output.extend(super::generate_doc_comments(&content));
+            }
+
+            let stripped_attrs = strip_doc_attrs_from_attr_list(&s.attributes);
+            for attr in stripped_attrs {
+                quote::ToTokens::to_tokens(&attr, &mut output);
+            }
+
+            if let Some(vis) = &s.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            if let Some(mut_kw) = &s.mut_kw {
+                unsynn::ToTokens::to_tokens(mut_kw, &mut output);
+            }
+            unsynn::ToTokens::to_tokens(&s._static, &mut output);
+            quote::ToTokens::to_tokens(&s.name, &mut output);
+            unsynn::ToTokens::to_tokens(&s._colon, &mut output);
+            unsynn::ToTokens::to_tokens(&s.static_type, &mut output);
+            unsynn::ToTokens::to_tokens(&s._eq, &mut output);
+            unsynn::ToTokens::to_tokens(&s.value, &mut output);
+            unsynn::ToTokens::to_tokens(&s._semi, &mut output);
+
+            output
         }
         ModuleItem::Other(t) => {
             let mut ts = TokenStream::new();
@@ -84,7 +160,33 @@ fn inject_trait_method_docs(
     }
 
     add_non_omnidoc_attrs(&method.attributes, &mut output);
-    quote::ToTokens::to_tokens(method, &mut output);
+
+    // Manually reconstruct method signature WITHOUT attributes
+    if let Some(const_kw) = &method.const_kw {
+        unsynn::ToTokens::to_tokens(const_kw, &mut output);
+    }
+    if let Some(async_kw) = &method.async_kw {
+        unsynn::ToTokens::to_tokens(async_kw, &mut output);
+    }
+    if let Some(unsafe_kw) = &method.unsafe_kw {
+        unsynn::ToTokens::to_tokens(unsafe_kw, &mut output);
+    }
+    if let Some(extern_kw) = &method.extern_kw {
+        unsynn::ToTokens::to_tokens(extern_kw, &mut output);
+    }
+    unsynn::ToTokens::to_tokens(&method._fn, &mut output);
+    quote::ToTokens::to_tokens(&method.name, &mut output);
+    if let Some(generics) = &method.generics {
+        unsynn::ToTokens::to_tokens(generics, &mut output);
+    }
+    unsynn::ToTokens::to_tokens(&method.params, &mut output);
+    if let Some(ret_type) = &method.return_type {
+        unsynn::ToTokens::to_tokens(ret_type, &mut output);
+    }
+    if let Some(where_clause) = &method.where_clause {
+        unsynn::ToTokens::to_tokens(where_clause, &mut output);
+    }
+    unsynn::ToTokens::to_tokens(&method._semi, &mut output);
 
     output
 }
@@ -97,24 +199,36 @@ fn inject_function_docs(func: &FnSig, context: &[String], docs_root: &str) -> To
     }
 
     add_non_omnidoc_attrs(&func.attributes, &mut output);
-    quote::ToTokens::to_tokens(func, &mut output);
 
-    output
-}
-
-fn inject_simple_item_docs<T: quote::ToTokens>(
-    item: &T,
-    name: &str,
-    context: &[String],
-    docs_root: &str,
-) -> TokenStream {
-    let mut output = TokenStream::new();
-
-    if let Some(content) = super::read_item_markdown(context, name, docs_root) {
-        output.extend(super::generate_doc_comments(&content));
+    // Manually reconstruct function WITHOUT attributes
+    if let Some(vis) = &func.visibility {
+        quote::ToTokens::to_tokens(vis, &mut output);
     }
-
-    quote::ToTokens::to_tokens(item, &mut output);
+    if let Some(const_kw) = &func.const_kw {
+        unsynn::ToTokens::to_tokens(const_kw, &mut output);
+    }
+    if let Some(async_kw) = &func.async_kw {
+        unsynn::ToTokens::to_tokens(async_kw, &mut output);
+    }
+    if let Some(unsafe_kw) = &func.unsafe_kw {
+        unsynn::ToTokens::to_tokens(unsafe_kw, &mut output);
+    }
+    if let Some(extern_kw) = &func.extern_kw {
+        unsynn::ToTokens::to_tokens(extern_kw, &mut output);
+    }
+    unsynn::ToTokens::to_tokens(&func._fn, &mut output);
+    quote::ToTokens::to_tokens(&func.name, &mut output);
+    if let Some(generics) = &func.generics {
+        unsynn::ToTokens::to_tokens(generics, &mut output);
+    }
+    unsynn::ToTokens::to_tokens(&func.params, &mut output);
+    if let Some(ret_type) = &func.return_type {
+        unsynn::ToTokens::to_tokens(ret_type, &mut output);
+    }
+    if let Some(where_clause) = &func.where_clause {
+        unsynn::ToTokens::to_tokens(where_clause, &mut output);
+    }
+    unsynn::ToTokens::to_tokens(&func.body, &mut output);
 
     output
 }
@@ -129,6 +243,7 @@ fn inject_struct_docs(struct_sig: &StructSig, context: &[String], docs_root: &st
 
     add_non_omnidoc_attrs(&struct_sig.attributes, &mut output);
 
+    // Manually reconstruct struct WITHOUT attributes
     if let Some(vis) = &struct_sig.visibility {
         quote::ToTokens::to_tokens(vis, &mut output);
     }
@@ -175,7 +290,14 @@ fn inject_struct_fields(
             }
 
             add_non_omnidoc_attrs(&field.attributes, &mut output);
-            quote::ToTokens::to_tokens(field, &mut output);
+
+            // Manually reconstruct field WITHOUT attributes
+            if let Some(vis) = &field.visibility {
+                quote::ToTokens::to_tokens(vis, &mut output);
+            }
+            quote::ToTokens::to_tokens(&field.name, &mut output);
+            unsynn::ToTokens::to_tokens(&field._colon, &mut output);
+            unsynn::ToTokens::to_tokens(&field.field_type, &mut output);
 
             if idx < fields_cdv.0.len() - 1 {
                 output.extend(quote! { , });
@@ -196,6 +318,7 @@ fn inject_enum_docs(enum_sig: &EnumSig, context: &[String], docs_root: &str) -> 
 
     add_non_omnidoc_attrs(&enum_sig.attributes, &mut output);
 
+    // Manually reconstruct enum WITHOUT attributes
     if let Some(vis) = &enum_sig.visibility {
         quote::ToTokens::to_tokens(vis, &mut output);
     }
@@ -237,6 +360,8 @@ fn inject_enum_variants(
             }
 
             add_non_omnidoc_attrs(&variant.attributes, &mut output);
+
+            // Manually reconstruct variant WITHOUT attributes
             quote::ToTokens::to_tokens(&variant.name, &mut output);
 
             if let Some(data) = &variant.data {
@@ -291,7 +416,14 @@ fn inject_enum_variant_fields(
         }
 
         add_non_omnidoc_attrs(&field.attributes, &mut output);
-        quote::ToTokens::to_tokens(field, &mut output);
+
+        // Manually reconstruct field WITHOUT attributes
+        if let Some(vis) = &field.visibility {
+            quote::ToTokens::to_tokens(vis, &mut output);
+        }
+        quote::ToTokens::to_tokens(&field.name, &mut output);
+        unsynn::ToTokens::to_tokens(&field._colon, &mut output);
+        unsynn::ToTokens::to_tokens(&field.field_type, &mut output);
 
         if idx < fields.0.len() - 1 {
             output.extend(quote! { , });
@@ -470,6 +602,34 @@ fn add_non_omnidoc_attrs(attrs: &Option<Many<Attribute>>, output: &mut TokenStre
             }
         }
     }
+}
+
+// Add this at the bottom of inject.rs
+fn strip_doc_attrs_from_attr_list(attrs: &Option<unsynn::Many<Attribute>>) -> Vec<Attribute> {
+    let Some(attr_list) = attrs else {
+        return Vec::new();
+    };
+
+    attr_list
+        .0
+        .iter()
+        .filter_map(|attr_delimited| {
+            let attr = &attr_delimited.value;
+            if is_outer_doc_attr(attr) {
+                None
+            } else {
+                Some(attr.clone())
+            }
+        })
+        .collect()
+}
+
+fn is_outer_doc_attr(attr: &Attribute) -> bool {
+    use unsynn::ToTokens;
+    let mut ts = TokenStream::new();
+    attr.to_tokens(&mut ts);
+    let s = ts.to_string().replace(' ', "");
+    s.contains("#[doc=")
 }
 
 fn wrap_in_braces(content: TokenStream) -> TokenStream {

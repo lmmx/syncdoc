@@ -498,17 +498,21 @@ fn strip_doc_attrs_from_fields(
     for (idx, field_delimited) in fields.0.iter().enumerate() {
         let field = &field_delimited.value;
 
-        // Strip field attributes
+        // Strip field attributes - preserve non-doc ones
         let stripped_attrs = strip_doc_attrs_from_attr_list(&field.attributes);
         for attr in stripped_attrs {
+            // Important: use quote::ToTokens to ensure proper formatting
             quote::ToTokens::to_tokens(&attr, &mut output);
         }
 
+        // Reconstruct field
         if let Some(vis) = &field.visibility {
             quote::ToTokens::to_tokens(vis, &mut output);
         }
         quote::ToTokens::to_tokens(&field.name, &mut output);
         unsynn::ToTokens::to_tokens(&field._colon, &mut output);
+
+        // Field type - preserve exactly as parsed
         unsynn::ToTokens::to_tokens(&field.field_type, &mut output);
 
         if idx < fields.0.len() - 1 {
