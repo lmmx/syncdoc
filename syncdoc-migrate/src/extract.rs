@@ -147,14 +147,15 @@ fn extract_from_single_attr(attr: &Attribute) -> Option<String> {
     None
 }
 
-/// Extracts a string literal from token text
+/// Extracts a string literal from token text and unescapes it
 fn extract_string_literal(s: &str) -> Option<String> {
     let s = s.trim();
 
     // Handle regular string "..."
     if s.starts_with('"') {
         if let Some(end_pos) = find_closing_quote(s, 1) {
-            return Some(s[1..end_pos].to_string());
+            let escaped_content = &s[1..end_pos];
+            return Some(unescape_rust_string(escaped_content));
         }
     }
 
@@ -162,6 +163,7 @@ fn extract_string_literal(s: &str) -> Option<String> {
     if s.starts_with("r#") {
         if let Some(start) = s.find('"') {
             if let Some(end) = s[start + 1..].find("\"#") {
+                // Raw strings have no escapes, return as-is
                 return Some(s[start + 1..start + 1 + end].to_string());
             }
         }
@@ -170,11 +172,79 @@ fn extract_string_literal(s: &str) -> Option<String> {
     // Handle raw string r"..."
     if s.starts_with("r\"") {
         if let Some(end_pos) = find_closing_quote(s, 2) {
+            // Raw strings have no escapes, return as-is
             return Some(s[2..end_pos].to_string());
         }
     }
 
     None
+}
+
+/// Unescapes Rust string escape sequences
+fn unescape_rust_string(s: &str) -> String {
+    let mut result = String::with_capacity(s.len());
+    let mut chars = s.chars();
+
+    while let Some(ch) = chars.next() {
+        if ch == '\\' {
+            match chars.next() {
+                Some('n') => result.push('\n'),
+                Some('r') => result.push('\r'),
+                Some('t') => result.push('\t'),
+                Some('\\') => result.push('\\'),
+                Some('0') => result.push('\0'),
+                Some('\'') => result.push('\''),
+                Some('"') => result.push('"'),
+                Some('x') => {
+                    // Hex escape: \xNN
+                    let hex: String = chars.by_ref().take(2).collect();
+                    if let Ok(byte) = u8::from_str_radix(&hex, 16) {
+                        result.push(byte as char);
+                    } else {
+                        // Invalid escape, keep as-is
+                        result.push('\\');
+                        result.push('x');
+                        result.push_str(&hex);
+                    }
+                }
+                Some('u') => {
+                    // Unicode escape: \u{NNNN}
+                    if chars.next() == Some('{') {
+                        let hex: String = chars.by_ref().take_while(|&c| c != '}').collect();
+                        if let Ok(code_point) = u32::from_str_radix(&hex, 16) {
+                            if let Some(c) = char::from_u32(code_point) {
+                                result.push(c);
+                            } else {
+                                // Invalid code point
+                                result.push_str("\\u{");
+                                result.push_str(&hex);
+                                result.push('}');
+                            }
+                        } else {
+                            // Invalid hex
+                            result.push_str("\\u{");
+                            result.push_str(&hex);
+                            result.push('}');
+                        }
+                    } else {
+                        // Malformed unicode escape
+                        result.push_str("\\u");
+                    }
+                }
+                Some(other) => {
+                    // Unknown escape, keep the backslash
+                    result.push('\\');
+                    result.push(other);
+                }
+                // Trailing backslash
+                None => result.push('\\'),
+            }
+        } else {
+            result.push(ch);
+        }
+    }
+
+    result
 }
 
 /// Finds the closing quote, accounting for escaped quotes
