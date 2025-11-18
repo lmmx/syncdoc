@@ -79,5 +79,50 @@ fn rustfmt(code: &str) -> Result<String, String> {
         })
 }
 
+/// Rewrites code for restore operations while preserving original formatting
+///
+/// This is the inverse of the forward migration - it converts omnidoc attributes
+/// back to inline doc comments while preserving formatting.
+pub fn rewrite_preserving_format_restore(
+    original: &str,
+    transformed: &str,
+) -> Result<String, String> {
+    #[cfg(debug_assertions)]
+    {
+        eprintln!("\n=== RESTORE REFORMAT START ===");
+        eprintln!("Original length: {}", original.len());
+        eprintln!("Transformed length: {}", transformed.len());
+    }
+
+    let formatted_original = rustfmt(original)?;
+    let formatted_transformed = rustfmt(transformed)?;
+
+    #[cfg(debug_assertions)]
+    {
+        eprintln!("Formatted original length: {}", formatted_original.len());
+        eprintln!(
+            "Formatted transformed length: {}",
+            formatted_transformed.len()
+        );
+    }
+
+    let diff_hunks = compute_line_diff(&formatted_original, &formatted_transformed);
+    let diff_result =
+        diff::apply_diff_restore(&formatted_original, &diff_hunks, &formatted_transformed);
+
+    let mut result = reformat_bookended_lines(&diff_result);
+
+    if !result.ends_with('\n') {
+        result.push('\n');
+    }
+
+    #[cfg(debug_assertions)]
+    {
+        eprintln!("=== RESTORE REFORMAT END ===\n");
+    }
+
+    Ok(result)
+}
+
 #[cfg(test)]
 mod reformat_tests;

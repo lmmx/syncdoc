@@ -202,3 +202,42 @@ fn test_split_preserves_original_blank_line() {
     // Should not have double blank lines
     assert_ne!(lines.get(2).map(|l| l.trim()), Some(""));
 }
+
+#[test]
+fn test_strip_doc_attr_bookends_module() {
+    let line = r#"#[doc = "//! Module doc"]"#;
+    let result = super::strip_doc_attr_bookends(line);
+    assert_eq!(result, "//! Module doc");
+}
+
+#[test]
+fn test_strip_doc_attr_bookends_item() {
+    let line = r#"#[doc = "/// Item doc"]"#;
+    let result = super::strip_doc_attr_bookends(line);
+    assert_eq!(result, "/// Item doc");
+}
+
+#[test]
+fn test_strip_doc_attr_bookends_preserves_indent() {
+    let line = r#"    #[doc = "//! Indented"]"#;
+    let result = super::strip_doc_attr_bookends(line);
+    assert_eq!(result, "    //! Indented");
+}
+
+#[test]
+fn test_strip_doc_attr_bookends_non_doc() {
+    let line = r#"#[derive(Debug)]"#;
+    let result = super::strip_doc_attr_bookends(line);
+    assert_eq!(result, r#"#[derive(Debug)]"#);
+}
+
+#[test]
+fn test_strip_doc_attr_bookends_empty_line() {
+    let line = r#"#[doc = "//! "]"#;
+    let result = super::strip_doc_attr_bookends(line);
+    assert_eq!(result, "//!");
+
+    let line2 = r#"#[doc = "/// "]"#;
+    let result2 = super::strip_doc_attr_bookends(line2);
+    assert_eq!(result2, "///");
+}

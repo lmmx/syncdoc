@@ -11,15 +11,18 @@ pub struct DiffHunk {
 
 /// Checks if a hunk is related to documentation changes
 pub fn is_doc_related_hunk(hunk: &DiffHunk, original_lines: &[&str], after_lines: &[&str]) -> bool {
-    // Check lines being removed
+    // Check lines being removed - ONLY actual doc comments/attributes
     for i in 0..hunk.before_count {
         let idx = hunk.before_start + i;
         if idx < original_lines.len() {
             let line = original_lines[idx].trim();
+            let no_spaces = line.replace(" ", "");
+
+            // Only match actual doc comments and doc-specific attributes
             if line.starts_with("///")
                 || line.starts_with("//!")
-                || line.replace(" ", "").contains("#[doc")
-                || line.replace(" ", "").contains("#![doc")
+                || no_spaces.starts_with("#[doc=")
+                || no_spaces.starts_with("#![doc=")
             {
                 return true;
             }
@@ -31,12 +34,16 @@ pub fn is_doc_related_hunk(hunk: &DiffHunk, original_lines: &[&str], after_lines
     for i in hunk.after_start..after_end {
         if i < after_lines.len() {
             let line = after_lines[i].trim();
+            let no_spaces = line.replace(" ", "");
+
+            // Only match doc-related additions
             if line.starts_with("///")
                 || line.starts_with("//!")
-                || line.replace(" ", "").contains("#[doc")
-                || line.replace(" ", "").contains("#![doc")
-                || line.replace(" ", "").contains("#[syncdoc::")
-                || line.replace(" ", "").contains("#[omnidoc")
+                || no_spaces.starts_with("#[doc=")
+                || no_spaces.starts_with("#![doc=")
+                || no_spaces.starts_with("#[syncdoc::omnidoc")
+                || no_spaces.starts_with("#[omnidoc")
+                || (no_spaces.contains("module_doc!") && no_spaces.contains("#![doc="))
             {
                 return true;
             }
@@ -109,4 +116,34 @@ pub fn split_hunk_if_mixed(hunk: &DiffHunk, after_lines: &[&str]) -> Vec<DiffHun
     } else {
         vec![hunk.clone()]
     }
+}
+
+/// Checks if a hunk is related to restore operations (removing omnidoc, adding doc comments)
+pub fn is_restore_related_hunk(
+    hunk: &DiffHunk,
+    original_lines: &[&str],
+    after_lines: &[&str],
+) -> bool {
+    let removes_omnidoc = (0..hunk.before_count).any(|i| {
+        let idx = hunk.before_start + i;
+        idx < original_lines.len() && {
+            let line = original_lines[idx].replace(" ", "");
+            line.contains("#[omnidoc")
+                || line.contains("#[syncdoc::omnidoc")
+                || line.contains("#![doc=syncdoc::module_doc!")
+        }
+    });
+
+    let adds_docs = (hunk.after_start..hunk.after_start + hunk.after_count).any(|i| {
+        i < after_lines.len() && {
+            let line = after_lines[i].trim();
+            // Check for both direct doc comments AND doc attributes from restore
+            line.starts_with("///")
+                || line.starts_with("//!")
+                || line.contains(r#"#[doc = "///"#)
+                || line.contains(r#"#[doc = "//!"#)
+        }
+    });
+
+    removes_omnidoc || adds_docs
 }

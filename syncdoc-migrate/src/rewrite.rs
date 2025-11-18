@@ -1,7 +1,7 @@
 // syncdoc-migrate/src/rewrite.rs
 
 mod inject;
-mod reformat;
+pub mod reformat;
 mod strip;
 
 pub use inject::{inject_module_doc_attr, inject_omnidoc_attr};
