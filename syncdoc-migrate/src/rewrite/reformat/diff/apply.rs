@@ -63,6 +63,15 @@ where
                 h.before_count,
             );
             continue;
+        } else {
+            #[cfg(debug_assertions)]
+            crate::syncdoc_debug!(
+                "APPLYING relevant hunk at lines {}..{} (adds {} lines, removes {} lines)",
+                h.before_start,
+                h.before_start + h.before_count,
+                h.after_count,
+                h.before_count
+            );
         }
 
         // Copy unchanged lines from original up to hunk start
