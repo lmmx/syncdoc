@@ -75,4 +75,5 @@ fn strip_all_doc_attr_bookends(code: &str) -> String {
 }
 
 #[cfg(test)]
+#[path = "../../tests/diff.rs"]
 mod diff_tests;

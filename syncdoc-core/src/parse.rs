@@ -1134,4 +1134,5 @@ impl quote::ToTokens for EnumVariantData {
 }
 
 #[cfg(test)]
+#[path = "tests/parse.rs"]
 mod tests;

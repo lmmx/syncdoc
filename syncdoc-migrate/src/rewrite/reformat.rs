@@ -125,4 +125,5 @@ pub fn rewrite_preserving_format_restore(
 }
 
 #[cfg(test)]
+#[path = "../tests/reformat.rs"]
 mod reformat_tests;

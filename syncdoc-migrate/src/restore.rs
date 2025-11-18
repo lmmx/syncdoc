@@ -94,4 +94,5 @@ fn is_module_doc_macro(inner_attrs: &unsynn::Many<syncdoc_core::parse::InnerAttr
 }
 
 #[cfg(test)]
+#[path = "tests/restore.rs"]
 mod tests;
