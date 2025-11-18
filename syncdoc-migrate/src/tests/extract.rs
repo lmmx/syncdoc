@@ -117,3 +117,27 @@ fn test_extract_strips_leading_spaces() {
         )
     );
 }
+
+#[test]
+fn test_extract_doc_with_quotes() {
+    // Test that quotes in doc strings are properly unescaped
+    // This simulates what we'd get from parsing an attribute
+    // like `[doc = "Change classification: \"unchanged\", \"changed\""]`
+    let expected = r#"Change classification: "unchanged", "changed""#;
+
+    // Test the unescape function directly
+    let escaped = r#"Change classification: \"unchanged\", \"changed\""#;
+    let unescaped = unescape_rust_string(escaped);
+
+    assert_eq!(unescaped, expected);
+}
+
+#[test]
+fn test_unescape_rust_string() {
+    assert_eq!(unescape_rust_string(r#"hello\"world"#), r#"hello"world"#);
+    assert_eq!(unescape_rust_string(r#"line1\nline2"#), "line1\nline2");
+    assert_eq!(unescape_rust_string(r#"tab\there"#), "tab\there");
+    assert_eq!(unescape_rust_string(r#"backslash\\"#), r#"backslash\"#);
+    assert_eq!(unescape_rust_string(r#"quote\'"#), "quote'");
+    assert_eq!(unescape_rust_string("no escapes"), "no escapes");
+}
