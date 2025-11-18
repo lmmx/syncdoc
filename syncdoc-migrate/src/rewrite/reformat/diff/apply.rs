@@ -25,13 +25,27 @@ where
         split_hunks.extend(split_hunk_if_mixed(h, &after_lines));
     }
 
+    // IMPORTANT: Separate module-level hunks from item-level hunks
+    // Module-level hunks should be processed first to ensure #![doc = module_doc!()]
+    // appears before any other inner attributes
+    let (mut module_hunks, mut item_hunks): (Vec<_>, Vec<_>) = split_hunks
+        .into_iter()
+        .partition(|h| is_module_level_hunk(h, &after_lines));
+
+    // Sort module hunks by position to maintain order
+    module_hunks.sort_by_key(|h| h.before_start);
+    item_hunks.sort_by_key(|h| h.before_start);
+
+    // Combine: module hunks first, then item hunks
+    let ordered_hunks: Vec<_> = module_hunks.into_iter().chain(item_hunks).collect();
+
     #[cfg(debug_assertions)]
-    debug_hunk_lines(original, formatted_after, &split_hunks);
+    debug_hunk_lines(original, formatted_after, &ordered_hunks);
 
     let mut result: Vec<&'a str> = Vec::new();
     let mut orig_idx = 0;
 
-    for h in &split_hunks {
+    for h in &ordered_hunks {
         // ONLY apply relevant hunks (doc-related or restore-related)
         if !is_relevant(h, &original_lines, &after_lines) {
             #[cfg(debug_assertions)]
@@ -84,10 +98,18 @@ where
         // Skip removed lines in original
         orig_idx += h.before_count;
 
-        // Add new lines from after
+        // Add new lines from after (but skip non-doc attributes we've already preserved)
         for i in h.after_start..h.after_start + h.after_count {
             if i < after_lines.len() {
-                result.push(after_lines[i]);
+                let line = after_lines[i];
+
+                // Skip non-doc attribute lines from transformed version
+                // since we've already preserved them from the original
+                if should_skip_from_transformed(line) {
+                    continue;
+                }
+
+                result.push(line);
             }
         }
 
@@ -172,4 +194,53 @@ pub fn apply_diff_restore(original: &str, hunks: &[DiffHunk], formatted_after: &
         hunk::is_restore_related_hunk,
         |s| strip_all_doc_attr_bookends(&s),
     )
+}
+
+/// Check if a line from the transformed version should be skipped
+/// because it's a non-doc attribute that we've already preserved from original
+fn should_skip_from_transformed(line: &str) -> bool {
+    let trimmed = line.trim_start();
+
+    // Remove ALL spaces to handle rustfmt'd attributes like "# [facet (...)]"
+    let no_spaces = trimmed.replace(" ", "");
+
+    // Skip OUTER non-doc attributes (already preserved from original)
+    // Must check no_spaces version since rustfmt may add spaces: "# [facet" -> "#[facet"
+    if no_spaces.starts_with("#[")
+        && !no_spaces.starts_with("#[doc")
+        && !no_spaces.contains("omnidoc")
+        && !no_spaces.contains("syncdoc::omnidoc")
+    {
+        return true;
+    }
+
+    // Skip INNER non-doc attributes (already preserved from original)
+    if no_spaces.starts_with("#![") && !no_spaces.starts_with("#![doc") {
+        return true;
+    }
+
+    // Skip regular comments (already preserved from original)
+    if trimmed.starts_with("//") && !trimmed.starts_with("///") && !trimmed.starts_with("//!") {
+        return true;
+    }
+
+    false
+}
+
+/// Checks if a hunk contains module-level documentation (inner attributes)
+fn is_module_level_hunk(hunk: &DiffHunk, after_lines: &[&str]) -> bool {
+    let after_end = hunk.after_start + hunk.after_count;
+
+    for i in hunk.after_start..after_end {
+        if i < after_lines.len() {
+            let line = after_lines[i].replace(" ", "");
+
+            // Check for module-level doc attributes
+            if line.starts_with("#![doc") || line.contains("module_doc!") {
+                return true;
+            }
+        }
+    }
+
+    false
 }
