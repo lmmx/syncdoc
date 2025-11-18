@@ -146,20 +146,11 @@ fn preserve_non_doc_lines<'a>(
             let no_spaces = trimmed.replace(" ", "");
 
             // Preserve any OUTER attribute line that's NOT a doc attribute
-            if trimmed.starts_with("#[")
-                && !no_spaces.starts_with("#[doc")
-                && !no_spaces.contains("omnidoc")
-            {
-                result.push(line);
-            }
-            // Preserve any INNER attribute line that's NOT a doc attribute
-            else if no_spaces.starts_with("#![") && !no_spaces.starts_with("#![doc") {
-                result.push(line);
-            }
-            // Also preserve regular comments (not doc comments)
-            else if trimmed.starts_with("//")
-                && !trimmed.starts_with("///")
-                && !trimmed.starts_with("//!")
+            if (trimmed.starts_with("#[") && !no_spaces.starts_with("#[doc") && !no_spaces.contains("omnidoc"))
+                // Preserve any INNER attribute line that's NOT a doc attribute
+                || (no_spaces.starts_with("#![") && !no_spaces.starts_with("#![doc"))
+                // Also preserve regular comments (not doc comments)
+                || (trimmed.starts_with("//") && !trimmed.starts_with("///") && !trimmed.starts_with("//!"))
             {
                 result.push(line);
             }
