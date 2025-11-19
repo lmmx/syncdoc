@@ -10,10 +10,8 @@ mod rewrite;
 mod strip;
 mod write;
 
-use crate::debug;
-
 /// Automatically enable debug output for all tests
 #[ctor::ctor]
 fn init_debug() {
-    debug::set_debug(true);
+    syncdoc_core::debug::set_debug(true);
 }
