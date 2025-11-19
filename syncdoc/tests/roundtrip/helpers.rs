@@ -29,7 +29,10 @@ impl ModuleConfig {
 
 /// Convert paths to brace-compressed string for inline snapshots
 pub fn to_braces(paths: &[&str]) -> String {
-    let braces_config = BraceConfig::default();
+    let braces_config = BraceConfig {
+        sort_items: true,
+        ..BraceConfig::default()
+    };
     brace_paths(paths, &braces_config).expect("Brace error")
 }
 
@@ -242,7 +245,6 @@ impl RoundtripResult {
             .keys()
             .map(|p| p.to_str().unwrap())
             .collect();
-        paths.sort();
         to_braces(&paths)
     }
 
@@ -253,7 +255,6 @@ impl RoundtripResult {
             .keys()
             .map(|p| p.to_str().unwrap())
             .collect();
-        paths.sort();
         to_braces(&paths)
     }
 
