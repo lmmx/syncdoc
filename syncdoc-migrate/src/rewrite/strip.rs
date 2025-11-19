@@ -65,7 +65,7 @@ pub fn strip_doc_attrs_from_items(content: &syncdoc_core::parse::ModuleContent) 
 }
 
 /// Strip doc attributes from a single item recursively
-fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
+pub(crate) fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
     // DEBUG: Print what kind of item this is
     syncdoc_debug!(
         "Processing item type: {}",
@@ -431,7 +431,9 @@ fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
 }
 
 /// Filter out doc attributes from an attribute list
-fn strip_doc_attrs_from_attr_list(attrs: &Option<unsynn::Many<Attribute>>) -> Vec<Attribute> {
+pub(crate) fn strip_doc_attrs_from_attr_list(
+    attrs: &Option<unsynn::Many<Attribute>>,
+) -> Vec<Attribute> {
     let Some(attr_list) = attrs else {
         return Vec::new();
     };
@@ -450,7 +452,7 @@ fn strip_doc_attrs_from_attr_list(attrs: &Option<unsynn::Many<Attribute>>) -> Ve
         .collect()
 }
 
-fn strip_doc_attrs_from_variants(
+pub(crate) fn strip_doc_attrs_from_variants(
     variants: &CommaDelimitedVec<syncdoc_core::parse::EnumVariant>,
 ) -> TokenStream {
     let mut output = TokenStream::new();
@@ -490,7 +492,7 @@ fn strip_doc_attrs_from_variants(
     output
 }
 
-fn strip_doc_attrs_from_fields(
+pub(crate) fn strip_doc_attrs_from_fields(
     fields: &CommaDelimitedVec<syncdoc_core::parse::StructField>,
 ) -> TokenStream {
     let mut output = TokenStream::new();
@@ -523,7 +525,7 @@ fn strip_doc_attrs_from_fields(
     output
 }
 
-fn extract_brace_group_containing_content<T: unsynn::ToTokens>(
+pub(crate) fn extract_brace_group_containing_content<T: unsynn::ToTokens>(
     brace_group_containing: &BraceGroupContaining<T>,
 ) -> TokenStream {
     let mut ts = TokenStream::new();
@@ -531,7 +533,7 @@ fn extract_brace_group_containing_content<T: unsynn::ToTokens>(
     ts
 }
 
-fn wrap_in_braces(content: TokenStream) -> TokenStream {
+pub(crate) fn wrap_in_braces(content: TokenStream) -> TokenStream {
     let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, content);
     std::iter::once(proc_macro2::TokenTree::Group(group)).collect()
 }

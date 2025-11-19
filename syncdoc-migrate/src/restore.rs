@@ -19,7 +19,11 @@ pub fn restore_file(parsed: &ParsedFile, docs_root: &str) -> Option<String> {
     .ok()
 }
 
-fn read_item_markdown(context: &[String], item_name: &str, docs_root: &str) -> Option<String> {
+pub(crate) fn read_item_markdown(
+    context: &[String],
+    item_name: &str,
+    docs_root: &str,
+) -> Option<String> {
     let mut path_parts = vec![docs_root.to_string()];
     path_parts.extend(context.iter().cloned());
     path_parts.push(format!("{}.md", item_name));
@@ -28,7 +32,7 @@ fn read_item_markdown(context: &[String], item_name: &str, docs_root: &str) -> O
     std::fs::read_to_string(&md_path).ok()
 }
 
-fn read_module_doc(parsed: &ParsedFile, docs_root: &str) -> Option<String> {
+pub(crate) fn read_module_doc(parsed: &ParsedFile, docs_root: &str) -> Option<String> {
     let module_path = syncdoc_core::path_utils::extract_module_path(&parsed.path.to_string_lossy());
 
     let file_stem = parsed
@@ -46,7 +50,7 @@ fn read_module_doc(parsed: &ParsedFile, docs_root: &str) -> Option<String> {
     std::fs::read_to_string(&md_path).ok()
 }
 
-fn generate_doc_comments(content: &str) -> TokenStream {
+pub(crate) fn generate_doc_comments(content: &str) -> TokenStream {
     use quote::quote;
     let lines: Vec<_> = content.trim_end().lines().collect();
     let mut output = TokenStream::new();
@@ -59,7 +63,7 @@ fn generate_doc_comments(content: &str) -> TokenStream {
     output
 }
 
-fn generate_module_doc_comments(content: &str) -> TokenStream {
+pub(crate) fn generate_module_doc_comments(content: &str) -> TokenStream {
     use quote::quote;
     let lines: Vec<_> = content.trim_end().lines().collect();
     let mut output = TokenStream::new();
@@ -72,14 +76,10 @@ fn generate_module_doc_comments(content: &str) -> TokenStream {
     output
 }
 
-fn is_omnidoc_attr(attr: &syncdoc_core::parse::Attribute) -> bool {
+pub(crate) fn is_omnidoc_attr(attr: &syncdoc_core::parse::Attribute) -> bool {
     use unsynn::ToTokens;
     let mut ts = TokenStream::new();
     attr.to_tokens(&mut ts);
     let s = ts.to_string().replace(' ', "");
     s.contains("omnidoc") || s.contains("syncdoc::omnidoc")
 }
-
-#[cfg(test)]
-#[path = "tests/restore.rs"]
-mod tests;

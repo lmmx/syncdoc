@@ -1,7 +1,5 @@
-// syncdoc-migrate/src/rewrite/tests.rs
-
-use super::*;
 use crate::config::DocsPathMode;
+use crate::rewrite::inject::*;
 use crate::rewrite_file;
 use quote::quote;
 use std::str::FromStr;

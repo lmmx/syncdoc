@@ -1,4 +1,4 @@
-use super::*;
+use crate::rewrite::reformat::bookend::*;
 
 #[test]
 fn test_needs_bookending_detects_triggers() {

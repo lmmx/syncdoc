@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
-use syncdoc_core::parse::{Attribute, InnerAttribute};
-use unsynn::*;
+pub(crate) use syncdoc_core::parse::{Attribute, InnerAttribute};
+pub(crate) use unsynn::*;
 
 /// Extracts documentation content from a list of attributes
 ///
@@ -90,7 +90,7 @@ pub fn is_outer_doc_attr(attr: &Attribute) -> bool {
 }
 
 /// Extracts doc content from a single inner attribute
-fn extract_from_inner_attr(attr: &InnerAttribute) -> Option<String> {
+pub(crate) fn extract_from_inner_attr(attr: &InnerAttribute) -> Option<String> {
     let mut tokens = TokenStream::new();
     unsynn::ToTokens::to_tokens(attr, &mut tokens);
 
@@ -118,7 +118,7 @@ fn extract_from_inner_attr(attr: &InnerAttribute) -> Option<String> {
 }
 
 /// Extracts doc content from a single attribute
-fn extract_from_single_attr(attr: &Attribute) -> Option<String> {
+pub(crate) fn extract_from_single_attr(attr: &Attribute) -> Option<String> {
     let mut tokens = TokenStream::new();
     unsynn::ToTokens::to_tokens(attr, &mut tokens);
 
@@ -148,7 +148,7 @@ fn extract_from_single_attr(attr: &Attribute) -> Option<String> {
 }
 
 /// Extracts a string literal from token text and unescapes it
-fn extract_string_literal(s: &str) -> Option<String> {
+pub(crate) fn extract_string_literal(s: &str) -> Option<String> {
     let s = s.trim();
 
     // Handle regular string "..."
@@ -181,7 +181,7 @@ fn extract_string_literal(s: &str) -> Option<String> {
 }
 
 /// Unescapes Rust string escape sequences
-fn unescape_rust_string(s: &str) -> String {
+pub(crate) fn unescape_rust_string(s: &str) -> String {
     let mut result = String::with_capacity(s.len());
     let mut chars = s.chars();
 
@@ -248,7 +248,7 @@ fn unescape_rust_string(s: &str) -> String {
 }
 
 /// Finds the closing quote, accounting for escaped quotes
-fn find_closing_quote(s: &str, start: usize) -> Option<usize> {
+pub(crate) fn find_closing_quote(s: &str, start: usize) -> Option<usize> {
     let chars = s[start..].chars().enumerate();
     let mut escaped = false;
 
@@ -267,7 +267,3 @@ fn find_closing_quote(s: &str, start: usize) -> Option<usize> {
 
     None
 }
-
-#[cfg(test)]
-#[path = "tests/extract.rs"]
-mod extract_tests;

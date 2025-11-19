@@ -1,6 +1,6 @@
-mod apply;
-mod debug;
-mod hunk;
+pub(crate) mod apply;
+pub(crate) mod debug;
+pub(crate) mod hunk;
 
 pub use apply::{apply_diff, apply_diff_restore};
 pub use hunk::DiffHunk;
@@ -34,7 +34,7 @@ pub fn compute_line_diff(before: &str, after: &str) -> Vec<DiffHunk> {
 /// Strips doc attribute bookends from a line if present
 /// Converts `#[doc = "//! text"]` -> `//! text`
 /// Converts `#[doc = "/// text"]` -> `/// text`
-fn strip_doc_attr_bookends(line: &str) -> String {
+pub(crate) fn strip_doc_attr_bookends(line: &str) -> String {
     let trimmed = line.trim();
 
     // Handle inner module-level docs: #![doc = "//! text"]
@@ -99,7 +99,7 @@ fn strip_doc_attr_bookends(line: &str) -> String {
 }
 
 /// Unescapes Rust string content (the reverse of what the compiler does)
-fn unescape_doc_content(s: &str) -> String {
+pub(crate) fn unescape_doc_content(s: &str) -> String {
     let mut result = String::with_capacity(s.len());
     let mut chars = s.chars().peekable();
 
@@ -138,13 +138,13 @@ fn unescape_doc_content(s: &str) -> String {
     result
 }
 
-fn strip_all_doc_attr_bookends(code: &str) -> String {
+pub(crate) fn strip_all_doc_attr_bookends(code: &str) -> String {
     code.lines()
         .map(strip_doc_attr_bookends)
         .collect::<Vec<_>>()
         .join("\n")
 }
 
-#[cfg(test)]
-#[path = "../../tests/diff.rs"]
-mod diff_tests;
+// #[cfg(test)]
+// #[path = "../../tests/diff.rs"]
+// mod diff_tests;

@@ -5,7 +5,7 @@ use super::strip_all_doc_attr_bookends;
 
 /// Applies a set of diff hunks to the original source, filtering hunks by a relevance predicate,
 /// and then post-processing the resulting string using the provided function.
-fn apply_hunks<'a, RelevanceFn, PostProcessFn>(
+pub(crate) fn apply_hunks<'a, RelevanceFn, PostProcessFn>(
     original: &'a str,
     hunks: &[DiffHunk],
     formatted_after: &'a str,
@@ -140,7 +140,7 @@ where
     post_process(result.join("\n"))
 }
 
-fn copy_original_lines<'a>(
+pub(crate) fn copy_original_lines<'a>(
     original: &[&'a str],
     result: &mut Vec<&'a str>,
     orig_idx: &mut usize,
@@ -154,7 +154,7 @@ fn copy_original_lines<'a>(
     }
 }
 
-fn count_blank_lines(original: &[&str], start: usize, count: usize) -> usize {
+pub(crate) fn count_blank_lines(original: &[&str], start: usize, count: usize) -> usize {
     (0..count)
         .filter(|i| {
             let idx = start + i;
@@ -163,7 +163,7 @@ fn count_blank_lines(original: &[&str], start: usize, count: usize) -> usize {
         .count()
 }
 
-fn preserve_non_doc_lines<'a>(
+pub(crate) fn preserve_non_doc_lines<'a>(
     original: &[&'a str],
     result: &mut Vec<&'a str>,
     start: usize,
@@ -207,7 +207,7 @@ pub fn apply_diff_restore(original: &str, hunks: &[DiffHunk], formatted_after: &
 
 /// Check if a line from the transformed version should be skipped
 /// because it's a non-doc attribute that we've already preserved from original
-fn should_skip_from_transformed(line: &str) -> bool {
+pub(crate) fn should_skip_from_transformed(line: &str) -> bool {
     let trimmed = line.trim_start();
 
     // Remove ALL spaces to handle rustfmt'd attributes like "# [facet (...)]"
@@ -237,7 +237,7 @@ fn should_skip_from_transformed(line: &str) -> bool {
 }
 
 /// Checks if a hunk contains module-level documentation (inner attributes)
-fn is_module_level_hunk(hunk: &DiffHunk, after_lines: &[&str]) -> bool {
+pub(crate) fn is_module_level_hunk(hunk: &DiffHunk, after_lines: &[&str]) -> bool {
     let after_end = hunk.after_start + hunk.after_count;
 
     for i in hunk.after_start..after_end {

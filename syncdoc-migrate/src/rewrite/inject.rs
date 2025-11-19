@@ -5,7 +5,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 
 /// Checks if a token stream already contains an omnidoc attribute
-fn has_omnidoc_attr(item: &TokenStream) -> bool {
+pub(crate) fn has_omnidoc_attr(item: &TokenStream) -> bool {
     let item_str = item.to_string().replace(" ", "");
     item_str.contains("#[omnidoc") || item_str.contains("#[syncdoc::omnidoc")
 }

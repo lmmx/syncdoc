@@ -6,7 +6,7 @@
 //! be created.
 
 use crate::write::DocExtraction;
-use std::path::{Path, PathBuf};
+pub(crate) use std::path::{Path, PathBuf};
 use syncdoc_core::parse::{
     EnumSig, EnumVariantData, ImplBlockSig, ModuleItem, ModuleSig, StructSig, TraitSig,
 };
@@ -59,7 +59,7 @@ pub fn find_expected_doc_paths(parsed: &ParsedFile, docs_root: &str) -> Vec<DocE
 }
 
 /// Recursively finds documentation paths for a single item
-fn find_item_paths(
+pub(crate) fn find_item_paths(
     item: &ModuleItem,
     context: Vec<String>,
     base_path: &str,
@@ -169,7 +169,7 @@ fn find_item_paths(
     extractions
 }
 
-fn find_impl_paths(
+pub(crate) fn find_impl_paths(
     impl_block: &ImplBlockSig,
     context: Vec<String>,
     base_path: &str,
@@ -236,7 +236,7 @@ fn find_impl_paths(
     extractions
 }
 
-fn find_module_paths(
+pub(crate) fn find_module_paths(
     module: &ModuleSig,
     context: Vec<String>,
     base_path: &str,
@@ -272,7 +272,7 @@ fn find_module_paths(
     extractions
 }
 
-fn find_trait_paths(
+pub(crate) fn find_trait_paths(
     trait_def: &TraitSig,
     context: Vec<String>,
     base_path: &str,
@@ -308,7 +308,7 @@ fn find_trait_paths(
     extractions
 }
 
-fn find_enum_paths(
+pub(crate) fn find_enum_paths(
     enum_sig: &EnumSig,
     context: Vec<String>,
     base_path: &str,
@@ -376,7 +376,7 @@ fn find_enum_paths(
     extractions
 }
 
-fn find_struct_paths(
+pub(crate) fn find_struct_paths(
     struct_sig: &StructSig,
     context: Vec<String>,
     base_path: &str,
@@ -422,7 +422,7 @@ fn find_struct_paths(
     extractions
 }
 
-fn build_path(base_path: &str, context: &[String], item_name: &str) -> String {
+pub(crate) fn build_path(base_path: &str, context: &[String], item_name: &str) -> String {
     let mut parts = vec![base_path.to_string()];
     parts.extend(context.iter().cloned());
     parts.push(format!("{}.md", item_name));

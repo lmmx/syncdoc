@@ -1,6 +1,4 @@
-// syncdoc-migrate/src/rewrite/tests.rs
-
-use super::*;
+use crate::rewrite::strip::*;
 use quote::quote;
 
 #[test]

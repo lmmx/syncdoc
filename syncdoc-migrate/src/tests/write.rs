@@ -1,4 +1,4 @@
-use super::*;
+use crate::write::*;
 use braces::{brace_paths, BraceConfig};
 use insta::assert_snapshot;
 use std::fs;

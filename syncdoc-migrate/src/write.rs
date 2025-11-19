@@ -4,12 +4,12 @@ use crate::discover::ParsedFile;
 use crate::extract::extract_doc_content;
 use std::collections::HashMap;
 use std::fs;
-use std::path::{Path, PathBuf};
+pub(crate) use std::path::{Path, PathBuf};
 use syncdoc_core::parse::{
     EnumSig, EnumVariantData, ImplBlockSig, ModuleItem, ModuleSig, StructSig, TraitSig,
 };
 
-mod expected;
+pub(crate) mod expected;
 pub use expected::find_expected_doc_paths;
 
 /// Represents a documentation extraction with its target path and metadata
@@ -98,7 +98,7 @@ pub fn extract_all_docs(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtracti
 }
 
 /// Recursively extracts documentation from a single module item
-fn extract_item_docs(
+pub(crate) fn extract_item_docs(
     item: &ModuleItem,
     context: Vec<String>,
     base_path: &str,
@@ -210,7 +210,7 @@ fn extract_item_docs(
 }
 
 /// Extracts documentation from an impl block and its methods
-fn extract_impl_docs(
+pub(crate) fn extract_impl_docs(
     impl_block: &ImplBlockSig,
     context: Vec<String>,
     base_path: &str,
@@ -279,7 +279,7 @@ fn extract_impl_docs(
 }
 
 /// Extracts documentation from a module and its contents
-fn extract_module_docs(
+pub(crate) fn extract_module_docs(
     module: &ModuleSig,
     context: Vec<String>,
     base_path: &str,
@@ -317,7 +317,7 @@ fn extract_module_docs(
 }
 
 /// Extracts documentation from a trait and its methods
-fn extract_trait_docs(
+pub(crate) fn extract_trait_docs(
     trait_def: &TraitSig,
     context: Vec<String>,
     base_path: &str,
@@ -355,7 +355,7 @@ fn extract_trait_docs(
 }
 
 /// Extracts documentation from an enum and its variants
-fn extract_enum_docs(
+pub(crate) fn extract_enum_docs(
     enum_sig: &EnumSig,
     context: Vec<String>,
     base_path: &str,
@@ -427,7 +427,7 @@ fn extract_enum_docs(
 }
 
 /// Extracts documentation from a struct and its fields
-fn extract_struct_docs(
+pub(crate) fn extract_struct_docs(
     struct_sig: &StructSig,
     context: Vec<String>,
     base_path: &str,
@@ -536,13 +536,9 @@ pub fn write_extractions(
 
 // Helper functions
 
-fn build_path(base_path: &str, context: &[String], item_name: &str) -> String {
+pub(crate) fn build_path(base_path: &str, context: &[String], item_name: &str) -> String {
     let mut parts = vec![base_path.to_string()];
     parts.extend(context.iter().cloned());
     parts.push(format!("{}.md", item_name));
     parts.join("/")
 }
-
-#[cfg(test)]
-#[path = "tests/write.rs"]
-mod tests;
