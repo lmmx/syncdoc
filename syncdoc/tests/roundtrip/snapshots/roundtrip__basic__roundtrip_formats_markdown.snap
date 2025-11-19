@@ -1,0 +1,1178 @@
+---
+source: syncdoc/tests/roundtrip/basic.rs
+expression: result.migrate_stderr
+---
+[SYNCDOC DEBUG] get_docs_path called:
+[SYNCDOC DEBUG]   source_file: src
+[SYNCDOC DEBUG]   manifest_dir: /tmp/.tmpXXXXXX
+[SYNCDOC DEBUG]   docs_path from toml: docs
+[SYNCDOC DEBUG]   manifest_path (canonical): /tmp/.tmpXXXXXX
+[SYNCDOC DEBUG]   source_dir (canonical): /tmp/.tmpXXXXXX
+[SYNCDOC DEBUG]   relative_path (stripped): 
+[SYNCDOC DEBUG]   depth: 0
+[SYNCDOC DEBUG]   final result: docs
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: use, span: bytes(212..215) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: crate, span: bytes(216..221) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ':', spacing: Joint, span: bytes(221..222) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ':', spacing: Alone, span: bytes(222..223) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: formats, span: bytes(223..230) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ':', spacing: Joint, span: bytes(230..231) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ':', spacing: Alone, span: bytes(231..232) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: Format, span: bytes(232..238) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ';', spacing: Alone, span: bytes(238..239) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: use, span: bytes(240..243) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: ratatui, span: bytes(244..251) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ':', spacing: Joint, span: bytes(251..252) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ':', spacing: Alone, span: bytes(252..253) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Group { delimiter: Brace, stream: TokenStream [Ident { sym: style, span: bytes(259..264) }, Punct { char: ':', spacing: Joint, span: bytes(264..265) }, Punct { char: ':', spacing: Alone, span: bytes(265..266) }, Group { delimiter: Brace, stream: TokenStream [Ident { sym: Color, span: bytes(267..272) }, Punct { char: ',', spacing: Alone, span: bytes(272..273) }, Ident { sym: Style, span: bytes(274..279) }], span: bytes(266..280) }, Punct { char: ',', spacing: Alone, span: bytes(280..281) }, Ident { sym: text, span: bytes(286..290) }, Punct { char: ':', spacing: Joint, span: bytes(290..291) }, Punct { char: ':', spacing: Alone, span: bytes(291..292) }, Group { delimiter: Brace, stream: TokenStream [Ident { sym: Line, span: bytes(293..297) }, Punct { char: ',', spacing: Alone, span: bytes(297..298) }, Ident { sym: Span, span: bytes(299..303) }], span: bytes(292..304) }, Punct { char: ',', spacing: Alone, span: bytes(304..305) }], span: bytes(253..307) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ';', spacing: Alone, span: bytes(307..308) })
+[SYNCDOC DEBUG] Processing item type: Struct
+[SYNCDOC DEBUG] Processing item: Struct(StructSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(310..377) }, Punct { char: '=', spacing: Alone, span: bytes(310..377) }, Literal { lit: " Tree-sitter queries for ATX-style markdown headings (# syntax).", span: bytes(310..377) }], span: bytes(310..377) }) }, delimiter: Some(Nothing) }])), visibility: Some(Public(KPub(Cached<proc_macro2::Ident> { value: Ident { sym: pub, span: bytes(378..381) }, string: "pub" }))), _struct: KStruct(Cached<proc_macro2::Ident> { value: Ident { sym: struct, span: bytes(382..388) }, string: "struct" }), name: Ident { sym: MarkdownFormat, span: bytes(389..403) }, generics: None, where_clause: None, body: Unit(Operator<';'>) })
+[SYNCDOC DEBUG] Processing item type: ImplBlock
+[SYNCDOC DEBUG] Processing item: ImplBlock(ImplBlockSig { attributes: None, _impl: KImpl(Cached<proc_macro2::Ident> { value: Ident { sym: impl, span: bytes(406..410) }, string: "impl" }), generics: None, target_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<syncdoc_core::parse::KFor, unsynn::group::BraceGroup>>, proc_macro2::TokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<syncdoc_core::parse::KFor, unsynn::group::BraceGroup>>, proc_macro2::TokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<syncdoc_core::parse::KFor, unsynn::group::BraceGroup>>, proc_macro2::TokenTree> { first: Except<unsynn::combinator::Either<syncdoc_core::parse::KFor, unsynn::group::BraceGroup>>, second: Ident { sym: Format, span: bytes(411..417) } }, delimiter: Some(Nothing) }]), for_trait: Some(Cons<syncdoc_core::parse::KFor, unsynn::container::Repeats<1, usize::MAX, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, proc_macro2::TokenTree>>> { first: KFor(Cached<proc_macro2::Ident> { value: Ident { sym: for, span: bytes(418..421) }, string: "for" }), second: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, proc_macro2::TokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, proc_macro2::TokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, proc_macro2::TokenTree> { first: Except<unsynn::group::BraceGroup>, second: Ident { sym: MarkdownFormat, span: bytes(422..436) } }, delimiter: Some(Nothing) }]) }), where_clause: None, items: BraceGroupContaining < syncdoc_core::parse::ModuleContent>(ModuleContent { inner_attrs: None, items: Repeats<1, 18446744073709551615, syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: Function(FnSig { attributes: None, visibility: None, const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(443..445) }, string: "fn" }), name: Ident { sym: file_extension, span: bytes(446..460) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(462..466) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeFn { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Joint, span: bytes(471..472) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(472..473) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(473..479) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(480..483) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, body: BraceGroup(Group { delimiter: Brace, stream: TokenStream [Literal { lit: "md", span: bytes(494..498) }], span: bytes(484..504) }) }), delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: Function(FnSig { attributes: None, visibility: None, const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(510..512) }, string: "fn" }), name: Ident { sym: language, span: bytes(513..521) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(523..527) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeFn { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: tree_sitter, span: bytes(532..543) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Joint, span: bytes(543..544) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Alone, span: bytes(544..545) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: Language, span: bytes(545..553) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, body: BraceGroup(Group { delimiter: Brace, stream: TokenStream [Ident { sym: tree_sitter_md, span: bytes(564..578) }, Punct { char: ':', spacing: Joint, span: bytes(578..579) }, Punct { char: ':', spacing: Alone, span: bytes(579..580) }, Ident { sym: LANGUAGE, span: bytes(580..588) }, Punct { char: '.', spacing: Alone, span: bytes(588..589) }, Ident { sym: into, span: bytes(589..593) }, Group { delimiter: Parenthesis, stream: TokenStream [], span: bytes(593..595) }], span: bytes(554..601) }) }), delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: Function(FnSig { attributes: None, visibility: None, const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(607..609) }, string: "fn" }), name: Ident { sym: section_query, span: bytes(610..623) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(625..629) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeFn { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Joint, span: bytes(634..635) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(635..636) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(636..642) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(643..646) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, body: BraceGroup(Group { delimiter: Brace, stream: TokenStream [Literal { lit: "(atx_heading) @heading", span: bytes(657..681) }], span: bytes(647..687) }) }), delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: Function(FnSig { attributes: None, visibility: None, const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(693..695) }, string: "fn" }), name: Ident { sym: title_query, span: bytes(696..707) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(709..713) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeFn { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Joint, span: bytes(718..719) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(719..720) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(720..726) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(727..730) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, body: BraceGroup(Group { delimiter: Brace, stream: TokenStream [Literal { lit: "(atx_heading heading_content: (inline) @title)", span: bytes(741..789) }], span: bytes(731..795) }) }), delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: Function(FnSig { attributes: None, visibility: None, const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(801..803) }, string: "fn" }), name: Ident { sym: format_section_display, span: bytes(804..826) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(828..832) }, string: "self" }) })), delimiter: Some(Operator<','>) }, Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: Named(NamedParam { mut_kw: None, name: Ident { sym: level, span: bytes(834..839) }, _colon: Operator<':'>, param_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: usize, span: bytes(841..846) })) }, delimiter: Some(Nothing) }]) }), delimiter: Some(Operator<','>) }, Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: Named(NamedParam { mut_kw: None, name: Ident { sym: title, span: bytes(848..853) }, _colon: Operator<':'>, param_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Alone, span: bytes(855..856) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(856..859) })) }, delimiter: Some(Nothing) }]) }), delimiter: None }]))), return_type: Some(ReturnTypeFn { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: Line, span: bytes(864..868) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>> { first: Operator<'<'>, second: [Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<'>'>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(869..870) })) }, Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<'>'>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(870..876) })) }], third: Operator<'>'> })) }, delimiter: Some(Nothing) }]) }), where_clause: None, body: BraceGroup(Group { delimiter: Brace, stream: TokenStream [Ident { sym: let, span: bytes(949..952) }, Ident { sym: colors, span: bytes(953..959) }, Punct { char: '=', spacing: Alone, span: bytes(960..961) }, Group { delimiter: Bracket, stream: TokenStream [Ident { sym: Color, span: bytes(976..981) }, Punct { char: ':', spacing: Joint, span: bytes(981..982) }, Punct { char: ':', spacing: Alone, span: bytes(982..983) }, Ident { sym: Cyan, span: bytes(983..987) }, Punct { char: ',', spacing: Alone, span: bytes(987..988) }, Ident { sym: Color, span: bytes(1001..1006) }, Punct { char: ':', spacing: Joint, span: bytes(1006..1007) }, Punct { char: ':', spacing: Alone, span: bytes(1007..1008) }, Ident { sym: Green, span: bytes(1008..1013) }, Punct { char: ',', spacing: Alone, span: bytes(1013..1014) }, Ident { sym: Color, span: bytes(1027..1032) }, Punct { char: ':', spacing: Joint, span: bytes(1032..1033) }, Punct { char: ':', spacing: Alone, span: bytes(1033..1034) }, Ident { sym: LightYellow, span: bytes(1034..1045) }, Punct { char: ',', spacing: Alone, span: bytes(1045..1046) }, Ident { sym: Color, span: bytes(1059..1064) }, Punct { char: ':', spacing: Joint, span: bytes(1064..1065) }, Punct { char: ':', spacing: Alone, span: bytes(1065..1066) }, Ident { sym: Magenta, span: bytes(1066..1073) }, Punct { char: ',', spacing: Alone, span: bytes(1073..1074) }, Ident { sym: Color, span: bytes(1087..1092) }, Punct { char: ':', spacing: Joint, span: bytes(1092..1093) }, Punct { char: ':', spacing: Alone, span: bytes(1093..1094) }, Ident { sym: Blue, span: bytes(1094..1098) }, Punct { char: ',', spacing: Alone, span: bytes(1098..1099) }, Ident { sym: Color, span: bytes(1112..1117) }, Punct { char: ':', spacing: Joint, span: bytes(1117..1118) }, Punct { char: ':', spacing: Alone, span: bytes(1118..1119) }, Ident { sym: Red, span: bytes(1119..1122) }, Punct { char: ',', spacing: Alone, span: bytes(1122..1123) }], span: bytes(962..1133) }, Punct { char: ';', spacing: Alone, span: bytes(1133..1134) }, Ident { sym: let, span: bytes(1144..1147) }, Ident { sym: color, span: bytes(1148..1153) }, Punct { char: '=', spacing: Alone, span: bytes(1154..1155) }, Ident { sym: colors, span: bytes(1156..1162) }, Group { delimiter: Bracket, stream: TokenStream [Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: level, span: bytes(1164..1169) }, Punct { char: '-', spacing: Alone, span: bytes(1170..1171) }, Literal { lit: 1, span: bytes(1172..1173) }], span: bytes(1163..1174) }, Punct { char: '%', spacing: Alone, span: bytes(1175..1176) }, Ident { sym: colors, span: bytes(1177..1183) }, Punct { char: '.', spacing: Alone, span: bytes(1183..1184) }, Ident { sym: len, span: bytes(1184..1187) }, Group { delimiter: Parenthesis, stream: TokenStream [], span: bytes(1187..1189) }], span: bytes(1162..1190) }, Punct { char: ';', spacing: Alone, span: bytes(1190..1191) }, Ident { sym: let, span: bytes(1200..1203) }, Ident { sym: prefix, span: bytes(1204..1210) }, Punct { char: '=', spacing: Alone, span: bytes(1211..1212) }, Literal { lit: "#", span: bytes(1213..1216) }, Punct { char: '.', spacing: Alone, span: bytes(1216..1217) }, Ident { sym: repeat, span: bytes(1217..1223) }, Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: level, span: bytes(1224..1229) }], span: bytes(1223..1230) }, Punct { char: ';', spacing: Alone, span: bytes(1230..1231) }, Ident { sym: let, span: bytes(1241..1244) }, Ident { sym: spans, span: bytes(1245..1250) }, Punct { char: '=', spacing: Alone, span: bytes(1251..1252) }, Ident { sym: vec, span: bytes(1253..1256) }, Punct { char: '!', spacing: Alone, span: bytes(1256..1257) }, Group { delimiter: Bracket, stream: TokenStream [Ident { sym: Span, span: bytes(1271..1275) }, Punct { char: ':', spacing: Joint, span: bytes(1275..1276) }, Punct { char: ':', spacing: Alone, span: bytes(1276..1277) }, Ident { sym: styled, span: bytes(1277..1283) }, Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: prefix, span: bytes(1284..1290) }, Punct { char: ',', spacing: Alone, span: bytes(1290..1291) }, Ident { sym: Style, span: bytes(1292..1297) }, Punct { char: ':', spacing: Joint, span: bytes(1297..1298) }, Punct { char: ':', spacing: Alone, span: bytes(1298..1299) }, Ident { sym: default, span: bytes(1299..1306) }, Group { delimiter: Parenthesis, stream: TokenStream [], span: bytes(1306..1308) }, Punct { char: '.', spacing: Alone, span: bytes(1308..1309) }, Ident { sym: fg, span: bytes(1309..1311) }, Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: color, span: bytes(1312..1317) }], span: bytes(1311..1318) }], span: bytes(1283..1319) }, Punct { char: ',', spacing: Alone, span: bytes(1319..1320) }, Ident { sym: Span, span: bytes(1333..1337) }, Punct { char: ':', spacing: Joint, span: bytes(1337..1338) }, Punct { char: ':', spacing: Alone, span: bytes(1338..1339) }, Ident { sym: raw, span: bytes(1339..1342) }, Group { delimiter: Parenthesis, stream: TokenStream [Literal { lit: " ", span: bytes(1343..1346) }], span: bytes(1342..1347) }, Punct { char: ',', spacing: Alone, span: bytes(1347..1348) }, Ident { sym: Span, span: bytes(1361..1365) }, Punct { char: ':', spacing: Joint, span: bytes(1365..1366) }, Punct { char: ':', spacing: Alone, span: bytes(1366..1367) }, Ident { sym: raw, span: bytes(1367..1370) }, Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: title, span: bytes(1371..1376) }, Punct { char: '.', spacing: Alone, span: bytes(1376..1377) }, Ident { sym: to_string, span: bytes(1377..1386) }, Group { delimiter: Parenthesis, stream: TokenStream [], span: bytes(1386..1388) }], span: bytes(1370..1389) }, Punct { char: ',', spacing: Alone, span: bytes(1389..1390) }], span: bytes(1257..1400) }, Punct { char: ';', spacing: Alone, span: bytes(1400..1401) }, Ident { sym: Line, span: bytes(1411..1415) }, Punct { char: ':', spacing: Joint, span: bytes(1415..1416) }, Punct { char: ':', spacing: Alone, span: bytes(1416..1417) }, Ident { sym: from, span: bytes(1417..1421) }, Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: spans, span: bytes(1422..1427) }], span: bytes(1421..1428) }], span: bytes(878..1434) }) }), delimiter: Some(Nothing) }]) }) })
+[SYNCDOC DEBUG] Processing item type: Function
+[SYNCDOC DEBUG] Processing item: Function(FnSig { attributes: None, visibility: None, const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(443..445) }, string: "fn" }), name: Ident { sym: file_extension, span: bytes(446..460) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(462..466) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeFn { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Joint, span: bytes(471..472) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(472..473) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(473..479) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(480..483) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, body: BraceGroup(Group { delimiter: Brace, stream: TokenStream [Literal { lit: "md", span: bytes(494..498) }], span: bytes(484..504) }) })
+[SYNCDOC DEBUG] Processing item type: Function
+[SYNCDOC DEBUG] Processing item: Function(FnSig { attributes: None, visibility: None, const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(510..512) }, string: "fn" }), name: Ident { sym: language, span: bytes(513..521) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(523..527) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeFn { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: tree_sitter, span: bytes(532..543) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Joint, span: bytes(543..544) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Alone, span: bytes(544..545) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: Language, span: bytes(545..553) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, body: BraceGroup(Group { delimiter: Brace, stream: TokenStream [Ident { sym: tree_sitter_md, span: bytes(564..578) }, Punct { char: ':', spacing: Joint, span: bytes(578..579) }, Punct { char: ':', spacing: Alone, span: bytes(579..580) }, Ident { sym: LANGUAGE, span: bytes(580..588) }, Punct { char: '.', spacing: Alone, span: bytes(588..589) }, Ident { sym: into, span: bytes(589..593) }, Group { delimiter: Parenthesis, stream: TokenStream [], span: bytes(593..595) }], span: bytes(554..601) }) })
+[SYNCDOC DEBUG] Processing item type: Function
+[SYNCDOC DEBUG] Processing item: Function(FnSig { attributes: None, visibility: None, const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(607..609) }, string: "fn" }), name: Ident { sym: section_query, span: bytes(610..623) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(625..629) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeFn { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Joint, span: bytes(634..635) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(635..636) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(636..642) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(643..646) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, body: BraceGroup(Group { delimiter: Brace, stream: TokenStream [Literal { lit: "(atx_heading) @heading", span: bytes(657..681) }], span: bytes(647..687) }) })
+[SYNCDOC DEBUG] Processing item type: Function
+[SYNCDOC DEBUG] Processing item: Function(FnSig { attributes: None, visibility: None, const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(693..695) }, string: "fn" }), name: Ident { sym: title_query, span: bytes(696..707) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(709..713) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeFn { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Joint, span: bytes(718..719) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(719..720) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(720..726) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(727..730) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, body: BraceGroup(Group { delimiter: Brace, stream: TokenStream [Literal { lit: "(atx_heading heading_content: (inline) @title)", span: bytes(741..789) }], span: bytes(731..795) }) })
+[SYNCDOC DEBUG] Processing item type: Function
+[SYNCDOC DEBUG] Processing item: Function(FnSig { attributes: None, visibility: None, const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(801..803) }, string: "fn" }), name: Ident { sym: format_section_display, span: bytes(804..826) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(828..832) }, string: "self" }) })), delimiter: Some(Operator<','>) }, Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: Named(NamedParam { mut_kw: None, name: Ident { sym: level, span: bytes(834..839) }, _colon: Operator<':'>, param_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: usize, span: bytes(841..846) })) }, delimiter: Some(Nothing) }]) }), delimiter: Some(Operator<','>) }, Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: Named(NamedParam { mut_kw: None, name: Ident { sym: title, span: bytes(848..853) }, _colon: Operator<':'>, param_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Alone, span: bytes(855..856) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(856..859) })) }, delimiter: Some(Nothing) }]) }), delimiter: None }]))), return_type: Some(ReturnTypeFn { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: Line, span: bytes(864..868) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::group::BraceGroup>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::group::BraceGroup>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>> { first: Operator<'<'>, second: [Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<'>'>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(869..870) })) }, Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<'>'>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(870..876) })) }], third: Operator<'>'> })) }, delimiter: Some(Nothing) }]) }), where_clause: None, body: BraceGroup(Group { delimiter: Brace, stream: TokenStream [Ident { sym: let, span: bytes(949..952) }, Ident { sym: colors, span: bytes(953..959) }, Punct { char: '=', spacing: Alone, span: bytes(960..961) }, Group { delimiter: Bracket, stream: TokenStream [Ident { sym: Color, span: bytes(976..981) }, Punct { char: ':', spacing: Joint, span: bytes(981..982) }, Punct { char: ':', spacing: Alone, span: bytes(982..983) }, Ident { sym: Cyan, span: bytes(983..987) }, Punct { char: ',', spacing: Alone, span: bytes(987..988) }, Ident { sym: Color, span: bytes(1001..1006) }, Punct { char: ':', spacing: Joint, span: bytes(1006..1007) }, Punct { char: ':', spacing: Alone, span: bytes(1007..1008) }, Ident { sym: Green, span: bytes(1008..1013) }, Punct { char: ',', spacing: Alone, span: bytes(1013..1014) }, Ident { sym: Color, span: bytes(1027..1032) }, Punct { char: ':', spacing: Joint, span: bytes(1032..1033) }, Punct { char: ':', spacing: Alone, span: bytes(1033..1034) }, Ident { sym: LightYellow, span: bytes(1034..1045) }, Punct { char: ',', spacing: Alone, span: bytes(1045..1046) }, Ident { sym: Color, span: bytes(1059..1064) }, Punct { char: ':', spacing: Joint, span: bytes(1064..1065) }, Punct { char: ':', spacing: Alone, span: bytes(1065..1066) }, Ident { sym: Magenta, span: bytes(1066..1073) }, Punct { char: ',', spacing: Alone, span: bytes(1073..1074) }, Ident { sym: Color, span: bytes(1087..1092) }, Punct { char: ':', spacing: Joint, span: bytes(1092..1093) }, Punct { char: ':', spacing: Alone, span: bytes(1093..1094) }, Ident { sym: Blue, span: bytes(1094..1098) }, Punct { char: ',', spacing: Alone, span: bytes(1098..1099) }, Ident { sym: Color, span: bytes(1112..1117) }, Punct { char: ':', spacing: Joint, span: bytes(1117..1118) }, Punct { char: ':', spacing: Alone, span: bytes(1118..1119) }, Ident { sym: Red, span: bytes(1119..1122) }, Punct { char: ',', spacing: Alone, span: bytes(1122..1123) }], span: bytes(962..1133) }, Punct { char: ';', spacing: Alone, span: bytes(1133..1134) }, Ident { sym: let, span: bytes(1144..1147) }, Ident { sym: color, span: bytes(1148..1153) }, Punct { char: '=', spacing: Alone, span: bytes(1154..1155) }, Ident { sym: colors, span: bytes(1156..1162) }, Group { delimiter: Bracket, stream: TokenStream [Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: level, span: bytes(1164..1169) }, Punct { char: '-', spacing: Alone, span: bytes(1170..1171) }, Literal { lit: 1, span: bytes(1172..1173) }], span: bytes(1163..1174) }, Punct { char: '%', spacing: Alone, span: bytes(1175..1176) }, Ident { sym: colors, span: bytes(1177..1183) }, Punct { char: '.', spacing: Alone, span: bytes(1183..1184) }, Ident { sym: len, span: bytes(1184..1187) }, Group { delimiter: Parenthesis, stream: TokenStream [], span: bytes(1187..1189) }], span: bytes(1162..1190) }, Punct { char: ';', spacing: Alone, span: bytes(1190..1191) }, Ident { sym: let, span: bytes(1200..1203) }, Ident { sym: prefix, span: bytes(1204..1210) }, Punct { char: '=', spacing: Alone, span: bytes(1211..1212) }, Literal { lit: "#", span: bytes(1213..1216) }, Punct { char: '.', spacing: Alone, span: bytes(1216..1217) }, Ident { sym: repeat, span: bytes(1217..1223) }, Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: level, span: bytes(1224..1229) }], span: bytes(1223..1230) }, Punct { char: ';', spacing: Alone, span: bytes(1230..1231) }, Ident { sym: let, span: bytes(1241..1244) }, Ident { sym: spans, span: bytes(1245..1250) }, Punct { char: '=', spacing: Alone, span: bytes(1251..1252) }, Ident { sym: vec, span: bytes(1253..1256) }, Punct { char: '!', spacing: Alone, span: bytes(1256..1257) }, Group { delimiter: Bracket, stream: TokenStream [Ident { sym: Span, span: bytes(1271..1275) }, Punct { char: ':', spacing: Joint, span: bytes(1275..1276) }, Punct { char: ':', spacing: Alone, span: bytes(1276..1277) }, Ident { sym: styled, span: bytes(1277..1283) }, Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: prefix, span: bytes(1284..1290) }, Punct { char: ',', spacing: Alone, span: bytes(1290..1291) }, Ident { sym: Style, span: bytes(1292..1297) }, Punct { char: ':', spacing: Joint, span: bytes(1297..1298) }, Punct { char: ':', spacing: Alone, span: bytes(1298..1299) }, Ident { sym: default, span: bytes(1299..1306) }, Group { delimiter: Parenthesis, stream: TokenStream [], span: bytes(1306..1308) }, Punct { char: '.', spacing: Alone, span: bytes(1308..1309) }, Ident { sym: fg, span: bytes(1309..1311) }, Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: color, span: bytes(1312..1317) }], span: bytes(1311..1318) }], span: bytes(1283..1319) }, Punct { char: ',', spacing: Alone, span: bytes(1319..1320) }, Ident { sym: Span, span: bytes(1333..1337) }, Punct { char: ':', spacing: Joint, span: bytes(1337..1338) }, Punct { char: ':', spacing: Alone, span: bytes(1338..1339) }, Ident { sym: raw, span: bytes(1339..1342) }, Group { delimiter: Parenthesis, stream: TokenStream [Literal { lit: " ", span: bytes(1343..1346) }], span: bytes(1342..1347) }, Punct { char: ',', spacing: Alone, span: bytes(1347..1348) }, Ident { sym: Span, span: bytes(1361..1365) }, Punct { char: ':', spacing: Joint, span: bytes(1365..1366) }, Punct { char: ':', spacing: Alone, span: bytes(1366..1367) }, Ident { sym: raw, span: bytes(1367..1370) }, Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: title, span: bytes(1371..1376) }, Punct { char: '.', spacing: Alone, span: bytes(1376..1377) }, Ident { sym: to_string, span: bytes(1377..1386) }, Group { delimiter: Parenthesis, stream: TokenStream [], span: bytes(1386..1388) }], span: bytes(1370..1389) }, Punct { char: ',', spacing: Alone, span: bytes(1389..1390) }], span: bytes(1257..1400) }, Punct { char: ';', spacing: Alone, span: bytes(1400..1401) }, Ident { sym: Line, span: bytes(1411..1415) }, Punct { char: ':', spacing: Joint, span: bytes(1415..1416) }, Punct { char: ':', spacing: Alone, span: bytes(1416..1417) }, Ident { sym: from, span: bytes(1417..1421) }, Group { delimiter: Parenthesis, stream: TokenStream [Ident { sym: spans, span: bytes(1422..1427) }], span: bytes(1421..1428) }], span: bytes(878..1434) }) })
+[SYNCDOC DEBUG] 
+=== REFORMAT START ===
+[SYNCDOC DEBUG] Original length: 1436
+[SYNCDOC DEBUG] Transformed length: 1025
+[SYNCDOC DEBUG] Formatted original length: 1436
+[SYNCDOC DEBUG] Formatted transformed length: 1166
+[SYNCDOC DEBUG] 
+--- Formatted Original ---
+[SYNCDOC DEBUG] //! Markdown format implementation using tree-sitter-md.
+//!
+//! This module provides tree-sitter queries for parsing markdown documents
+//! and extracting section structure from ATX-style headings (# syntax).
+
+use crate::formats::Format;
+use ratatui::{
+    style::{Color, Style},
+    text::{Line, Span},
+};
+
+/// Tree-sitter queries for ATX-style markdown headings (# syntax).
+pub struct MarkdownFormat;
+
+impl Format for MarkdownFormat {
+    fn file_extension(&self) -> &'static str {
+        "md"
+    }
+
+    fn language(&self) -> tree_sitter::Language {
+        tree_sitter_md::LANGUAGE.into()
+    }
+
+    fn section_query(&self) -> &'static str {
+        "(atx_heading) @heading"
+    }
+
+    fn title_query(&self) -> &'static str {
+        "(atx_heading heading_content: (inline) @title)"
+    }
+
+    fn format_section_display(&self, level: usize, title: &str) -> Line<'static> {
+        // Cycle through colors for different heading levels
+        let colors = [
+            Color::Cyan,
+            Color::Green,
+            Color::LightYellow,
+            Color::Magenta,
+            Color::Blue,
+            Color::Red,
+        ];
+
+        let color = colors[(level - 1) % colors.len()];
+        let prefix = "#".repeat(level);
+
+        let spans = vec![
+            Span::styled(prefix, Style::default().fg(color)),
+            Span::raw(" "),
+            Span::raw(title.to_string()),
+        ];
+
+        Line::from(spans)
+    }
+}
+
+[SYNCDOC DEBUG] 
+--- Formatted Transformed ---
+[SYNCDOC DEBUG] # ! [doc = syncdoc :: module_doc ! ()]
+use crate::formats::Format;
+use ratatui::{
+    style::{Color, Style},
+    text::{Line, Span},
+};
+#[syncdoc::omnidoc]
+pub struct MarkdownFormat;
+#[syncdoc::omnidoc]
+impl Format for MarkdownFormat {
+    fn file_extension(&self) -> &'static str {
+        "md"
+    }
+    fn language(&self) -> tree_sitter::Language {
+        tree_sitter_md::LANGUAGE.into()
+    }
+    fn section_query(&self) -> &'static str {
+        "(atx_heading) @heading"
+    }
+    fn title_query(&self) -> &'static str {
+        "(atx_heading heading_content: (inline) @title)"
+    }
+    fn format_section_display(&self, level: usize, title: &str) -> Line<'static> {
+        let colors = [
+            Color::Cyan,
+            Color::Green,
+            Color::LightYellow,
+            Color::Magenta,
+            Color::Blue,
+            Color::Red,
+        ];
+        let color = colors[(level - 1) % colors.len()];
+        let prefix = "#".repeat(level);
+        let spans = vec![
+            Span::styled(prefix, Style::default().fg(color)),
+            Span::raw(" "),
+            Span::raw(title.to_string()),
+        ];
+        Line::from(spans)
+    }
+}
+
+[SYNCDOC DEBUG] === HUNK DEBUG ===
+[SYNCDOC DEBUG] Before lines: 54
+[SYNCDOC DEBUG] After lines: 41
+[SYNCDOC DEBUG] Hunks: 11
+[SYNCDOC DEBUG] Hunk 0: before[0..5] -> after[0..1]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [0]: "//! Markdown format implementation using tree-sitter-md."
+[SYNCDOC DEBUG]     [1]: "//!"
+[SYNCDOC DEBUG]     [2]: "//! This module provides tree-sitter queries for parsing markdown documents"
+[SYNCDOC DEBUG]     [3]: "//! and extracting section structure from ATX-style headings (# syntax)."
+[SYNCDOC DEBUG]     [4]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [0]: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG] Hunk 1: before[10..12] -> after[6..7]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [10]: ""
+[SYNCDOC DEBUG]     [11]: "/// Tree-sitter queries for ATX-style markdown headings (# syntax)."
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [6]: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG] Hunk 2: before[13..14] -> after[8..9]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [13]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [8]: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG] Hunk 3: before[18..19] -> after[13..13]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [18]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 4: before[22..23] -> after[16..16]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [22]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 5: before[26..27] -> after[19..19]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [26]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 6: before[30..31] -> after[22..22]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [30]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 7: before[32..33] -> after[23..23]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [32]: "        // Cycle through colors for different heading levels"
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 8: before[41..42] -> after[31..31]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [41]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 9: before[44..45] -> after[33..33]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [44]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 10: before[50..51] -> after[38..38]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [50]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] ==================
+[SYNCDOC DEBUG] DEBUG restore: Found 11 hunks
+[SYNCDOC DEBUG]   Hunk 0: before[0..5] after[0..1]
+[SYNCDOC DEBUG]   Hunk 1: before[10..12] after[6..7]
+[SYNCDOC DEBUG]   Hunk 2: before[13..14] after[8..9]
+[SYNCDOC DEBUG]   Hunk 3: before[18..19] after[13..13]
+[SYNCDOC DEBUG]   Hunk 4: before[22..23] after[16..16]
+[SYNCDOC DEBUG]   Hunk 5: before[26..27] after[19..19]
+[SYNCDOC DEBUG]   Hunk 6: before[30..31] after[22..22]
+[SYNCDOC DEBUG]   Hunk 7: before[32..33] after[23..23]
+[SYNCDOC DEBUG]   Hunk 8: before[41..42] after[31..31]
+[SYNCDOC DEBUG]   Hunk 9: before[44..45] after[33..33]
+[SYNCDOC DEBUG]   Hunk 10: before[50..51] after[38..38]
+[SYNCDOC DEBUG] === HUNK DEBUG ===
+[SYNCDOC DEBUG] Before lines: 54
+[SYNCDOC DEBUG] After lines: 41
+[SYNCDOC DEBUG] Hunks: 11
+[SYNCDOC DEBUG] Hunk 0: before[0..5] -> after[0..1]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [0]: "//! Markdown format implementation using tree-sitter-md."
+[SYNCDOC DEBUG]     [1]: "//!"
+[SYNCDOC DEBUG]     [2]: "//! This module provides tree-sitter queries for parsing markdown documents"
+[SYNCDOC DEBUG]     [3]: "//! and extracting section structure from ATX-style headings (# syntax)."
+[SYNCDOC DEBUG]     [4]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [0]: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG] Hunk 1: before[10..12] -> after[6..7]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [10]: ""
+[SYNCDOC DEBUG]     [11]: "/// Tree-sitter queries for ATX-style markdown headings (# syntax)."
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [6]: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG] Hunk 2: before[13..14] -> after[8..9]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [13]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [8]: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG] Hunk 3: before[18..19] -> after[13..13]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [18]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 4: before[22..23] -> after[16..16]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [22]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 5: before[26..27] -> after[19..19]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [26]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 6: before[30..31] -> after[22..22]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [30]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 7: before[32..33] -> after[23..23]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [32]: "        // Cycle through colors for different heading levels"
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 8: before[41..42] -> after[31..31]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [41]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 9: before[44..45] -> after[33..33]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [44]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 10: before[50..51] -> after[38..38]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [50]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] ==================
+[SYNCDOC DEBUG] APPLYING relevant hunk at lines 0..5 (adds 1 lines, removes 5 lines)
+[SYNCDOC DEBUG] APPLYING relevant hunk at lines 10..12 (adds 1 lines, removes 2 lines)
+[SYNCDOC DEBUG] APPLYING relevant hunk at lines 13..14 (adds 1 lines, removes 1 lines)
+[SYNCDOC DEBUG] Skipping irrelevant hunk at lines 18..19
+[SYNCDOC DEBUG] Skipping irrelevant hunk at lines 22..23
+[SYNCDOC DEBUG] Skipping irrelevant hunk at lines 26..27
+[SYNCDOC DEBUG] Skipping irrelevant hunk at lines 30..31
+[SYNCDOC DEBUG] Skipping irrelevant hunk at lines 32..33
+[SYNCDOC DEBUG] Skipping irrelevant hunk at lines 41..42
+[SYNCDOC DEBUG] Skipping irrelevant hunk at lines 44..45
+[SYNCDOC DEBUG] Skipping irrelevant hunk at lines 50..51
+[SYNCDOC DEBUG] Original != Result: true
+[SYNCDOC DEBUG] 
+=== BOOKEND DEBUG START ===
+[SYNCDOC DEBUG] Input code length: 1236
+[SYNCDOC DEBUG] 
+Line 0: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG]       no_spaces: "#![doc=syncdoc::module_doc!()]"
+[SYNCDOC DEBUG]       -> Starts with #!
+[SYNCDOC DEBUG]       -> Checking trigger "syncdoc::module_doc!": true
+[SYNCDOC DEBUG]       -> Has trigger: true
+[SYNCDOC DEBUG]   -> NEEDS BOOKENDING
+[SYNCDOC DEBUG]     reformat_line for: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG]     extract_bookend_content:
+[SYNCDOC DEBUG]       trimmed: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG]       no_spaces: "#![doc=syncdoc::module_doc!()]"
+[SYNCDOC DEBUG]       Found #![ at position: 0
+[SYNCDOC DEBUG]       Found ] at position: 29
+[SYNCDOC DEBUG]       Extracted content: "doc=syncdoc::module_doc!()"
+[SYNCDOC DEBUG]     Got content: "doc=syncdoc::module_doc!()"
+[SYNCDOC DEBUG]     Created bookended expr: "const _: i32 = { doc=syncdoc::module_doc!() };"
+[SYNCDOC DEBUG]     Rustfmt output: "const _: i32 = { doc = syncdoc::module_doc!() };\n"
+[SYNCDOC DEBUG]     Stripped bookends: "doc = syncdoc::module_doc!()"
+[SYNCDOC DEBUG]     Final result: "#![doc = syncdoc::module_doc!()]"
+[SYNCDOC DEBUG]   -> Reformatted to: "#![doc = syncdoc::module_doc!()]"
+[SYNCDOC DEBUG] 
+Line 1: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 2: "use crate::formats::Format;"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "use crate::formats::Format;"
+[SYNCDOC DEBUG]       no_spaces: "usecrate::formats::Format;"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 3: "use ratatui::{"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "use ratatui::{"
+[SYNCDOC DEBUG]       no_spaces: "useratatui::{"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 4: "    style::{Color, Style},"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "style::{Color, Style},"
+[SYNCDOC DEBUG]       no_spaces: "style::{Color,Style},"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 5: "    text::{Line, Span},"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "text::{Line, Span},"
+[SYNCDOC DEBUG]       no_spaces: "text::{Line,Span},"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 6: "};"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "};"
+[SYNCDOC DEBUG]       no_spaces: "};"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 7: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 8: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]       no_spaces: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 9: "pub struct MarkdownFormat;"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "pub struct MarkdownFormat;"
+[SYNCDOC DEBUG]       no_spaces: "pubstructMarkdownFormat;"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 10: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 11: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]       no_spaces: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 12: "impl Format for MarkdownFormat {"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "impl Format for MarkdownFormat {"
+[SYNCDOC DEBUG]       no_spaces: "implFormatforMarkdownFormat{"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 13: "    fn file_extension(&self) -> &'static str {"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "fn file_extension(&self) -> &'static str {"
+[SYNCDOC DEBUG]       no_spaces: "fnfile_extension(&self)->&'staticstr{"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 14: "        \"md\""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "\"md\""
+[SYNCDOC DEBUG]       no_spaces: "\"md\""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 15: "    }"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "}"
+[SYNCDOC DEBUG]       no_spaces: "}"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 16: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 17: "    fn language(&self) -> tree_sitter::Language {"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "fn language(&self) -> tree_sitter::Language {"
+[SYNCDOC DEBUG]       no_spaces: "fnlanguage(&self)->tree_sitter::Language{"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 18: "        tree_sitter_md::LANGUAGE.into()"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "tree_sitter_md::LANGUAGE.into()"
+[SYNCDOC DEBUG]       no_spaces: "tree_sitter_md::LANGUAGE.into()"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 19: "    }"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "}"
+[SYNCDOC DEBUG]       no_spaces: "}"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 20: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 21: "    fn section_query(&self) -> &'static str {"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "fn section_query(&self) -> &'static str {"
+[SYNCDOC DEBUG]       no_spaces: "fnsection_query(&self)->&'staticstr{"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 22: "        \"(atx_heading) @heading\""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "\"(atx_heading) @heading\""
+[SYNCDOC DEBUG]       no_spaces: "\"(atx_heading)@heading\""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 23: "    }"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "}"
+[SYNCDOC DEBUG]       no_spaces: "}"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 24: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 25: "    fn title_query(&self) -> &'static str {"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "fn title_query(&self) -> &'static str {"
+[SYNCDOC DEBUG]       no_spaces: "fntitle_query(&self)->&'staticstr{"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 26: "        \"(atx_heading heading_content: (inline) @title)\""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "\"(atx_heading heading_content: (inline) @title)\""
+[SYNCDOC DEBUG]       no_spaces: "\"(atx_headingheading_content:(inline)@title)\""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 27: "    }"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "}"
+[SYNCDOC DEBUG]       no_spaces: "}"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 28: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 29: "    fn format_section_display(&self, level: usize, title: &str) -> Line<'static> {"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "fn format_section_display(&self, level: usize, title: &str) -> Line<'static> {"
+[SYNCDOC DEBUG]       no_spaces: "fnformat_section_display(&self,level:usize,title:&str)->Line<'static>{"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 30: "        // Cycle through colors for different heading levels"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "// Cycle through colors for different heading levels"
+[SYNCDOC DEBUG]       no_spaces: "//Cyclethroughcolorsfordifferentheadinglevels"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 31: "        let colors = ["
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "let colors = ["
+[SYNCDOC DEBUG]       no_spaces: "letcolors=["
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 32: "            Color::Cyan,"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "Color::Cyan,"
+[SYNCDOC DEBUG]       no_spaces: "Color::Cyan,"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 33: "            Color::Green,"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "Color::Green,"
+[SYNCDOC DEBUG]       no_spaces: "Color::Green,"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 34: "            Color::LightYellow,"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "Color::LightYellow,"
+[SYNCDOC DEBUG]       no_spaces: "Color::LightYellow,"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 35: "            Color::Magenta,"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "Color::Magenta,"
+[SYNCDOC DEBUG]       no_spaces: "Color::Magenta,"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 36: "            Color::Blue,"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "Color::Blue,"
+[SYNCDOC DEBUG]       no_spaces: "Color::Blue,"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 37: "            Color::Red,"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "Color::Red,"
+[SYNCDOC DEBUG]       no_spaces: "Color::Red,"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 38: "        ];"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "];"
+[SYNCDOC DEBUG]       no_spaces: "];"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 39: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 40: "        let color = colors[(level - 1) % colors.len()];"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "let color = colors[(level - 1) % colors.len()];"
+[SYNCDOC DEBUG]       no_spaces: "letcolor=colors[(level-1)%colors.len()];"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 41: "        let prefix = \"#\".repeat(level);"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "let prefix = \"#\".repeat(level);"
+[SYNCDOC DEBUG]       no_spaces: "letprefix=\"#\".repeat(level);"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 42: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 43: "        let spans = vec!["
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "let spans = vec!["
+[SYNCDOC DEBUG]       no_spaces: "letspans=vec!["
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 44: "            Span::styled(prefix, Style::default().fg(color)),"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "Span::styled(prefix, Style::default().fg(color)),"
+[SYNCDOC DEBUG]       no_spaces: "Span::styled(prefix,Style::default().fg(color)),"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 45: "            Span::raw(\" \"),"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "Span::raw(\" \"),"
+[SYNCDOC DEBUG]       no_spaces: "Span::raw(\"\"),"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 46: "            Span::raw(title.to_string()),"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "Span::raw(title.to_string()),"
+[SYNCDOC DEBUG]       no_spaces: "Span::raw(title.to_string()),"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 47: "        ];"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "];"
+[SYNCDOC DEBUG]       no_spaces: "];"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 48: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 49: "        Line::from(spans)"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "Line::from(spans)"
+[SYNCDOC DEBUG]       no_spaces: "Line::from(spans)"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 50: "    }"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "}"
+[SYNCDOC DEBUG]       no_spaces: "}"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 51: "}"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "}"
+[SYNCDOC DEBUG]       no_spaces: "}"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Final result length: 1230
+[SYNCDOC DEBUG] === BOOKEND DEBUG END ===
+
+[SYNCDOC DEBUG] After bookending: 1025
+[SYNCDOC DEBUG] 
+--- Final Result ---
+[SYNCDOC DEBUG] #![doc = syncdoc::module_doc!()]
+
+use crate::formats::Format;
+use ratatui::{
+    style::{Color, Style},
+    text::{Line, Span},
+};
+
+#[syncdoc::omnidoc]
+pub struct MarkdownFormat;
+
+#[syncdoc::omnidoc]
+impl Format for MarkdownFormat {
+    fn file_extension(&self) -> &'static str {
+        "md"
+    }
+
+    fn language(&self) -> tree_sitter::Language {
+        tree_sitter_md::LANGUAGE.into()
+    }
+
+    fn section_query(&self) -> &'static str {
+        "(atx_heading) @heading"
+    }
+
+    fn title_query(&self) -> &'static str {
+        "(atx_heading heading_content: (inline) @title)"
+    }
+
+    fn format_section_display(&self, level: usize, title: &str) -> Line<'static> {
+        // Cycle through colors for different heading levels
+        let colors = [
+            Color::Cyan,
+            Color::Green,
+            Color::LightYellow,
+            Color::Magenta,
+            Color::Blue,
+            Color::Red,
+        ];
+
+        let color = colors[(level - 1) % colors.len()];
+        let prefix = "#".repeat(level);
+
+        let spans = vec![
+            Span::styled(prefix, Style::default().fg(color)),
+            Span::raw(" "),
+            Span::raw(title.to_string()),
+        ];
+
+        Line::from(spans)
+    }
+}
+
+[SYNCDOC DEBUG] === REFORMAT END ===
+
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: pub, span: bytes(1797..1800) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: mod, span: bytes(1801..1804) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: difftastic, span: bytes(1805..1815) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ';', spacing: Alone, span: bytes(1815..1816) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: pub, span: bytes(1817..1820) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: mod, span: bytes(1821..1824) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: markdown, span: bytes(1825..1833) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ';', spacing: Alone, span: bytes(1833..1834) })
+[SYNCDOC DEBUG] Processing item type: Trait
+[SYNCDOC DEBUG] Processing item: Trait(TraitSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(1836..1904) }, Punct { char: '=', spacing: Alone, span: bytes(1836..1904) }, Literal { lit: " Abstracts document type differences through tree-sitter queries.", span: bytes(1836..1904) }], span: bytes(1836..1904) }) }, delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(1905..1908) }, Punct { char: '=', spacing: Alone, span: bytes(1905..1908) }, Literal { lit: "", span: bytes(1905..1908) }], span: bytes(1905..1908) }) }, delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(1909..2007) }, Punct { char: '=', spacing: Alone, span: bytes(1909..2007) }, Literal { lit: " Enables support for markdown and other structured formats by providing format-specific parsing", span: bytes(1909..2007) }], span: bytes(1909..2007) }) }, delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(2008..2056) }, Punct { char: '=', spacing: Alone, span: bytes(2008..2056) }, Literal { lit: " queries (tree-sitter uses SCM lisp queries).", span: bytes(2008..2056) }], span: bytes(2008..2056) }) }, delimiter: Some(Nothing) }])), visibility: Some(Public(KPub(Cached<proc_macro2::Ident> { value: Ident { sym: pub, span: bytes(2057..2060) }, string: "pub" }))), unsafe_kw: None, _trait: KTrait(Cached<proc_macro2::Ident> { value: Ident { sym: trait, span: bytes(2061..2066) }, string: "trait" }), name: Ident { sym: Format, span: bytes(2067..2073) }, generics: None, bounds: None, where_clause: None, items: BraceGroupContaining < syncdoc_core::parse::ModuleContent>(ModuleContent { inner_attrs: None, items: Repeats<1, 18446744073709551615, syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: TraitMethod(TraitMethodSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(2080..2141) }, Punct { char: '=', spacing: Alone, span: bytes(2080..2141) }, Literal { lit: " File extension for syntax highlighting (e.g., \"md\", \"rs\")", span: bytes(2080..2141) }], span: bytes(2080..2141) }) }, delimiter: Some(Nothing) }])), const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(2146..2148) }, string: "fn" }), name: Ident { sym: file_extension, span: bytes(2149..2163) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(2165..2169) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeTrait { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Joint, span: bytes(2174..2175) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(2175..2176) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(2176..2182) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(2183..2186) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, _semi: Operator<';'> }), delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: TraitMethod(TraitMethodSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(2192..2252) }, Punct { char: '=', spacing: Alone, span: bytes(2192..2252) }, Literal { lit: " Returns the tree-sitter language parser for this format.", span: bytes(2192..2252) }], span: bytes(2192..2252) }) }, delimiter: Some(Nothing) }])), const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(2257..2259) }, string: "fn" }), name: Ident { sym: language, span: bytes(2260..2268) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(2270..2274) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeTrait { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: tree_sitter, span: bytes(2279..2290) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Joint, span: bytes(2290..2291) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Alone, span: bytes(2291..2292) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: Language, span: bytes(2292..2300) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, _semi: Operator<';'> }), delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: TraitMethod(TraitMethodSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(2306..2371) }, Punct { char: '=', spacing: Alone, span: bytes(2306..2371) }, Literal { lit: " Tree-sitter query matching section boundaries in this format.", span: bytes(2306..2371) }], span: bytes(2306..2371) }) }, delimiter: Some(Nothing) }])), const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(2376..2378) }, string: "fn" }), name: Ident { sym: section_query, span: bytes(2379..2392) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(2394..2398) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeTrait { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Alone, span: bytes(2403..2404) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(2404..2407) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, _semi: Operator<';'> }), delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: TraitMethod(TraitMethodSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(2413..2476) }, Punct { char: '=', spacing: Alone, span: bytes(2413..2476) }, Literal { lit: " Tree-sitter query extracting section titles in this format.", span: bytes(2413..2476) }], span: bytes(2413..2476) }) }, delimiter: Some(Nothing) }])), const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(2481..2483) }, string: "fn" }), name: Ident { sym: title_query, span: bytes(2484..2495) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(2497..2501) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeTrait { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Alone, span: bytes(2506..2507) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(2507..2510) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, _semi: Operator<';'> }), delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: TraitMethod(TraitMethodSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(2516..2581) }, Punct { char: '=', spacing: Alone, span: bytes(2516..2581) }, Literal { lit: " Format a section heading for display with syntax highlighting", span: bytes(2516..2581) }], span: bytes(2516..2581) }) }, delimiter: Some(Nothing) }])), const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(2586..2588) }, string: "fn" }), name: Ident { sym: format_section_display, span: bytes(2589..2611) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(2613..2617) }, string: "self" }) })), delimiter: Some(Operator<','>) }, Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: Named(NamedParam { mut_kw: None, name: Ident { sym: level, span: bytes(2619..2624) }, _colon: Operator<':'>, param_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: usize, span: bytes(2626..2631) })) }, delimiter: Some(Nothing) }]) }), delimiter: Some(Operator<','>) }, Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: Named(NamedParam { mut_kw: None, name: Ident { sym: title, span: bytes(2633..2638) }, _colon: Operator<':'>, param_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Alone, span: bytes(2640..2641) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(2641..2644) })) }, delimiter: Some(Nothing) }]) }), delimiter: None }]))), return_type: Some(ReturnTypeTrait { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: ratatui, span: bytes(2649..2656) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Joint, span: bytes(2656..2657) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Alone, span: bytes(2657..2658) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: text, span: bytes(2658..2662) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Joint, span: bytes(2662..2663) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Alone, span: bytes(2663..2664) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: Line, span: bytes(2664..2668) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>> { first: Operator<'<'>, second: [Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<'>'>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(2669..2670) })) }, Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<'>'>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(2670..2676) })) }], third: Operator<'>'> })) }, delimiter: Some(Nothing) }]) }), where_clause: None, _semi: Operator<';'> }), delimiter: Some(Nothing) }]) }) })
+[SYNCDOC DEBUG] Processing item type: TraitMethod
+[SYNCDOC DEBUG] Processing item: TraitMethod(TraitMethodSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(2080..2141) }, Punct { char: '=', spacing: Alone, span: bytes(2080..2141) }, Literal { lit: " File extension for syntax highlighting (e.g., \"md\", \"rs\")", span: bytes(2080..2141) }], span: bytes(2080..2141) }) }, delimiter: Some(Nothing) }])), const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(2146..2148) }, string: "fn" }), name: Ident { sym: file_extension, span: bytes(2149..2163) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(2165..2169) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeTrait { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Joint, span: bytes(2174..2175) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(2175..2176) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(2176..2182) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(2183..2186) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, _semi: Operator<';'> })
+[SYNCDOC DEBUG] Processing item type: TraitMethod
+[SYNCDOC DEBUG] Processing item: TraitMethod(TraitMethodSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(2192..2252) }, Punct { char: '=', spacing: Alone, span: bytes(2192..2252) }, Literal { lit: " Returns the tree-sitter language parser for this format.", span: bytes(2192..2252) }], span: bytes(2192..2252) }) }, delimiter: Some(Nothing) }])), const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(2257..2259) }, string: "fn" }), name: Ident { sym: language, span: bytes(2260..2268) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(2270..2274) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeTrait { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: tree_sitter, span: bytes(2279..2290) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Joint, span: bytes(2290..2291) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Alone, span: bytes(2291..2292) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: Language, span: bytes(2292..2300) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, _semi: Operator<';'> })
+[SYNCDOC DEBUG] Processing item type: TraitMethod
+[SYNCDOC DEBUG] Processing item: TraitMethod(TraitMethodSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(2306..2371) }, Punct { char: '=', spacing: Alone, span: bytes(2306..2371) }, Literal { lit: " Tree-sitter query matching section boundaries in this format.", span: bytes(2306..2371) }], span: bytes(2306..2371) }) }, delimiter: Some(Nothing) }])), const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(2376..2378) }, string: "fn" }), name: Ident { sym: section_query, span: bytes(2379..2392) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(2394..2398) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeTrait { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Alone, span: bytes(2403..2404) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(2404..2407) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, _semi: Operator<';'> })
+[SYNCDOC DEBUG] Processing item type: TraitMethod
+[SYNCDOC DEBUG] Processing item: TraitMethod(TraitMethodSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(2413..2476) }, Punct { char: '=', spacing: Alone, span: bytes(2413..2476) }, Literal { lit: " Tree-sitter query extracting section titles in this format.", span: bytes(2413..2476) }], span: bytes(2413..2476) }) }, delimiter: Some(Nothing) }])), const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(2481..2483) }, string: "fn" }), name: Ident { sym: title_query, span: bytes(2484..2495) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(2497..2501) }, string: "self" }) })), delimiter: None }]))), return_type: Some(ReturnTypeTrait { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Alone, span: bytes(2506..2507) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(2507..2510) })) }, delimiter: Some(Nothing) }]) }), where_clause: None, _semi: Operator<';'> })
+[SYNCDOC DEBUG] Processing item type: TraitMethod
+[SYNCDOC DEBUG] Processing item: TraitMethod(TraitMethodSig { attributes: Some(Repeats<1, 18446744073709551615, syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::Attribute, unsynn::fundamental::Nothing> { value: Attribute { _hash: Operator<'#'>, content: BracketGroup(Group { delimiter: Bracket, stream: TokenStream [Ident { sym: doc, span: bytes(2516..2581) }, Punct { char: '=', spacing: Alone, span: bytes(2516..2581) }, Literal { lit: " Format a section heading for display with syntax highlighting", span: bytes(2516..2581) }], span: bytes(2516..2581) }) }, delimiter: Some(Nothing) }])), const_kw: None, async_kw: None, unsafe_kw: None, extern_kw: None, _fn: KFn(Cached<proc_macro2::Ident> { value: Ident { sym: fn, span: bytes(2586..2588) }, string: "fn" }), name: Ident { sym: format_section_display, span: bytes(2589..2611) }, generics: None, params: ParenthesisGroupContaining < core::option::Option<unsynn::container::DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>>>(Some(DelimitedVec<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>>([Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: SelfParam(Ref(Cons<unsynn::operator::Operator<'&'>, syncdoc_core::parse::KSelf> { first: Operator<'&'>, second: KSelf(Cached<proc_macro2::Ident> { value: Ident { sym: self, span: bytes(2613..2617) }, string: "self" }) })), delimiter: Some(Operator<','>) }, Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: Named(NamedParam { mut_kw: None, name: Ident { sym: level, span: bytes(2619..2624) }, _colon: Operator<':'>, param_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: usize, span: bytes(2626..2631) })) }, delimiter: Some(Nothing) }]) }), delimiter: Some(Operator<','>) }, Delimited<syncdoc_core::parse::FnParam, unsynn::operator::Operator<','>> { value: Named(NamedParam { mut_kw: None, name: Ident { sym: title, span: bytes(2633..2638) }, _colon: Operator<':'>, param_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '&', spacing: Alone, span: bytes(2640..2641) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::operator::Operator<','>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<','>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: str, span: bytes(2641..2644) })) }, delimiter: Some(Nothing) }]) }), delimiter: None }]))), return_type: Some(ReturnTypeTrait { _arrow: Operator<'->'>, return_type: Repeats<1, 18446744073709551615, unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing>([Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: ratatui, span: bytes(2649..2656) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Joint, span: bytes(2656..2657) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Alone, span: bytes(2657..2658) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: text, span: bytes(2658..2662) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Joint, span: bytes(2662..2663) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: ':', spacing: Alone, span: bytes(2663..2664) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: Line, span: bytes(2664..2668) })) }, delimiter: Some(Nothing) }, Delimited<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree>, unsynn::fundamental::Nothing> { value: Cons<unsynn::fundamental::Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::combinator::Either<unsynn::group::BraceGroup, unsynn::operator::Operator<';'>>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>> { first: Operator<'<'>, second: [Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<'>'>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Punct { char: '\'', spacing: Joint, span: bytes(2669..2670) })) }, Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree> { first: Except<unsynn::operator::Operator<'>'>>, second: AngleTokenTree(Either<unsynn::combinator::Cons<unsynn::operator::Operator<'<'>, alloc::vec::Vec<unsynn::combinator::Cons<unsynn::fundamental::Except<unsynn::operator::Operator<'>'>>, syncdoc_core::parse::AngleTokenTree>>, unsynn::operator::Operator<'>'>>, proc_macro2::TokenTree>(Ident { sym: static, span: bytes(2670..2676) })) }], third: Operator<'>'> })) }, delimiter: Some(Nothing) }]) }), where_clause: None, _semi: Operator<';'> })
+[SYNCDOC DEBUG] 
+=== REFORMAT START ===
+[SYNCDOC DEBUG] Original length: 1158
+[SYNCDOC DEBUG] Transformed length: 397
+[SYNCDOC DEBUG] Formatted original length: 1158
+[SYNCDOC DEBUG] Formatted transformed length: 382
+[SYNCDOC DEBUG] 
+--- Formatted Original ---
+[SYNCDOC DEBUG] //! Format trait and implementations for different document types.
+//!
+//! This module defines the `Format` trait which abstracts over different
+//! document formats (markdown, org-mode, restructuredtext, etc.) by providing
+//! tree-sitter queries specific to each format.
+
+pub mod difftastic;
+pub mod markdown;
+
+/// Abstracts document type differences through tree-sitter queries.
+///
+/// Enables support for markdown and other structured formats by providing format-specific parsing
+/// queries (tree-sitter uses SCM lisp queries).
+pub trait Format {
+    /// File extension for syntax highlighting (e.g., "md", "rs")
+    fn file_extension(&self) -> &'static str;
+    /// Returns the tree-sitter language parser for this format.
+    fn language(&self) -> tree_sitter::Language;
+    /// Tree-sitter query matching section boundaries in this format.
+    fn section_query(&self) -> &str;
+    /// Tree-sitter query extracting section titles in this format.
+    fn title_query(&self) -> &str;
+    /// Format a section heading for display with syntax highlighting
+    fn format_section_display(&self, level: usize, title: &str) -> ratatui::text::Line<'static>;
+}
+
+[SYNCDOC DEBUG] 
+--- Formatted Transformed ---
+[SYNCDOC DEBUG] # ! [doc = syncdoc :: module_doc ! ()]
+pub mod difftastic;
+pub mod markdown;
+#[syncdoc::omnidoc]
+pub trait Format {
+    fn file_extension(&self) -> &'static str;
+    fn language(&self) -> tree_sitter::Language;
+    fn section_query(&self) -> &str;
+    fn title_query(&self) -> &str;
+    fn format_section_display(&self, level: usize, title: &str) -> ratatui::text::Line<'static>;
+}
+
+[SYNCDOC DEBUG] === HUNK DEBUG ===
+[SYNCDOC DEBUG] Before lines: 25
+[SYNCDOC DEBUG] After lines: 11
+[SYNCDOC DEBUG] Hunks: 7
+[SYNCDOC DEBUG] Hunk 0: before[0..6] -> after[0..1]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [0]: "//! Format trait and implementations for different document types."
+[SYNCDOC DEBUG]     [1]: "//!"
+[SYNCDOC DEBUG]     [2]: "//! This module defines the `Format` trait which abstracts over different"
+[SYNCDOC DEBUG]     [3]: "//! document formats (markdown, org-mode, restructuredtext, etc.) by providing"
+[SYNCDOC DEBUG]     [4]: "//! tree-sitter queries specific to each format."
+[SYNCDOC DEBUG]     [5]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [0]: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG] Hunk 1: before[8..13] -> after[3..4]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [8]: ""
+[SYNCDOC DEBUG]     [9]: "/// Abstracts document type differences through tree-sitter queries."
+[SYNCDOC DEBUG]     [10]: "///"
+[SYNCDOC DEBUG]     [11]: "/// Enables support for markdown and other structured formats by providing format-specific parsing"
+[SYNCDOC DEBUG]     [12]: "/// queries (tree-sitter uses SCM lisp queries)."
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [3]: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG] Hunk 2: before[14..15] -> after[5..5]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [14]: "    /// File extension for syntax highlighting (e.g., \"md\", \"rs\")"
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 3: before[16..17] -> after[6..6]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [16]: "    /// Returns the tree-sitter language parser for this format."
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 4: before[18..19] -> after[7..7]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [18]: "    /// Tree-sitter query matching section boundaries in this format."
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 5: before[20..21] -> after[8..8]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [20]: "    /// Tree-sitter query extracting section titles in this format."
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 6: before[22..23] -> after[9..9]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [22]: "    /// Format a section heading for display with syntax highlighting"
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] ==================
+[SYNCDOC DEBUG] DEBUG restore: Found 7 hunks
+[SYNCDOC DEBUG]   Hunk 0: before[0..6] after[0..1]
+[SYNCDOC DEBUG]   Hunk 1: before[8..13] after[3..4]
+[SYNCDOC DEBUG]   Hunk 2: before[14..15] after[5..5]
+[SYNCDOC DEBUG]   Hunk 3: before[16..17] after[6..6]
+[SYNCDOC DEBUG]   Hunk 4: before[18..19] after[7..7]
+[SYNCDOC DEBUG]   Hunk 5: before[20..21] after[8..8]
+[SYNCDOC DEBUG]   Hunk 6: before[22..23] after[9..9]
+[SYNCDOC DEBUG] === HUNK DEBUG ===
+[SYNCDOC DEBUG] Before lines: 25
+[SYNCDOC DEBUG] After lines: 11
+[SYNCDOC DEBUG] Hunks: 7
+[SYNCDOC DEBUG] Hunk 0: before[0..6] -> after[0..1]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [0]: "//! Format trait and implementations for different document types."
+[SYNCDOC DEBUG]     [1]: "//!"
+[SYNCDOC DEBUG]     [2]: "//! This module defines the `Format` trait which abstracts over different"
+[SYNCDOC DEBUG]     [3]: "//! document formats (markdown, org-mode, restructuredtext, etc.) by providing"
+[SYNCDOC DEBUG]     [4]: "//! tree-sitter queries specific to each format."
+[SYNCDOC DEBUG]     [5]: ""
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [0]: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG] Hunk 1: before[8..13] -> after[3..4]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [8]: ""
+[SYNCDOC DEBUG]     [9]: "/// Abstracts document type differences through tree-sitter queries."
+[SYNCDOC DEBUG]     [10]: "///"
+[SYNCDOC DEBUG]     [11]: "/// Enables support for markdown and other structured formats by providing format-specific parsing"
+[SYNCDOC DEBUG]     [12]: "/// queries (tree-sitter uses SCM lisp queries)."
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [3]: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG] Hunk 2: before[14..15] -> after[5..5]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [14]: "    /// File extension for syntax highlighting (e.g., \"md\", \"rs\")"
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 3: before[16..17] -> after[6..6]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [16]: "    /// Returns the tree-sitter language parser for this format."
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 4: before[18..19] -> after[7..7]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [18]: "    /// Tree-sitter query matching section boundaries in this format."
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 5: before[20..21] -> after[8..8]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [20]: "    /// Tree-sitter query extracting section titles in this format."
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] Hunk 6: before[22..23] -> after[9..9]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]     [22]: "    /// Format a section heading for display with syntax highlighting"
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG] ==================
+[SYNCDOC DEBUG] APPLYING relevant hunk at lines 0..6 (adds 1 lines, removes 6 lines)
+[SYNCDOC DEBUG] APPLYING relevant hunk at lines 8..13 (adds 1 lines, removes 5 lines)
+[SYNCDOC DEBUG] APPLYING relevant hunk at lines 14..15 (adds 0 lines, removes 1 lines)
+[SYNCDOC DEBUG] APPLYING relevant hunk at lines 16..17 (adds 0 lines, removes 1 lines)
+[SYNCDOC DEBUG] APPLYING relevant hunk at lines 18..19 (adds 0 lines, removes 1 lines)
+[SYNCDOC DEBUG] APPLYING relevant hunk at lines 20..21 (adds 0 lines, removes 1 lines)
+[SYNCDOC DEBUG] APPLYING relevant hunk at lines 22..23 (adds 0 lines, removes 1 lines)
+[SYNCDOC DEBUG] Original != Result: true
+[SYNCDOC DEBUG] 
+=== BOOKEND DEBUG START ===
+[SYNCDOC DEBUG] Input code length: 383
+[SYNCDOC DEBUG] 
+Line 0: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG]       no_spaces: "#![doc=syncdoc::module_doc!()]"
+[SYNCDOC DEBUG]       -> Starts with #!
+[SYNCDOC DEBUG]       -> Checking trigger "syncdoc::module_doc!": true
+[SYNCDOC DEBUG]       -> Has trigger: true
+[SYNCDOC DEBUG]   -> NEEDS BOOKENDING
+[SYNCDOC DEBUG]     reformat_line for: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG]     extract_bookend_content:
+[SYNCDOC DEBUG]       trimmed: "# ! [doc = syncdoc :: module_doc ! ()]"
+[SYNCDOC DEBUG]       no_spaces: "#![doc=syncdoc::module_doc!()]"
+[SYNCDOC DEBUG]       Found #![ at position: 0
+[SYNCDOC DEBUG]       Found ] at position: 29
+[SYNCDOC DEBUG]       Extracted content: "doc=syncdoc::module_doc!()"
+[SYNCDOC DEBUG]     Got content: "doc=syncdoc::module_doc!()"
+[SYNCDOC DEBUG]     Created bookended expr: "const _: i32 = { doc=syncdoc::module_doc!() };"
+[SYNCDOC DEBUG]     Rustfmt output: "const _: i32 = { doc = syncdoc::module_doc!() };\n"
+[SYNCDOC DEBUG]     Stripped bookends: "doc = syncdoc::module_doc!()"
+[SYNCDOC DEBUG]     Final result: "#![doc = syncdoc::module_doc!()]"
+[SYNCDOC DEBUG]   -> Reformatted to: "#![doc = syncdoc::module_doc!()]"
+[SYNCDOC DEBUG] 
+Line 1: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 2: "pub mod difftastic;"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "pub mod difftastic;"
+[SYNCDOC DEBUG]       no_spaces: "pubmoddifftastic;"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 3: "pub mod markdown;"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "pub mod markdown;"
+[SYNCDOC DEBUG]       no_spaces: "pubmodmarkdown;"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 4: ""
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: ""
+[SYNCDOC DEBUG]       no_spaces: ""
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 5: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]       no_spaces: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 6: "pub trait Format {"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "pub trait Format {"
+[SYNCDOC DEBUG]       no_spaces: "pubtraitFormat{"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 7: "    fn file_extension(&self) -> &'static str;"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "fn file_extension(&self) -> &'static str;"
+[SYNCDOC DEBUG]       no_spaces: "fnfile_extension(&self)->&'staticstr;"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 8: "    fn language(&self) -> tree_sitter::Language;"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "fn language(&self) -> tree_sitter::Language;"
+[SYNCDOC DEBUG]       no_spaces: "fnlanguage(&self)->tree_sitter::Language;"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 9: "    fn section_query(&self) -> &str;"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "fn section_query(&self) -> &str;"
+[SYNCDOC DEBUG]       no_spaces: "fnsection_query(&self)->&str;"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 10: "    fn title_query(&self) -> &str;"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "fn title_query(&self) -> &str;"
+[SYNCDOC DEBUG]       no_spaces: "fntitle_query(&self)->&str;"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 11: "    fn format_section_display(&self, level: usize, title: &str) -> ratatui::text::Line<'static>;"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "fn format_section_display(&self, level: usize, title: &str) -> ratatui::text::Line<'static>;"
+[SYNCDOC DEBUG]       no_spaces: "fnformat_section_display(&self,level:usize,title:&str)->ratatui::text::Line<'static>;"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 12: "}"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "}"
+[SYNCDOC DEBUG]       no_spaces: "}"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Final result length: 377
+[SYNCDOC DEBUG] === BOOKEND DEBUG END ===
+
+[SYNCDOC DEBUG] After bookending: 397
+[SYNCDOC DEBUG] 
+--- Final Result ---
+[SYNCDOC DEBUG] #![doc = syncdoc::module_doc!()]
+
+pub mod difftastic;
+pub mod markdown;
+
+#[syncdoc::omnidoc]
+pub trait Format {
+    fn file_extension(&self) -> &'static str;
+    fn language(&self) -> tree_sitter::Language;
+    fn section_query(&self) -> &str;
+    fn title_query(&self) -> &str;
+    fn format_section_display(&self, level: usize, title: &str) -> ratatui::text::Line<'static>;
+}
+
+[SYNCDOC DEBUG] === REFORMAT END ===
+
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: pub, span: bytes(2682..2685) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: mod, span: bytes(2686..2689) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: formats, span: bytes(2690..2697) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ';', spacing: Alone, span: bytes(2697..2698) })
+[SYNCDOC DEBUG] Processing item type: Module
+[SYNCDOC DEBUG] Processing item: Module(ModuleSig { attributes: None, visibility: Some(Public(KPub(Cached<proc_macro2::Ident> { value: Ident { sym: pub, span: bytes(2699..2702) }, string: "pub" }))), _mod: KMod(Cached<proc_macro2::Ident> { value: Ident { sym: mod, span: bytes(2703..2706) }, string: "mod" }), name: Ident { sym: formats, span: bytes(2707..2714) }, items: BraceGroupContaining < syncdoc_core::parse::ModuleContent>(ModuleContent { inner_attrs: None, items: Repeats<1, 18446744073709551615, syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing>([Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: Other(Ident { sym: pub, span: bytes(2721..2724) }), delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: Other(Ident { sym: mod, span: bytes(2725..2728) }), delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: Other(Ident { sym: markdown, span: bytes(2729..2737) }), delimiter: Some(Nothing) }, Delimited<syncdoc_core::parse::ModuleItem, unsynn::fundamental::Nothing> { value: Other(Punct { char: ';', spacing: Alone, span: bytes(2737..2738) }), delimiter: Some(Nothing) }]) }) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: pub, span: bytes(2721..2724) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: mod, span: bytes(2725..2728) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Ident { sym: markdown, span: bytes(2729..2737) })
+[SYNCDOC DEBUG] Processing item type: Other
+[SYNCDOC DEBUG] Processing item: Other(Punct { char: ';', spacing: Alone, span: bytes(2737..2738) })
+[SYNCDOC DEBUG] 
+=== REFORMAT START ===
+[SYNCDOC DEBUG] Original length: 59
+[SYNCDOC DEBUG] Transformed length: 79
+[SYNCDOC DEBUG] Formatted original length: 59
+[SYNCDOC DEBUG] Formatted transformed length: 79
+[SYNCDOC DEBUG] 
+--- Formatted Original ---
+[SYNCDOC DEBUG] pub mod formats;
+pub mod formats {
+    pub mod markdown;
+}
+
+[SYNCDOC DEBUG] 
+--- Formatted Transformed ---
+[SYNCDOC DEBUG] pub mod formats;
+#[syncdoc::omnidoc]
+pub mod formats {
+    pub mod markdown;
+}
+
+[SYNCDOC DEBUG] === HUNK DEBUG ===
+[SYNCDOC DEBUG] Before lines: 4
+[SYNCDOC DEBUG] After lines: 5
+[SYNCDOC DEBUG] Hunks: 1
+[SYNCDOC DEBUG] Hunk 0: before[1..1] -> after[1..2]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [1]: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG] ==================
+[SYNCDOC DEBUG] DEBUG restore: Found 1 hunks
+[SYNCDOC DEBUG]   Hunk 0: before[1..1] after[1..2]
+[SYNCDOC DEBUG] === HUNK DEBUG ===
+[SYNCDOC DEBUG] Before lines: 4
+[SYNCDOC DEBUG] After lines: 5
+[SYNCDOC DEBUG] Hunks: 1
+[SYNCDOC DEBUG] Hunk 0: before[1..1] -> after[1..2]
+[SYNCDOC DEBUG]   Before snippet:
+[SYNCDOC DEBUG]   After snippet:
+[SYNCDOC DEBUG]     [1]: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG] ==================
+[SYNCDOC DEBUG] APPLYING relevant hunk at lines 1..1 (adds 1 lines, removes 0 lines)
+[SYNCDOC DEBUG] Original != Result: true
+[SYNCDOC DEBUG] 
+=== BOOKEND DEBUG START ===
+[SYNCDOC DEBUG] Input code length: 78
+[SYNCDOC DEBUG] 
+Line 0: "pub mod formats;"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "pub mod formats;"
+[SYNCDOC DEBUG]       no_spaces: "pubmodformats;"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 1: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]       no_spaces: "#[syncdoc::omnidoc]"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 2: "pub mod formats {"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "pub mod formats {"
+[SYNCDOC DEBUG]       no_spaces: "pubmodformats{"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 3: "    pub mod markdown;"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "pub mod markdown;"
+[SYNCDOC DEBUG]       no_spaces: "pubmodmarkdown;"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Line 4: "}"
+[SYNCDOC DEBUG]     Checking needs_bookending:
+[SYNCDOC DEBUG]       trimmed: "}"
+[SYNCDOC DEBUG]       no_spaces: "}"
+[SYNCDOC DEBUG]       -> Does NOT start with #!
+[SYNCDOC DEBUG]   -> No bookending needed
+[SYNCDOC DEBUG] 
+Final result length: 78
+[SYNCDOC DEBUG] === BOOKEND DEBUG END ===
+
+[SYNCDOC DEBUG] After bookending: 79
+[SYNCDOC DEBUG] 
+--- Final Result ---
+[SYNCDOC DEBUG] pub mod formats;
+#[syncdoc::omnidoc]
+pub mod formats {
+    pub mod markdown;
+}
+
+[SYNCDOC DEBUG] === REFORMAT END ===
+
+
+=== Migration Summary ===
+Processed 3 file(s)
+Extracted 9 documentation(s)
+Touched 7 missing file(s)
+Rewrote 3 file(s)
