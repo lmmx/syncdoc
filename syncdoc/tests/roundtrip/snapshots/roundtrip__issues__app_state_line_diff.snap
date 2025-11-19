@@ -1,0 +1,7 @@
+---
+source: syncdoc/tests/roundtrip/issues.rs
+expression: "format!(\"Original: {} lines\\nRestored: {} lines\\nDiff: {}\", original_lines,\nrestored_lines, original_lines as i32 - restored_lines as i32)"
+---
+Original: 891 lines
+Restored: 890 lines
+Diff: 1

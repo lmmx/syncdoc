@@ -1,0 +1,5 @@
+---
+source: syncdoc/tests/roundtrip/basic.rs
+expression: result.get_docs_files_brace()
+---
+{edit_plan.md,edit_plan/{Edit.md,Edit/{column_end.md,column_start.md,file_name.md,item_name.md,line_end.md,line_start.md,section_content.md},EditPlan.md,EditPlan/{apply.md,edits.md}},lib.md}

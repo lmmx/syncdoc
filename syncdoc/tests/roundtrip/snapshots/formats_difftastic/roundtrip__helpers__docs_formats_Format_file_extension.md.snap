@@ -1,0 +1,5 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+File extension for syntax highlighting (e.g., "md", "rs")

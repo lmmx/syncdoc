@@ -1,0 +1,11 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Parse difftastic JSON output into sections
+
+Files become non-navigable containers, hunks become navigable sections.
+
+# Errors
+
+Returns an error if JSON parsing fails or if the format is invalid.

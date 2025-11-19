@@ -1,0 +1,12 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Extract sections from a document using tree-sitter.
+
+Parses the file with the given format and extracts all sections,
+building parent/child relationships based on heading levels.
+
+# Errors
+
+Returns an error if file reading or parsing fails.

@@ -654,6 +654,7 @@ dependencies = [
  "facet-args",
  "insta",
  "proc-macro2",
+ "regex",
  "rust-format",
  "syncdoc-core",
  "syncdoc-migrate",

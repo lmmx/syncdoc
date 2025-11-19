@@ -1,0 +1,9 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Format trait and implementations for different document types.
+
+This module defines the `Format` trait which abstracts over different
+document formats (markdown, org-mode, restructuredtext, etc.) by providing
+tree-sitter queries specific to each format.

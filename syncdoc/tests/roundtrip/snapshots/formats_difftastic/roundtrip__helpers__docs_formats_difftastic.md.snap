@@ -1,0 +1,8 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Difftastic format implementation for displaying structural diffs.
+
+This module provides support for parsing difftastic JSON output and
+converting it into sections that can be navigated and edited in asterism.

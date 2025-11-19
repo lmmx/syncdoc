@@ -1,0 +1,8 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Abstracts document type differences through tree-sitter queries.
+
+Enables support for markdown and other structured formats by providing format-specific parsing
+queries (tree-sitter uses SCM lisp queries).

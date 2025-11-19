@@ -1,0 +1,8 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Document discovery and section extraction using tree-sitter.
+
+This module handles finding markdown files in the filesystem and parsing
+them with tree-sitter queries to extract section hierarchies.

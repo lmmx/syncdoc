@@ -1,0 +1,12 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Find documents matching the given extensions.
+
+If paths is empty, scans the current directory recursively.
+Skips common build/dependency directories.
+
+# Errors
+
+Returns an error if directory traversal fails.
