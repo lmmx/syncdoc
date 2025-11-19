@@ -205,7 +205,9 @@ pub struct RoundtripResult {
     pub migrated_source: HashMap<PathBuf, String>,
     pub docs_files: HashMap<PathBuf, String>,
     pub restored_source: HashMap<PathBuf, String>,
+    #[allow(dead_code)] // may use later
     pub migrate_stderr: String,
+    #[allow(dead_code)] // may use later
     pub restore_stderr: String,
 }
 
@@ -231,6 +233,7 @@ impl RoundtripResult {
     }
 
     /// Get all files that differ
+    #[allow(dead_code)]
     pub fn get_differing_files(&self) -> Vec<PathBuf> {
         self.original_source
             .keys()
@@ -301,9 +304,11 @@ impl RoundtripResult {
 
 #[derive(Debug)]
 pub struct FileDiff {
+    #[allow(dead_code)]
     pub path: PathBuf,
     pub original: String,
     pub restored: String,
+    #[allow(dead_code)]
     pub matches: bool,
 }
 
