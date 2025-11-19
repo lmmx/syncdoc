@@ -9,7 +9,7 @@ fn roundtrip_config() {
 
     // Snapshot file lists
     assert_snapshot!(result.get_source_files_brace(), @"{config,lib}.rs");
-    assert_snapshot!(result.get_docs_files_brace(), @"{config.md,config/{Config.md,Config/{file_extensions.md,load.md,wrap_width.md}},lib.md}");
+    assert_snapshot!(result.get_docs_files_brace(), @"{config,config/Config{,/{file_extensions,load,wrap_width}},lib}.md");
 
     // Snapshot file contents in subdirectory
     result.snapshot_source_files("config");
@@ -32,7 +32,7 @@ fn roundtrip_edit_plan() {
     let result = run_roundtrip(temp.path());
 
     assert_snapshot!(result.get_source_files_brace(), @"{edit_plan,lib}.rs");
-    assert_snapshot!(result.get_docs_files_brace(), @"{edit_plan.md,edit_plan/{Edit.md,Edit/{column_end.md,column_start.md,file_name.md,item_name.md,line_end.md,line_start.md,section_content.md},EditPlan.md,EditPlan/{apply.md,edits.md}},lib.md}");
+    assert_snapshot!(result.get_docs_files_brace(), @"{edit_plan,edit_plan/Edit{,/{column_end,column_start,file_name,item_name,line_end,line_start,section_content},Plan,Plan/{apply,edits}},lib}.md");
 
     result.snapshot_source_files("edit_plan");
     result.snapshot_docs_files("edit_plan");
@@ -53,7 +53,7 @@ fn roundtrip_input() {
     let result = run_roundtrip(temp.path());
 
     assert_snapshot!(result.get_source_files_brace(), @"{input,lib}.rs");
-    assert_snapshot!(result.get_docs_files_brace(), @"{input.md,input/{build_hierarchy.md,extract_sections.md,find_documents.md,find_in_directory.md},lib.md}");
+    assert_snapshot!(result.get_docs_files_brace(), @"{input,input/{build_hierarchy,extract_sections,find_documents,find_in_directory},lib}.md");
 
     result.snapshot_source_files("input");
     result.snapshot_docs_files("input");
@@ -73,8 +73,8 @@ fn roundtrip_formats_parent() {
     let temp = setup_test_project(&[ModuleConfig::new("formats")]);
     let result = run_roundtrip(temp.path());
 
-    assert_snapshot!(result.get_source_files_brace(), @"{formats.rs,lib.rs}");
-    assert_snapshot!(result.get_docs_files_brace(), @"{formats/{,Format/{,file_extension,format_section_display,language,section_query,title_query}},lib}.md");
+    assert_snapshot!(result.get_source_files_brace(), @"{formats,lib}.rs");
+    assert_snapshot!(result.get_docs_files_brace(), @"{formats,formats/Format{,/{file_extension,format_section_display,language,section_query,title_query}},lib}.md");
 
     result.snapshot_source_files("formats_parent");
     result.snapshot_docs_files("formats_parent");
@@ -97,8 +97,8 @@ fn roundtrip_formats_markdown() {
     ]);
     let result = run_roundtrip(temp.path());
 
-    assert_snapshot!(result.get_source_files_brace(), @"{formats.rs,formats/markdown.rs,lib.rs}");
-    assert_snapshot!(result.get_docs_files_brace(), @"{formats.md,formats/{Format.md,Format/{file_extension.md,format_section_display.md,language.md,section_query.md,title_query.md},markdown.md,markdown/{MarkdownFormat.md,MarkdownFormat/Format/{file_extension.md,format_section_display.md,language.md,section_query.md,title_query.md}}},lib.md,lib/formats.md}");
+    assert_snapshot!(result.get_source_files_brace(), @"{formats,formats/markdown,lib}.rs");
+    assert_snapshot!(result.get_docs_files_brace(), @"{formats,formats/{Format,Format/{file_extension,format_section_display,language,section_query,title_query},markdown,markdown/MarkdownFormat{,/Format/{file_extension,format_section_display,language,section_query,title_query}}},lib,lib/formats}.md");
 
     result.snapshot_source_files("formats_markdown");
     result.snapshot_docs_files("formats_markdown");
@@ -121,8 +121,8 @@ fn roundtrip_formats_difftastic() {
     ]);
     let result = run_roundtrip(temp.path());
 
-    assert_snapshot!(result.get_source_files_brace(), @"{formats.rs,formats/difftastic.rs,lib.rs}");
-    assert_snapshot!(result.get_docs_files_brace(), @"{formats.md,formats/{Format.md,Format/{file_extension.md,format_section_display.md,language.md,section_query.md,title_query.md},difftastic.md,difftastic/{DifftChange.md,DifftChange/{content.md,end.md,highlight.md,start.md},DifftFile.md,DifftFile/{chunks.md,language.md,path.md,status.md},DifftLine.md,DifftLine/{lhs.md,rhs.md},DifftSide.md,DifftSide/{changes.md,line_number.md},DifftasticFormat.md,DifftasticFormat/{Format/{file_extension.md,format_section_display.md,language.md,section_query.md,title_query.md},determine_hunk_color_from_header.md},create_chunk_section.md,extract_chunk_text.md,extract_column_range.md,extract_difftastic_sections.md,format_change_content.md,format_hunk_header.md,parse_difftastic_json.md}},lib.md,lib/formats.md}");
+    assert_snapshot!(result.get_source_files_brace(), @"{formats,formats/difftastic,lib}.rs");
+    assert_snapshot!(result.get_docs_files_brace(), @"{formats,formats/{Format,Format/{file_extension,format_section_display,language,section_query,title_query},difftastic,difftastic/{DifftChange,DifftChange/{content,end,highlight,start},DifftFile,DifftFile/{chunks,language,path,status},DifftLine,DifftLine/{l,r}hs,DifftSide,DifftSide/{changes,line_number},DifftasticFormat,DifftasticFormat/{Format/{file_extension,format_section_display,language,section_query,title_query},determine_hunk_color_from_header},create_chunk_section,extract_chunk_text,extract_column_range,extract_difftastic_sections,format_change_content,format_hunk_header,parse_difftastic_json}},lib,lib/formats}.md");
 
     result.snapshot_source_files("formats_difftastic");
     result.snapshot_docs_files("formats_difftastic");

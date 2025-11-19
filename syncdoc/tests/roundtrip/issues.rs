@@ -7,8 +7,8 @@ fn roundtrip_app_state() {
     let temp = setup_test_project(&[ModuleConfig::new("app_state")]);
     let result = run_roundtrip(temp.path());
 
-    assert_snapshot!(result.get_source_files_brace(), @"{app_state.rs,lib.rs}");
-    assert_snapshot!(result.get_docs_files_brace(), @"{app_state.md,app_state/{AppState.md,AppState/{build_tree.md,cancel_move.md,command_buffer.md,cumulative_offset.md,current_node_index.md,current_view.md,editor_state.md,enter_detail_view.md,exit_detail_view.md,file_mode.md,file_offsets.md,files.md,find_next_node.md,find_prev_node.md,generate_edit_plan.md,get_current_section.md,get_current_section_index.md,get_indent.md,get_max_line_width.md,load_docs.md,mark_moved.md,message.md,move_section_down.md,move_section_in.md,move_section_out.md,move_section_to_bottom.md,move_section_to_top.md,move_section_up.md,move_state.md,moving_section_index.md,navigate_to_first.md,navigate_to_first_at_level.md,navigate_to_first_child.md,navigate_to_last.md,navigate_to_last_at_level.md,navigate_to_next_descendant.md,navigate_to_next_sibling.md,navigate_to_parent.md,navigate_to_prev_sibling.md,new.md,rebuild_file_offsets.md,rebuild_tree.md,rewrite_file_sections.md,save_current.md,save_section_reorder.md,sections.md,start_move.md,tree_nodes.md,wrap_width.md},FileMode.md,FileMode/{Multi.md,Single.md},MoveState.md,MoveState/{Moved.md,None.md,Selected.md},View.md,View/{Command.md,Detail.md,List.md}},lib.md}");
+    assert_snapshot!(result.get_source_files_brace(), @"{app_state,lib}.rs");
+    assert_snapshot!(result.get_docs_files_brace(), @"{app_state,app_state/{AppState,AppState/{build_tree,cancel_move,command_buffer,cumulative_offset,current_node_index,current_view,editor_state,enter_detail_view,exit_detail_view,file_mode,file_offsets,files,find_next_node,find_prev_node,generate_edit_plan,get_current_section,get_current_section_index,get_indent,get_max_line_width,load_docs,mark_moved,message,move_section_down,move_section_in,move_section_out,move_section_to_bottom,move_section_to_top,move_section_up,move_state,moving_section_index,navigate_to_first,navigate_to_first_at_level,navigate_to_first_child,navigate_to_last,navigate_to_last_at_level,navigate_to_next_descendant,navigate_to_next_sibling,navigate_to_parent,navigate_to_prev_sibling,new,rebuild_file_offsets,rebuild_tree,rewrite_file_sections,save_current,save_section_reorder,sections,start_move,tree_nodes,wrap_width},FileMode,FileMode/{Multi,Single},MoveState,MoveState/{Moved,None,Selected},View,View/{Command,Detail,List}},lib}.md");
 
     result.snapshot_source_files("app_state");
     result.snapshot_docs_files("app_state");
@@ -44,7 +44,7 @@ fn roundtrip_highlight() {
     let result = run_roundtrip(temp.path());
 
     assert_snapshot!(result.get_source_files_brace(), @"{highlight,lib}.rs");
-    assert_snapshot!(result.get_docs_files_brace(), @"{highlight.md,highlight/{SYNTAX_SET.md,THEME_SET.md,highlight_line_with_extension.md,highlight_source_lines.md},lib.md}");
+    assert_snapshot!(result.get_docs_files_brace(), @"{highlight,highlight/{SYNTAX_SET,THEME_SET,highlight_line_with_extension,highlight_source_lines},lib}.md");
 
     result.snapshot_source_files("highlight");
     result.snapshot_docs_files("highlight");
@@ -100,8 +100,8 @@ fn roundtrip_ui() {
     let temp = setup_test_project(&[ModuleConfig::new("ui")]);
     let result = run_roundtrip(temp.path());
 
-    assert_snapshot!(result.get_source_files_brace(), @"{lib.rs,ui.rs}");
-    assert_snapshot!(result.get_docs_files_brace(), @"{lib.md,ui.md,ui/{draw.md,draw_detail.md,draw_list.md,draw_list_with_command.md,get_tree_prefix.md}}");
+    assert_snapshot!(result.get_source_files_brace(), @"{lib,ui}.rs");
+    assert_snapshot!(result.get_docs_files_brace(), @"{lib,ui,ui/{draw,draw_detail,draw_list,draw_list_with_command,get_tree_prefix}}.md");
 
     result.snapshot_source_files("ui");
     result.snapshot_docs_files("ui");
