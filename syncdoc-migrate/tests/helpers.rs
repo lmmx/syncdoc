@@ -10,6 +10,11 @@ use syncdoc_migrate::{
 };
 use tempfile::TempDir;
 
+#[ctor::ctor]
+fn init_debug() {
+    syncdoc_migrate::debug::set_debug(true);
+}
+
 pub fn setup_test_file(source: &str, filename: &str) -> (TempDir, PathBuf) {
     let temp_dir = TempDir::new().unwrap();
     let file_path = temp_dir.path().join(filename);
