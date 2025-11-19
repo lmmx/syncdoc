@@ -15,14 +15,9 @@ fn roundtrip_config() {
     result.snapshot_source_files("config");
     result.snapshot_docs_files("config");
 
-    // Document round-trip status
-    assert_snapshot!(
-        "config_roundtrip_status",
-        if result.is_perfectly_restored() {
-            "PERFECT: Round-trip successful"
-        } else {
-            "IMPERFECT: Round-trip has differences"
-        }
+    assert!(
+        result.is_perfectly_restored(),
+        "Round-trip failed: original != restored"
     );
 }
 
@@ -37,13 +32,9 @@ fn roundtrip_edit_plan() {
     result.snapshot_source_files("edit_plan");
     result.snapshot_docs_files("edit_plan");
 
-    assert_snapshot!(
-        "edit_plan_roundtrip_status",
-        if result.is_perfectly_restored() {
-            "PERFECT: Round-trip successful"
-        } else {
-            "IMPERFECT: Round-trip has differences"
-        }
+    assert!(
+        result.is_perfectly_restored(),
+        "Round-trip failed: original != restored"
     );
 }
 
@@ -58,13 +49,9 @@ fn roundtrip_input() {
     result.snapshot_source_files("input");
     result.snapshot_docs_files("input");
 
-    assert_snapshot!(
-        "input_roundtrip_status",
-        if result.is_perfectly_restored() {
-            "PERFECT: Round-trip successful"
-        } else {
-            "IMPERFECT: Round-trip has differences"
-        }
+    assert!(
+        result.is_perfectly_restored(),
+        "Round-trip failed: original != restored"
     );
 }
 
@@ -79,13 +66,9 @@ fn roundtrip_formats_parent() {
     result.snapshot_source_files("formats_parent");
     result.snapshot_docs_files("formats_parent");
 
-    assert_snapshot!(
-        "formats_parent_roundtrip_status",
-        if result.is_perfectly_restored() {
-            "PERFECT: Round-trip successful"
-        } else {
-            "IMPERFECT: Round-trip has differences"
-        }
+    assert!(
+        result.is_perfectly_restored(),
+        "Round-trip failed: original != restored"
     );
 }
 
@@ -103,13 +86,9 @@ fn roundtrip_formats_markdown() {
     result.snapshot_source_files("formats_markdown");
     result.snapshot_docs_files("formats_markdown");
 
-    assert_snapshot!(
-        "formats_markdown_roundtrip_status",
-        if result.is_perfectly_restored() {
-            "PERFECT: Round-trip successful"
-        } else {
-            "IMPERFECT: Round-trip has differences"
-        }
+    assert!(
+        result.is_perfectly_restored(),
+        "Round-trip failed: original != restored"
     );
 }
 
@@ -127,12 +106,8 @@ fn roundtrip_formats_difftastic() {
     result.snapshot_source_files("formats_difftastic");
     result.snapshot_docs_files("formats_difftastic");
 
-    assert_snapshot!(
-        "formats_difftastic_roundtrip_status",
-        if result.is_perfectly_restored() {
-            "PERFECT: Round-trip successful"
-        } else {
-            "IMPERFECT: Round-trip has differences"
-        }
+    assert!(
+        result.is_perfectly_restored(),
+        "Round-trip failed: original != restored"
     );
 }

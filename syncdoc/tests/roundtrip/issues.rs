@@ -13,13 +13,9 @@ fn roundtrip_app_state() {
     result.snapshot_source_files("app_state");
     result.snapshot_docs_files("app_state");
 
-    assert_snapshot!(
-        "app_state_roundtrip_status",
-        if result.is_perfectly_restored() {
-            "PERFECT: Round-trip successful"
-        } else {
-            "IMPERFECT: Round-trip has differences (whitespace changes)"
-        }
+    assert!(
+        result.is_perfectly_restored(),
+        "Round-trip failed: original != restored"
     );
 
     // Extra diagnostic: line count difference
@@ -49,13 +45,9 @@ fn roundtrip_highlight() {
     result.snapshot_source_files("highlight");
     result.snapshot_docs_files("highlight");
 
-    assert_snapshot!(
-        "highlight_roundtrip_status",
-        if result.is_perfectly_restored() {
-            "PERFECT: Round-trip successful"
-        } else {
-            "IMPERFECT: Round-trip has differences (omnidoc added)"
-        }
+    assert!(
+        result.is_perfectly_restored(),
+        "Round-trip failed: original != restored"
     );
 
     // Extra diagnostic: omnidoc presence
@@ -85,13 +77,9 @@ fn roundtrip_section() {
     result.snapshot_source_files("section");
     result.snapshot_docs_files("section");
 
-    assert_snapshot!(
-        "section_roundtrip_status",
-        if result.is_perfectly_restored() {
-            "PERFECT: Round-trip successful"
-        } else {
-            "IMPERFECT: Round-trip has differences (major restoration issues)"
-        }
+    assert!(
+        result.is_perfectly_restored(),
+        "Round-trip failed: original != restored"
     );
 }
 
@@ -106,12 +94,8 @@ fn roundtrip_ui() {
     result.snapshot_source_files("ui");
     result.snapshot_docs_files("ui");
 
-    assert_snapshot!(
-        "ui_roundtrip_status",
-        if result.is_perfectly_restored() {
-            "PERFECT: Round-trip successful"
-        } else {
-            "IMPERFECT: Round-trip has differences (major restoration issues)"
-        }
+    assert!(
+        result.is_perfectly_restored(),
+        "Round-trip failed: original != restored"
     );
 }

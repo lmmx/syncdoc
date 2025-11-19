@@ -1,5 +1,0 @@
----
-source: syncdoc/tests/roundtrip/issues.rs
-expression: "if result.is_perfectly_restored() { \"PERFECT: Round-trip successful\" } else\n{ \"IMPERFECT: Round-trip has differences (major restoration issues)\" }"
----
-PERFECT: Round-trip successful
