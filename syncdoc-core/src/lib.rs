@@ -22,10 +22,3 @@ macro_rules! syncdoc_debug {
         }
     };
 }
-
-/// Automatically enable debug output for all tests
-#[cfg(test)]
-#[ctor::ctor]
-fn init_debug() {
-    crate::debug::set_debug(true);
-}

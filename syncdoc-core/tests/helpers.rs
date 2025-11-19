@@ -13,7 +13,7 @@ use tempfile::TempDir;
 
 #[ctor::ctor]
 fn init_debug() {
-    syncdoc_core::debug::set_debug(true);
+    syncdoc_core::debug::init_from_env();
 }
 
 pub struct TestCrate {
