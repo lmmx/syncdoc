@@ -1,0 +1,10 @@
+---
+source: syncdoc-migrate/src/tests/diff/integration.rs
+expression: migrated
+---
+#[syncdoc::omnidoc]
+#[derive(Debug, Clone)]
+#[cfg(test)]
+pub struct Test {
+    pub field: i32,
+}

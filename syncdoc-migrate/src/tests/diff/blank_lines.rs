@@ -118,5 +118,20 @@ pub enum ChunkType {
     let hunks = compute_hunks(original, transformed);
     let result = apply_diff(original, &hunks, transformed);
 
-    assert_snapshot!(result, @"");
+    assert_snapshot!(result, @r"
+    #![doc = syncdoc::module_doc!()]
+
+    #[syncdoc::omnidoc]
+    #[derive(Clone)]
+    pub struct Section {
+        pub title: String,
+    }
+
+    #[syncdoc::omnidoc]
+    #[derive(Clone)]
+    pub enum ChunkType {
+        Added,
+        Deleted,
+    }
+    ");
 }

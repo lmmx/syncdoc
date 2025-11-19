@@ -1,0 +1,16 @@
+---
+source: syncdoc-migrate/src/tests/diff/skip_transformed.rs
+expression: "results.join(\"\\n\")"
+---
+#[derive(Debug)]                         -> SKIP
+#[cfg(test)]                             -> SKIP
+# [derive (Clone)]                       -> SKIP
+#[doc = "/// Doc"]                       -> KEEP
+#[syncdoc::omnidoc]                      -> KEEP
+#![allow(dead_code)]                     -> SKIP
+# ! [cfg (test)]                         -> SKIP
+#![doc = "//! Module"]                   -> KEEP
+// Regular comment                       -> SKIP
+/// Doc comment                          -> KEEP
+//! Inner doc                            -> KEEP
+pub fn test() {}                         -> KEEP

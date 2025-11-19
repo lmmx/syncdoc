@@ -1,0 +1,18 @@
+---
+source: syncdoc-migrate/src/tests/diff/integration.rs
+expression: migrated
+---
+#![doc = syncdoc::module_doc!()]
+
+#[syncdoc::omnidoc]
+#[derive(Clone)]
+pub struct Section {
+    pub title: String,
+}
+
+#[syncdoc::omnidoc]
+#[derive(Clone)]
+pub enum ChunkType {
+    Added,
+    Deleted,
+}

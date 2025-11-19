@@ -1,0 +1,10 @@
+---
+source: syncdoc-migrate/src/tests/diff/module_level.rs
+expression: "results.join(\"\\n\")"
+---
+module_doc_macro: MODULE
+inner_doc: MODULE
+outer_omnidoc: ITEM
+outer_doc: ITEM
+regular_code: ITEM
+mixed: MODULE
