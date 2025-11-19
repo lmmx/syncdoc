@@ -11,10 +11,9 @@ mod strip;
 mod write;
 
 use crate::debug;
-use ctor::ctor;
 
-#[ctor]
+/// Automatically enable debug output for all tests
+#[ctor::ctor]
 fn init_debug() {
-    // Enable debug output for all tests automatically
     debug::set_debug(true);
 }
