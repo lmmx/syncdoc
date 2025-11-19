@@ -681,6 +681,7 @@ version = "0.4.0"
 dependencies = [
  "assert_cmd",
  "braces",
+ "ctor",
  "facet",
  "facet-args",
  "insta",
