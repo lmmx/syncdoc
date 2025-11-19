@@ -21,4 +21,6 @@ repos:
         exclude: ^mkdocs.yml
       - id: debug-statements
       - id: end-of-file-fixer
+        exclude: snapshots/
       - id: trailing-whitespace
+        exclude: snapshots/
