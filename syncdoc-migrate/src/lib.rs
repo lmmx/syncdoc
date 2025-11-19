@@ -1,6 +1,7 @@
 // syncdoc-migrate/src/lib.rs
 
 pub mod config;
+pub mod debug;
 pub mod discover;
 mod extract;
 mod report;
@@ -17,10 +18,14 @@ pub use write::{
     extract_all_docs, find_expected_doc_paths, write_extractions, DocExtraction, WriteReport,
 };
 
+/// Macro for debug output in syncdoc.
+///
+/// Prints to stderr only if debug output is enabled via the atomic flag (tests do this using ctor)
+/// or the `SYNCDOC_DEBUG` environment variable at startup.
 #[macro_export]
 macro_rules! syncdoc_debug {
     ($($arg:tt)*) => {
-        if std::env::var("SYNCDOC_DEBUG").is_ok() {
+        if $crate::debug::is_enabled() {
             eprintln!("[SYNCDOC DEBUG] {}", format!($($arg)*));
         }
     };
