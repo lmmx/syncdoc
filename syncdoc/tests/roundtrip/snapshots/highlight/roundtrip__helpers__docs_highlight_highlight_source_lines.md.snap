@@ -1,0 +1,9 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Highlight source lines with syntax coloring.
+
+# Panics
+
+Panics if syntax highlighting fails for any line in the input.

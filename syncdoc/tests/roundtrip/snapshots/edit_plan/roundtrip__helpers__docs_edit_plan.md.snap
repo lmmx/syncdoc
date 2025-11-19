@@ -1,0 +1,8 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+The edit plan manages document modifications using textum patches.
+
+This module defines the transformation that work in the TUI manifests as actual edits on disk.
+asterism uses textum for generic line-based patching that works with any text format.

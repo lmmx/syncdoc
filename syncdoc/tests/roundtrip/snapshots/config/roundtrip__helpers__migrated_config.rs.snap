@@ -1,0 +1,30 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+#![doc = syncdoc::module_doc!()]
+
+use facet::Facet;
+use std::fs;
+
+#[syncdoc::omnidoc]
+#[derive(Facet, Clone)]
+pub struct Config {
+    #[facet(default = 100)]
+    pub wrap_width: usize,
+    #[facet(default = vec!["md".to_string()])]
+    pub file_extensions: Vec<String>,
+}
+
+#[syncdoc::omnidoc]
+impl Config {
+    #[must_use]
+    pub fn load() -> Self {
+        if let Ok(contents) = fs::read_to_string("asterism.toml") {
+            if let Ok(config) = facet_toml::from_str::<Self>(&contents) {
+                return config;
+            }
+        }
+        facet_toml::from_str::<Self>("").unwrap()
+    }
+}

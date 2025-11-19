@@ -1,0 +1,5 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Format a change as a proper git diff hunk header

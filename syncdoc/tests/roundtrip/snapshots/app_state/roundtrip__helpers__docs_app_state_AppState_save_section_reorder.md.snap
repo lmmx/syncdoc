@@ -1,0 +1,9 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Apply section reordering to disk
+
+# Errors
+
+Returns an error if writing to disk fails or if file operations cannot complete.

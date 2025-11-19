@@ -1,0 +1,9 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+pub mod formats;
+#[syncdoc::omnidoc]
+pub mod formats {
+    pub mod difftastic;
+}

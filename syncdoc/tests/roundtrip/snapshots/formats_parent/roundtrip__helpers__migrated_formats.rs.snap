@@ -1,0 +1,17 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+#![doc = syncdoc::module_doc!()]
+
+pub mod difftastic;
+pub mod markdown;
+
+#[syncdoc::omnidoc]
+pub trait Format {
+    fn file_extension(&self) -> &'static str;
+    fn language(&self) -> tree_sitter::Language;
+    fn section_query(&self) -> &str;
+    fn title_query(&self) -> &str;
+    fn format_section_display(&self, level: usize, title: &str) -> ratatui::text::Line<'static>;
+}

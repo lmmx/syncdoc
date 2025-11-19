@@ -1,0 +1,5 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Section has been repositioned but changes not yet persisted to disk.

@@ -1,0 +1,7 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Highlight a single line with syntax coloring for a given file extension.
+
+Falls back to plain text rendering if syntax highlighting fails.

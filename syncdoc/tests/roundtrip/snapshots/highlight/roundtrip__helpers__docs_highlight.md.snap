@@ -1,0 +1,5 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Syntax highlighting for displaying source code with visual distinction between language elements.

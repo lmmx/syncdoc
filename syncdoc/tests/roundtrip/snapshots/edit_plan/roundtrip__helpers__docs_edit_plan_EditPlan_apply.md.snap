@@ -1,0 +1,13 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Apply all edits in the plan using textum patches.
+
+Groups edits by file and uses textum's `PatchSet` to apply all changes
+atomically per file. Each edit targets a line range and replaces the
+content between those lines with the new section content.
+
+# Errors
+
+Returns an error if file operations, patching, or line number conversion fails.

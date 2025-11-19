@@ -1,0 +1,8 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+The UI renders the application state into something visible and vim-able.
+
+The draw function dispatches based on the current view (list or editor).
+The list view shows a unified tree with files and sections using box-drawing characters.

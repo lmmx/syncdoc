@@ -1,5 +1,6 @@
 #![cfg(feature = "cli")]
 use assert_cmd::cargo;
+use braces::{brace_paths, BraceConfig};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -24,6 +25,12 @@ impl ModuleConfig {
     pub const fn with_submodules(name: &'static str, submodules: &'static [&'static str]) -> Self {
         Self { name, submodules }
     }
+}
+
+/// Convert paths to brace-compressed string for inline snapshots
+pub fn to_braces(paths: &[&str]) -> String {
+    let braces_config = BraceConfig::default();
+    brace_paths(paths, &braces_config).expect("Brace error")
 }
 
 /// Set up a test project with specified modules from fixtures
@@ -226,6 +233,65 @@ impl RoundtripResult {
             .filter(|path| self.original_source.get(*path) != self.restored_source.get(*path))
             .cloned()
             .collect()
+    }
+
+    /// Get brace-compressed list of all source files
+    pub fn get_source_files_brace(&self) -> String {
+        let mut paths: Vec<_> = self
+            .original_source
+            .keys()
+            .map(|p| p.to_str().unwrap())
+            .collect();
+        paths.sort();
+        to_braces(&paths)
+    }
+
+    /// Get brace-compressed list of all docs files
+    pub fn get_docs_files_brace(&self) -> String {
+        let mut paths: Vec<_> = self
+            .docs_files
+            .keys()
+            .map(|p| p.to_str().unwrap())
+            .collect();
+        paths.sort();
+        to_braces(&paths)
+    }
+
+    /// Snapshot all source files to external snapshots with prefix in subdirectory
+    pub fn snapshot_source_files(&self, test_name: &str) {
+        let mut settings = insta::Settings::clone_current();
+        settings.set_snapshot_path(format!("snapshots/{}", test_name));
+        settings.bind(|| {
+            for (path, content) in &self.original_source {
+                let snapshot_name =
+                    format!("original_{}", path.to_str().unwrap().replace('/', "_"));
+                insta::assert_snapshot!(snapshot_name, content);
+            }
+
+            for (path, content) in &self.migrated_source {
+                let snapshot_name =
+                    format!("migrated_{}", path.to_str().unwrap().replace('/', "_"));
+                insta::assert_snapshot!(snapshot_name, content);
+            }
+
+            for (path, content) in &self.restored_source {
+                let snapshot_name =
+                    format!("restored_{}", path.to_str().unwrap().replace('/', "_"));
+                insta::assert_snapshot!(snapshot_name, content);
+            }
+        });
+    }
+
+    /// Snapshot all docs files to external snapshots with prefix in subdirectory
+    pub fn snapshot_docs_files(&self, test_name: &str) {
+        let mut settings = insta::Settings::clone_current();
+        settings.set_snapshot_path(format!("snapshots/{}", test_name));
+        settings.bind(|| {
+            for (path, content) in &self.docs_files {
+                let snapshot_name = format!("docs_{}", path.to_str().unwrap().replace('/', "_"));
+                insta::assert_snapshot!(snapshot_name, content);
+            }
+        });
     }
 }
 

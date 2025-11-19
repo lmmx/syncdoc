@@ -1,6 +1,0 @@
----
-source: syncdoc/tests/roundtrip/issues.rs
-expression: "format!(\"Original has omnidoc: {}\\nRestored has omnidoc: {}\",\nhas_omnidoc_original, has_omnidoc_restored)"
----
-Original has omnidoc: false
-Restored has omnidoc: true

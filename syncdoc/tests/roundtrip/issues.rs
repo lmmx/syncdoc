@@ -3,85 +3,115 @@ use crate::helpers::{run_roundtrip, setup_test_project, ModuleConfig};
 use insta::assert_snapshot;
 
 #[test]
-fn roundtrip_app_state_whitespace_issue() {
+fn roundtrip_app_state() {
     let temp = setup_test_project(&[ModuleConfig::new("app_state")]);
     let result = run_roundtrip(temp.path());
 
-    // Known issue: removes whitespace
-    let diff = result.get_file_diff("app_state.rs").unwrap();
+    assert_snapshot!(result.get_source_files_brace(), @"{app_state.rs,lib.rs}");
+    assert_snapshot!(result.get_docs_files_brace());
 
-    assert_snapshot!("app_state_migrate_stderr", result.migrate_stderr);
-    assert_snapshot!("app_state_restore_stderr", result.restore_stderr);
+    result.snapshot_source_files("app_state");
+    result.snapshot_docs_files("app_state");
 
-    // Document the whitespace difference
-    if !diff.matches {
-        let original_lines: Vec<&str> = diff.original.lines().collect();
-        let restored_lines: Vec<&str> = diff.restored.lines().collect();
+    assert_snapshot!(
+        "app_state_roundtrip_status",
+        if result.is_perfectly_restored() {
+            "PERFECT: Round-trip successful"
+        } else {
+            "IMPERFECT: Round-trip has differences (whitespace changes)"
+        }
+    );
 
+    // Extra diagnostic: line count difference
+    if let Some(diff) = result.get_file_diff("app_state.rs") {
+        let original_lines = diff.original.lines().count();
+        let restored_lines = diff.restored.lines().count();
         assert_snapshot!(
-            "app_state_line_count_diff",
+            "app_state_line_diff",
             format!(
-                "Original: {} lines\nRestored: {} lines\nDifference: {}",
-                original_lines.len(),
-                restored_lines.len(),
-                original_lines.len() as i32 - restored_lines.len() as i32
+                "Original: {} lines\nRestored: {} lines\nDiff: {}",
+                original_lines,
+                restored_lines,
+                original_lines as i32 - restored_lines as i32
             )
         );
     }
 }
 
 #[test]
-fn roundtrip_highlight_omnidoc_added() {
+fn roundtrip_highlight() {
     let temp = setup_test_project(&[ModuleConfig::new("highlight")]);
     let result = run_roundtrip(temp.path());
 
-    // Known issue: adds omnidoc where previously undocumented
-    let diff = result.get_file_diff("highlight.rs").unwrap();
+    assert_snapshot!(result.get_source_files_brace(), @"{highlight.rs,lib.rs}");
+    assert_snapshot!(result.get_docs_files_brace());
 
-    assert_snapshot!("highlight_migrate_stderr", result.migrate_stderr);
-    assert_snapshot!("highlight_restore_stderr", result.restore_stderr);
-
-    // Check if omnidoc was added
-    let has_omnidoc_original = diff.original.contains("#[syncdoc::omnidoc]");
-    let has_omnidoc_restored = diff.restored.contains("#[syncdoc::omnidoc]");
+    result.snapshot_source_files("highlight");
+    result.snapshot_docs_files("highlight");
 
     assert_snapshot!(
-        "highlight_omnidoc_status",
-        format!(
-            "Original has omnidoc: {}\nRestored has omnidoc: {}",
-            has_omnidoc_original, has_omnidoc_restored
-        )
+        "highlight_roundtrip_status",
+        if result.is_perfectly_restored() {
+            "PERFECT: Round-trip successful"
+        } else {
+            "IMPERFECT: Round-trip has differences (omnidoc added)"
+        }
+    );
+
+    // Extra diagnostic: omnidoc presence
+    if let Some(diff) = result.get_file_diff("highlight.rs") {
+        let original_omnidoc = diff.original.matches("#[syncdoc::omnidoc]").count();
+        let restored_omnidoc = diff.restored.matches("#[syncdoc::omnidoc]").count();
+        assert_snapshot!(
+            "highlight_omnidoc_diff",
+            format!(
+                "Original omnidoc attrs: {}\nRestored omnidoc attrs: {}\nDiff: {}",
+                original_omnidoc,
+                restored_omnidoc,
+                restored_omnidoc as i32 - original_omnidoc as i32
+            )
+        );
+    }
+}
+
+#[test]
+fn roundtrip_section() {
+    let temp = setup_test_project(&[ModuleConfig::new("section")]);
+    let result = run_roundtrip(temp.path());
+
+    assert_snapshot!(result.get_source_files_brace(), @"{lib.rs,section.rs}");
+    assert_snapshot!(result.get_docs_files_brace());
+
+    result.snapshot_source_files("section");
+    result.snapshot_docs_files("section");
+
+    assert_snapshot!(
+        "section_roundtrip_status",
+        if result.is_perfectly_restored() {
+            "PERFECT: Round-trip successful"
+        } else {
+            "IMPERFECT: Round-trip has differences (major restoration issues)"
+        }
     );
 }
 
 #[test]
-fn roundtrip_section_completely_unrestored() {
-    let temp = setup_test_project(&[ModuleConfig::new("section")]);
-    let result = run_roundtrip(temp.path());
-
-    // Known issue: completely fails to restore
-    assert!(!result.is_perfectly_restored());
-
-    let diff = result.get_file_diff("section.rs").unwrap();
-
-    assert_snapshot!("section_migrate_stderr", result.migrate_stderr);
-    assert_snapshot!("section_restore_stderr", result.restore_stderr);
-    assert_snapshot!("section_original", diff.original);
-    assert_snapshot!("section_restored", diff.restored);
-}
-
-#[test]
-fn roundtrip_ui_completely_unrestored() {
+fn roundtrip_ui() {
     let temp = setup_test_project(&[ModuleConfig::new("ui")]);
     let result = run_roundtrip(temp.path());
 
-    // Known issue: completely fails to restore
-    assert!(!result.is_perfectly_restored());
+    assert_snapshot!(result.get_source_files_brace(), @"{lib.rs,ui.rs}");
+    assert_snapshot!(result.get_docs_files_brace());
 
-    let diff = result.get_file_diff("ui.rs").unwrap();
+    result.snapshot_source_files("ui");
+    result.snapshot_docs_files("ui");
 
-    assert_snapshot!("ui_migrate_stderr", result.migrate_stderr);
-    assert_snapshot!("ui_restore_stderr", result.restore_stderr);
-    assert_snapshot!("ui_original", diff.original);
-    assert_snapshot!("ui_restored", diff.restored);
+    assert_snapshot!(
+        "ui_roundtrip_status",
+        if result.is_perfectly_restored() {
+            "PERFECT: Round-trip successful"
+        } else {
+            "IMPERFECT: Round-trip has differences (major restoration issues)"
+        }
+    );
 }

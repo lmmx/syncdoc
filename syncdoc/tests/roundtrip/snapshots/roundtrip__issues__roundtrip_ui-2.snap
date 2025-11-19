@@ -1,0 +1,5 @@
+---
+source: syncdoc/tests/roundtrip/issues.rs
+expression: result.get_docs_files_brace()
+---
+{lib.md,ui.md,ui/{draw.md,draw_detail.md,draw_list.md,draw_list_with_command.md,get_tree_prefix.md}}

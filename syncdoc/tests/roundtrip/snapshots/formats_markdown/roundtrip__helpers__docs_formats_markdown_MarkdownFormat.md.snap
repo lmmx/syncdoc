@@ -1,0 +1,5 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Tree-sitter queries for ATX-style markdown headings (# syntax).
