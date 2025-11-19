@@ -1,0 +1,8 @@
+---
+source: syncdoc-migrate/src/tests/diff/preserve_non_doc.rs
+expression: result
+---
+#[derive(Debug, Clone)]
+#[cfg(feature = "test")]
+#[syncdoc::omnidoc]
+pub struct Test;

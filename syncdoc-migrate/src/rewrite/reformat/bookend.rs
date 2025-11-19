@@ -42,7 +42,7 @@ pub fn reformat_bookended_lines(code: &str) -> String {
 }
 
 /// Checks if line needs bookending (starts with #! and has trigger)
-fn needs_bookending(line: &str) -> bool {
+pub(crate) fn needs_bookending(line: &str) -> bool {
     let trimmed = line.trim_start();
     syncdoc_debug!("    Checking needs_bookending:");
     syncdoc_debug!("      trimmed: {:?}", trimmed);
@@ -67,7 +67,7 @@ fn needs_bookending(line: &str) -> bool {
 }
 
 /// Extracts content between #![ and ] for reformatting
-fn extract_bookend_content(line: &str) -> Option<String> {
+pub(crate) fn extract_bookend_content(line: &str) -> Option<String> {
     syncdoc_debug!("    extract_bookend_content:");
     let trimmed = line.trim_start();
     syncdoc_debug!("      trimmed: {:?}", trimmed);
@@ -94,7 +94,7 @@ fn extract_bookend_content(line: &str) -> Option<String> {
 }
 
 /// Reformats a single line via bookending
-fn reformat_line(line: &str) -> Option<String> {
+pub(crate) fn reformat_line(line: &str) -> Option<String> {
     syncdoc_debug!("    reformat_line for: {:?}", line);
 
     let content = extract_bookend_content(line)?;
@@ -117,12 +117,12 @@ fn reformat_line(line: &str) -> Option<String> {
 }
 
 /// Wraps content in const expression for rustfmt
-fn create_bookended_expr(content: &str) -> String {
+pub(crate) fn create_bookended_expr(content: &str) -> String {
     format!("const _: i32 = {{ {} }};", content)
 }
 
 /// Strips const wrapper after rustfmt
-fn strip_bookends(formatted: &str) -> Option<String> {
+pub(crate) fn strip_bookends(formatted: &str) -> Option<String> {
     let trimmed = formatted.trim();
     let prefix = "const _: i32 = { ";
     let suffix = " };";
@@ -136,10 +136,6 @@ fn strip_bookends(formatted: &str) -> Option<String> {
 }
 
 /// Reconstructs #![ ... ] with reformatted content
-fn reconstruct_inner_attr(content: &str) -> String {
+pub(crate) fn reconstruct_inner_attr(content: &str) -> String {
     format!("#![{}]", content)
 }
-
-#[cfg(test)]
-#[path = "../../tests/bookend.rs"]
-mod bookend_tests;

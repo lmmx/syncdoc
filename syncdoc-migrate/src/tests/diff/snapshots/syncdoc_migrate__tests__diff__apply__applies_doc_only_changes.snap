@@ -1,0 +1,6 @@
+---
+source: syncdoc-migrate/src/tests/diff/apply.rs
+expression: result
+---
+/// New doc
+pub fn test() {}

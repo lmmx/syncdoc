@@ -1,0 +1,7 @@
+---
+source: syncdoc-migrate/src/tests/diff/blank_lines.rs
+expression: result
+---
+#![doc = syncdoc::module_doc!()]
+
+use std::path::Path;

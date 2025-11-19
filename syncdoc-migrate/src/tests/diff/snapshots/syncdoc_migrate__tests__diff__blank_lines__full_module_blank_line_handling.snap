@@ -1,0 +1,5 @@
+---
+source: syncdoc-migrate/src/tests/diff/blank_lines.rs
+expression: "format!(\"Line after module_doc (index {}): {:?}\", module_doc_idx + 1,\nlines.get(module_doc_idx + 1))"
+---
+Line after module_doc (index 1): Some("")

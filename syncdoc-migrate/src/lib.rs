@@ -25,3 +25,6 @@ macro_rules! syncdoc_debug {
         }
     };
 }
+
+#[cfg(test)]
+mod tests;

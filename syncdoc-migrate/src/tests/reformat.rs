@@ -1,4 +1,4 @@
-use super::*;
+use crate::rewrite::reformat::*;
 
 #[test]
 fn test_rustfmt_basic() {

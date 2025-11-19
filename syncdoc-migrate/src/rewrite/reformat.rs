@@ -1,7 +1,7 @@
 //! Format-preserving code rewriting using rustfmt and line-level diffs
 
-mod bookend;
-mod diff;
+pub(crate) mod bookend;
+pub(crate) mod diff;
 
 use bookend::reformat_bookended_lines;
 use diff::{apply_diff, compute_line_diff};
@@ -90,7 +90,7 @@ pub fn rewrite_preserving_format(original: &str, transformed: &str) -> Result<St
 }
 
 /// Formats Rust code using rustfmt
-fn rustfmt(code: &str) -> Result<String, String> {
+pub(crate) fn rustfmt(code: &str) -> Result<String, String> {
     cmd!("rustfmt", "--emit=stdout")
         .stdin_bytes(code.as_bytes())
         .stdout_capture()

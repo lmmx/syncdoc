@@ -1,0 +1,11 @@
+mod bookend;
+mod diff;
+mod discover;
+mod expected;
+mod extract;
+mod inject;
+mod reformat;
+mod restore;
+mod rewrite;
+mod strip;
+mod write;

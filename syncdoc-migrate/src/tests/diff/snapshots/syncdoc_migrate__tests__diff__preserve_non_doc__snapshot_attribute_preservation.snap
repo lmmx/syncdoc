@@ -1,0 +1,15 @@
+---
+source: syncdoc-migrate/src/tests/diff/preserve_non_doc.rs
+expression: result
+---
+#[derive(Clone)]
+#[syncdoc::omnidoc]
+pub struct Section {
+    pub title: String,
+}
+
+#[derive(Clone)]
+#[syncdoc::omnidoc]
+pub enum ChunkType {
+    Added,
+}

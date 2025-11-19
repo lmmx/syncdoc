@@ -1,0 +1,7 @@
+---
+source: syncdoc-migrate/src/tests/diff/whitespace.rs
+expression: comparison
+---
+Original lines: 22
+Restored lines: 22
+Match: true

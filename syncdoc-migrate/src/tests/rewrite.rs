@@ -1,6 +1,4 @@
-// syncdoc-migrate/src/rewrite/tests.rs
-
-use super::*;
+use crate::rewrite::*;
 use syncdoc_core::parse::ModuleContent;
 
 use crate::config::DocsPathMode;
@@ -10,7 +8,6 @@ use std::str::FromStr;
 #[test]
 fn test_rewrite_roundtrip() {
     use std::fs;
-    use std::str::FromStr;
     use tempfile::TempDir;
 
     let temp_dir = TempDir::new().unwrap();

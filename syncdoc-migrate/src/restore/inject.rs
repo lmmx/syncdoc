@@ -60,7 +60,11 @@ pub fn inject_all_doc_comments(
     output
 }
 
-fn inject_item_docs(item: &ModuleItem, context: Vec<String>, docs_root: &str) -> TokenStream {
+pub(crate) fn inject_item_docs(
+    item: &ModuleItem,
+    context: Vec<String>,
+    docs_root: &str,
+) -> TokenStream {
     match item {
         ModuleItem::TraitMethod(method) => inject_trait_method_docs(method, &context, docs_root),
         ModuleItem::Function(func) => inject_function_docs(func, &context, docs_root),
@@ -162,7 +166,7 @@ fn inject_item_docs(item: &ModuleItem, context: Vec<String>, docs_root: &str) ->
     }
 }
 
-fn inject_trait_method_docs(
+pub(crate) fn inject_trait_method_docs(
     method: &TraitMethodSig,
     context: &[String],
     docs_root: &str,
@@ -205,7 +209,11 @@ fn inject_trait_method_docs(
     output
 }
 
-fn inject_function_docs(func: &FnSig, context: &[String], docs_root: &str) -> TokenStream {
+pub(crate) fn inject_function_docs(
+    func: &FnSig,
+    context: &[String],
+    docs_root: &str,
+) -> TokenStream {
     let mut output = TokenStream::new();
 
     if let Some(content) = super::read_item_markdown(context, &func.name.to_string(), docs_root) {
@@ -247,7 +255,11 @@ fn inject_function_docs(func: &FnSig, context: &[String], docs_root: &str) -> To
     output
 }
 
-fn inject_struct_docs(struct_sig: &StructSig, context: &[String], docs_root: &str) -> TokenStream {
+pub(crate) fn inject_struct_docs(
+    struct_sig: &StructSig,
+    context: &[String],
+    docs_root: &str,
+) -> TokenStream {
     let mut output = TokenStream::new();
     let struct_name = struct_sig.name.to_string();
 
@@ -283,7 +295,7 @@ fn inject_struct_docs(struct_sig: &StructSig, context: &[String], docs_root: &st
     output
 }
 
-fn inject_struct_fields(
+pub(crate) fn inject_struct_fields(
     fields: &BraceGroupContaining<Option<CommaDelimitedVec<StructField>>>,
     struct_name: &str,
     context: &[String],
@@ -322,7 +334,11 @@ fn inject_struct_fields(
     output
 }
 
-fn inject_enum_docs(enum_sig: &EnumSig, context: &[String], docs_root: &str) -> TokenStream {
+pub(crate) fn inject_enum_docs(
+    enum_sig: &EnumSig,
+    context: &[String],
+    docs_root: &str,
+) -> TokenStream {
     let mut output = TokenStream::new();
     let enum_name = enum_sig.name.to_string();
 
@@ -352,7 +368,7 @@ fn inject_enum_docs(enum_sig: &EnumSig, context: &[String], docs_root: &str) -> 
     output
 }
 
-fn inject_enum_variants(
+pub(crate) fn inject_enum_variants(
     variants: &BraceGroupContaining<Option<CommaDelimitedVec<EnumVariant>>>,
     enum_name: &str,
     context: &[String],
@@ -409,7 +425,7 @@ fn inject_enum_variants(
     output
 }
 
-fn inject_enum_variant_fields(
+pub(crate) fn inject_enum_variant_fields(
     fields: &CommaDelimitedVec<StructField>,
     enum_name: &str,
     variant_name: &str,
@@ -447,7 +463,11 @@ fn inject_enum_variant_fields(
     output
 }
 
-fn inject_module_docs(module: &ModuleSig, context: Vec<String>, docs_root: &str) -> TokenStream {
+pub(crate) fn inject_module_docs(
+    module: &ModuleSig,
+    context: Vec<String>,
+    docs_root: &str,
+) -> TokenStream {
     let mut output = TokenStream::new();
     let module_name = module.name.to_string();
 
@@ -479,7 +499,11 @@ fn inject_module_docs(module: &ModuleSig, context: Vec<String>, docs_root: &str)
     output
 }
 
-fn inject_trait_docs(trait_def: &TraitSig, context: Vec<String>, docs_root: &str) -> TokenStream {
+pub(crate) fn inject_trait_docs(
+    trait_def: &TraitSig,
+    context: Vec<String>,
+    docs_root: &str,
+) -> TokenStream {
     let mut output = TokenStream::new();
     let trait_name = trait_def.name.to_string();
 
@@ -536,7 +560,7 @@ fn inject_trait_docs(trait_def: &TraitSig, context: Vec<String>, docs_root: &str
     output
 }
 
-fn inject_impl_docs(
+pub(crate) fn inject_impl_docs(
     impl_block: &ImplBlockSig,
     context: Vec<String>,
     docs_root: &str,
@@ -608,7 +632,7 @@ fn inject_impl_docs(
     output
 }
 
-fn add_non_omnidoc_attrs(attrs: &Option<Many<Attribute>>, output: &mut TokenStream) {
+pub(crate) fn add_non_omnidoc_attrs(attrs: &Option<Many<Attribute>>, output: &mut TokenStream) {
     if let Some(attr_list) = attrs {
         for attr in &attr_list.0 {
             if !super::is_omnidoc_attr(&attr.value) {
@@ -619,7 +643,9 @@ fn add_non_omnidoc_attrs(attrs: &Option<Many<Attribute>>, output: &mut TokenStre
 }
 
 // Add this at the bottom of inject.rs
-fn strip_doc_attrs_from_attr_list(attrs: &Option<unsynn::Many<Attribute>>) -> Vec<Attribute> {
+pub(crate) fn strip_doc_attrs_from_attr_list(
+    attrs: &Option<unsynn::Many<Attribute>>,
+) -> Vec<Attribute> {
     let Some(attr_list) = attrs else {
         return Vec::new();
     };
@@ -638,7 +664,7 @@ fn strip_doc_attrs_from_attr_list(attrs: &Option<unsynn::Many<Attribute>>) -> Ve
         .collect()
 }
 
-fn is_outer_doc_attr(attr: &Attribute) -> bool {
+pub(crate) fn is_outer_doc_attr(attr: &Attribute) -> bool {
     use unsynn::ToTokens;
     let mut ts = TokenStream::new();
     attr.to_tokens(&mut ts);
@@ -646,7 +672,7 @@ fn is_outer_doc_attr(attr: &Attribute) -> bool {
     s.contains("#[doc=")
 }
 
-fn wrap_in_braces(content: TokenStream) -> TokenStream {
+pub(crate) fn wrap_in_braces(content: TokenStream) -> TokenStream {
     let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, content);
     std::iter::once(proc_macro2::TokenTree::Group(group)).collect()
 }

@@ -1,5 +1,5 @@
-use super::*;
 use crate::discover::parse_file;
+use crate::restore::*;
 use std::fs;
 use tempfile::TempDir;
 

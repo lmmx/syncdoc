@@ -1,0 +1,12 @@
+mod apply;
+mod blank_lines;
+// mod copy_lines;
+mod doc_related;
+mod helpers;
+mod integration;
+mod module_level;
+mod preserve_non_doc;
+mod restore_related;
+mod skip_transformed;
+mod splitting;
+mod whitespace;

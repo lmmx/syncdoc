@@ -6,7 +6,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use syncdoc_core::parse::ModuleContent;
-use unsynn::*;
+pub(crate) use unsynn::*;
 
 /// Represents a parsed Rust file with its content and metadata
 #[derive(Debug)]
@@ -74,7 +74,7 @@ pub fn discover_rust_files(source_dir: &Path) -> std::result::Result<Vec<PathBuf
     Ok(rust_files)
 }
 
-fn discover_rust_files_recursive(
+pub(crate) fn discover_rust_files_recursive(
     dir: &Path,
     files: &mut Vec<PathBuf>,
 ) -> std::result::Result<(), std::io::Error> {
@@ -158,7 +158,3 @@ pub fn get_or_create_docs_path(
         }
     }
 }
-
-#[cfg(test)]
-#[path = "tests/discover.rs"]
-mod tests;

@@ -1,17 +1,17 @@
 // syncdoc-migrate/src/rewrite.rs
 
-mod inject;
+pub(crate) mod inject;
 pub mod reformat;
-mod strip;
+pub(crate) mod strip;
 
 pub use inject::{inject_module_doc_attr, inject_omnidoc_attr};
 pub use strip::{strip_doc_attrs, strip_inner_doc_attrs};
-use unsynn::*;
+pub(crate) use unsynn::*;
 
 use crate::config::DocsPathMode;
 use crate::discover::ParsedFile;
 use crate::rewrite::inject::has_module_doc_macro;
-use proc_macro2::TokenStream;
+pub(crate) use proc_macro2::TokenStream;
 use reformat::rewrite_preserving_format;
 use strip::strip_doc_attrs_from_items;
 use syncdoc_core::parse::ModuleItem;
@@ -100,7 +100,3 @@ pub fn rewrite_file(
     // Apply format-preserving rewrite
     rewrite_preserving_format(&parsed.original_source, &transformed).ok()
 }
-
-#[cfg(test)]
-#[path = "tests/rewrite.rs"]
-mod rewrite_tests;
