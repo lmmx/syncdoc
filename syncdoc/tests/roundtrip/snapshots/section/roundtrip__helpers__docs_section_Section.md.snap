@@ -1,0 +1,5 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Hierarchical document division with precise coordinates for extraction and modification.

@@ -1,0 +1,5 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Nesting level in the tree (for indentation/box-drawing)

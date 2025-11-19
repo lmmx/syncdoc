@@ -71,8 +71,8 @@ fn roundtrip_section() {
     let temp = setup_test_project(&[ModuleConfig::new("section")]);
     let result = run_roundtrip(temp.path());
 
-    assert_snapshot!(result.get_source_files_brace(), @"{lib.rs,section.rs}");
-    assert_snapshot!(result.get_docs_files_brace(), @"");
+    assert_snapshot!(result.get_source_files_brace(), @"{lib,section}.rs");
+    assert_snapshot!(result.get_docs_files_brace(), @"{lib,section/{,ChunkType/{,Added,Deleted,Modified,Unchanged},NodeType/{,Directory/{,name,path},File/{,name,path},Section},Section/{,byte_end,byte_start,children_indices,chunk_type,column_end,column_start,file_path,level,lhs_content,line_end,line_start,parent_index,rhs_content,section_content,title},TreeNode/{,directory,file,navigable,node_type,section,section_index,tree_level}}}.md");
 
     result.snapshot_source_files("section");
     result.snapshot_docs_files("section");

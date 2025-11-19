@@ -55,6 +55,11 @@ pub fn is_doc_related_hunk(hunk: &DiffHunk, original_lines: &[&str], after_lines
 
 /// Splits a hunk if it contains both module-level and item-level doc changes
 pub fn split_hunk_if_mixed(hunk: &DiffHunk, after_lines: &[&str]) -> Vec<DiffHunk> {
+    // Don't try to split deletion-only or insertion-only hunks
+    if hunk.after_count == 0 || hunk.before_count == 0 {
+        return vec![hunk.clone()];
+    }
+
     let after_end = hunk.after_start + hunk.after_count;
 
     // Find if there's a module doc line followed by item doc line
@@ -98,6 +103,12 @@ pub fn split_hunk_if_mixed(hunk: &DiffHunk, after_lines: &[&str]) -> Vec<DiffHun
 
     if let Some(split_point) = module_doc_end {
         let lines_in_first = split_point - hunk.after_start;
+
+        // SAFETY CHECK: Ensure we have enough lines in before
+        if lines_in_first > hunk.before_count {
+            // Can't split—not enough before content
+            return vec![hunk.clone()];
+        }
 
         vec![
             DiffHunk {

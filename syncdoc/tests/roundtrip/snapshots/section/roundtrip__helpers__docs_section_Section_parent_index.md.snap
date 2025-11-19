@@ -1,0 +1,5 @@
+---
+source: syncdoc/tests/roundtrip/helpers.rs
+expression: content
+---
+Index of the containing section in the hierarchy.
