@@ -47,6 +47,7 @@ syncdoc-migrate = { optional = true, workspace = true }
 [dev-dependencies]
 assert_cmd.workspace = true
 braces = "0.2.6"
+ctor = "0.6.1"
 insta.workspace = true
 regex = "1.12.2"
 rust-format.workspace = true

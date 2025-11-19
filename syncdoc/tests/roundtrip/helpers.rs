@@ -7,6 +7,11 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use tempfile::TempDir;
 
+#[ctor::ctor]
+fn init_debug() {
+    syncdoc_core::debug::set_debug(true);
+}
+
 /// Module configuration for test setup
 #[derive(Debug, Clone)]
 pub struct ModuleConfig {

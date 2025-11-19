@@ -6,6 +6,11 @@ use std::fs;
 use std::path::Path;
 use tempfile::TempDir;
 
+#[ctor::ctor]
+fn init_debug() {
+    syncdoc_core::debug::set_debug(true);
+}
+
 fn to_braces(paths: &[&str]) -> String {
     let braces_config = BraceConfig::default();
     brace_paths(paths, &braces_config).expect("Brace error")

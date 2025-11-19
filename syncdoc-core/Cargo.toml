@@ -23,6 +23,7 @@ unsynn.workspace = true
 
 [dev-dependencies]
 braces = "0.2.6"
+ctor = "0.6.1"
 duct = "1.1.1"
 insta.workspace = true
 itertools = "0.14.0"
