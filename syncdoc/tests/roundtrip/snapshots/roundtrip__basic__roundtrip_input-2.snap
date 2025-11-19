@@ -1,5 +1,0 @@
----
-source: syncdoc/tests/roundtrip/basic.rs
-expression: result.get_docs_files_brace()
----
-{input.md,input/{build_hierarchy.md,extract_sections.md,find_documents.md,find_in_directory.md},lib.md}

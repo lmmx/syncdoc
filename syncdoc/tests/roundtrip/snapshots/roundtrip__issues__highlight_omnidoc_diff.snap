@@ -1,7 +1,0 @@
----
-source: syncdoc/tests/roundtrip/issues.rs
-expression: "format!(\"Original omnidoc attrs: {}\\nRestored omnidoc attrs: {}\\nDiff: {}\",\noriginal_omnidoc, restored_omnidoc, restored_omnidoc as i32 - original_omnidoc\nas i32)"
----
-Original omnidoc attrs: 0
-Restored omnidoc attrs: 2
-Diff: 2

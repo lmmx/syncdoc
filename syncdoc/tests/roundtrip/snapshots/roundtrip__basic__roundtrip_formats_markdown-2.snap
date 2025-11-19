@@ -1,5 +1,0 @@
----
-source: syncdoc/tests/roundtrip/basic.rs
-expression: result.get_docs_files_brace()
----
-{formats.md,formats/{Format.md,Format/{file_extension.md,format_section_display.md,language.md,section_query.md,title_query.md},markdown.md,markdown/{MarkdownFormat.md,MarkdownFormat/Format/{file_extension.md,format_section_display.md,language.md,section_query.md,title_query.md}}},lib.md,lib/formats.md}

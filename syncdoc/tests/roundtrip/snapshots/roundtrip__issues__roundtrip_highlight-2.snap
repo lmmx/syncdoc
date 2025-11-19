@@ -1,5 +1,0 @@
----
-source: syncdoc/tests/roundtrip/issues.rs
-expression: result.get_docs_files_brace()
----
-{highlight.md,highlight/{SYNTAX_SET.md,THEME_SET.md,highlight_line_with_extension.md,highlight_source_lines.md},lib.md}

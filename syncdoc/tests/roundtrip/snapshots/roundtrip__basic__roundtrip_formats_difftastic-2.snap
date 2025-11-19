@@ -1,5 +1,0 @@
----
-source: syncdoc/tests/roundtrip/basic.rs
-expression: result.get_docs_files_brace()
----
-{formats.md,formats/{Format.md,Format/{file_extension.md,format_section_display.md,language.md,section_query.md,title_query.md},difftastic.md,difftastic/{DifftChange.md,DifftChange/{content.md,end.md,highlight.md,start.md},DifftFile.md,DifftFile/{chunks.md,language.md,path.md,status.md},DifftLine.md,DifftLine/{lhs.md,rhs.md},DifftSide.md,DifftSide/{changes.md,line_number.md},DifftasticFormat.md,DifftasticFormat/{Format/{file_extension.md,format_section_display.md,language.md,section_query.md,title_query.md},determine_hunk_color_from_header.md},create_chunk_section.md,extract_chunk_text.md,extract_column_range.md,extract_difftastic_sections.md,format_change_content.md,format_hunk_header.md,parse_difftastic_json.md}},lib.md,lib/formats.md}

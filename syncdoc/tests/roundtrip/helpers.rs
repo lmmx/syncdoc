@@ -268,19 +268,19 @@ impl RoundtripResult {
         settings.bind(|| {
             for (path, content) in &self.original_source {
                 let snapshot_name =
-                    format!("original_{}", path.to_str().unwrap().replace('/', "_"));
+                    format!("{}_original", path.to_str().unwrap().replace('/', "_"));
                 insta::assert_snapshot!(snapshot_name, content);
             }
 
             for (path, content) in &self.migrated_source {
                 let snapshot_name =
-                    format!("migrated_{}", path.to_str().unwrap().replace('/', "_"));
+                    format!("{}_migrated", path.to_str().unwrap().replace('/', "_"));
                 insta::assert_snapshot!(snapshot_name, content);
             }
 
             for (path, content) in &self.restored_source {
                 let snapshot_name =
-                    format!("restored_{}", path.to_str().unwrap().replace('/', "_"));
+                    format!("{}_restored", path.to_str().unwrap().replace('/', "_"));
                 insta::assert_snapshot!(snapshot_name, content);
             }
         });
