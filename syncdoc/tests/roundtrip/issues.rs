@@ -49,21 +49,6 @@ fn roundtrip_highlight() {
         result.is_perfectly_restored(),
         "Round-trip failed: original != restored"
     );
-
-    // Extra diagnostic: omnidoc presence
-    if let Some(diff) = result.get_file_diff("highlight.rs") {
-        let original_omnidoc = diff.original.matches("#[syncdoc::omnidoc]").count();
-        let restored_omnidoc = diff.restored.matches("#[syncdoc::omnidoc]").count();
-        assert_snapshot!(
-            "highlight_omnidoc_diff",
-            format!(
-                "Original omnidoc attrs: {}\nRestored omnidoc attrs: {}\nDiff: {}",
-                original_omnidoc,
-                restored_omnidoc,
-                restored_omnidoc as i32 - original_omnidoc as i32
-            )
-        );
-    }
 }
 
 #[test]

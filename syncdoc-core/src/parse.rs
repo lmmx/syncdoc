@@ -483,10 +483,10 @@ unsynn! {
         pub attributes: Option<Many<Attribute>>,
         /// Optional visibility
         pub visibility: Option<Visibility>,
-        /// Optional mut keyword
-        pub mut_kw: Option<KMut>,
         /// "static" keyword
         pub _static: KStatic,
+        /// Optional mut keyword
+        pub mut_kw: Option<KMut>,
         /// Static name
         pub name: Ident,
         /// Colon

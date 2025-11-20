@@ -154,3 +154,30 @@ fn test_parse_simple_trait_method() {
         result.err()
     );
 }
+
+#[test]
+fn test_parse_static_sig() {
+    let code = "static SYNTAX_SET: std::sync::LazyLock<SyntaxSet> = std::sync::LazyLock::new(SyntaxSet::load_defaults_newlines);";
+    let tokens = TokenStream::from_str(code).unwrap();
+    let result = tokens.into_token_iter().parse::<StaticSig>();
+    assert!(result.is_ok(), "Failed to parse static: {:?}", result.err());
+
+    let static_sig = result.unwrap();
+    assert_eq!(static_sig.name.to_string(), "SYNTAX_SET");
+}
+
+#[test]
+fn test_parse_static_mut() {
+    let code = "static mut COUNTER: i32 = 0;";
+    let tokens = TokenStream::from_str(code).unwrap();
+    let result = tokens.into_token_iter().parse::<StaticSig>();
+    assert!(
+        result.is_ok(),
+        "Failed to parse static mut: {:?}",
+        result.err()
+    );
+
+    let static_sig = result.unwrap();
+    assert_eq!(static_sig.name.to_string(), "COUNTER");
+    assert!(static_sig.mut_kw.is_some());
+}

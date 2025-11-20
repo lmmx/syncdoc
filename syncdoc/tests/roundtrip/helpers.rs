@@ -173,6 +173,28 @@ pub fn run_restore(project_dir: &Path, env_vars: HashMap<&str, &str>) -> String 
     normalize_debug_output(&stderr)
 }
 
+/// Show a unified diff between two strings
+pub fn show_diff(original: &str, restored: &str, label: &str) {
+    use imara_diff::{Algorithm, BasicLineDiffPrinter, Diff, InternedInput, UnifiedDiffConfig};
+
+    let input = InternedInput::new(original, restored);
+    let mut diff = Diff::compute(Algorithm::Histogram, &input);
+    diff.postprocess_lines(&input);
+
+    if diff.count_additions() == 0 && diff.count_removals() == 0 {
+        eprintln!("\n=== {}: [IDENTICAL] ===\n", label);
+    } else {
+        eprintln!("\n=== DIFF: {} ===", label);
+
+        let config = UnifiedDiffConfig::default();
+        let printer = BasicLineDiffPrinter(&input.interner);
+        let unified = diff.unified_diff(&printer, config, &input);
+
+        eprintln!("{}", unified);
+        eprintln!("=== END DIFF ===\n");
+    }
+}
+
 /// Run full round-trip: migrate then restore
 pub fn run_roundtrip(project_dir: &Path) -> RoundtripResult {
     let env_vars = HashMap::from([("SYNCDOC_DEBUG", "1")]);
@@ -183,6 +205,9 @@ pub fn run_roundtrip(project_dir: &Path) -> RoundtripResult {
     // Run migration
     let migrate_stderr = run_migrate(project_dir, env_vars.clone());
 
+    // AUTO-PRINT DEBUG OUTPUT
+    eprintln!("\n=== MIGRATE STDERR ===\n{}", migrate_stderr);
+
     // Capture state after migration
     let migrated_source = read_all_rs_files(&project_dir.join("src"));
     let docs_files = read_all_md_files(&project_dir.join("docs"));
@@ -190,8 +215,35 @@ pub fn run_roundtrip(project_dir: &Path) -> RoundtripResult {
     // Run restore
     let restore_stderr = run_restore(project_dir, env_vars);
 
+    // AUTO-PRINT DEBUG OUTPUT
+    eprintln!("\n=== RESTORE STDERR ===\n{}", restore_stderr);
+
     // Capture restored source
     let restored_source = read_all_rs_files(&project_dir.join("src"));
+
+    // Print all source files for comparison
+    eprintln!("\n=== ORIGINAL SOURCE ===");
+    for (path, content) in &original_source {
+        eprintln!("\n--- {:?} ---\n{}", path, content);
+    }
+
+    eprintln!("\n=== MIGRATED SOURCE ===");
+    for (path, content) in &migrated_source {
+        eprintln!("\n--- {:?} ---\n{}", path, content);
+    }
+
+    eprintln!("\n=== RESTORED SOURCE ===");
+    for (path, content) in &restored_source {
+        eprintln!("\n--- {:?} ---\n{}", path, content);
+    }
+
+    // Print diffs for comparison
+    eprintln!("\n=== SOURCE FILE DIFFS ===");
+    for (path, original_content) in &original_source {
+        if let Some(restored_content) = restored_source.get(path) {
+            show_diff(original_content, restored_content, &format!("{:?}", path));
+        }
+    }
 
     RoundtripResult {
         original_source,
