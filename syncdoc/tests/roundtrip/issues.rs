@@ -17,21 +17,6 @@ fn roundtrip_app_state() {
         result.is_perfectly_restored(),
         "Round-trip failed: original != restored"
     );
-
-    // Extra diagnostic: line count difference
-    if let Some(diff) = result.get_file_diff("app_state.rs") {
-        let original_lines = diff.original.lines().count();
-        let restored_lines = diff.restored.lines().count();
-        assert_snapshot!(
-            "app_state_line_diff",
-            format!(
-                "Original: {} lines\nRestored: {} lines\nDiff: {}",
-                original_lines,
-                restored_lines,
-                original_lines as i32 - restored_lines as i32
-            )
-        );
-    }
 }
 
 #[test]

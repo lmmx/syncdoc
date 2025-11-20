@@ -165,10 +165,29 @@ pub(crate) fn copy_original_lines<'a>(
 }
 
 pub(crate) fn count_blank_lines(original: &[&str], start: usize, count: usize) -> usize {
+    let mut prev_was_non_doc_comment = false;
+
     (0..count)
         .filter(|i| {
             let idx = start + i;
-            idx < original.len() && original[idx].trim().is_empty()
+            if idx >= original.len() {
+                return false;
+            }
+
+            let line = original[idx];
+            let trimmed = line.trim_start();
+
+            // Check if previous line was a non-doc comment
+            let is_blank_after_comment = line.trim().is_empty() && prev_was_non_doc_comment;
+
+            // Update for next iteration
+            prev_was_non_doc_comment = trimmed.starts_with("//")
+                && !trimmed.starts_with("///")
+                && !trimmed.starts_with("//!");
+
+            // Count blank lines, but NOT ones that come after non-doc comments
+            // (those are handled by preserve_non_doc_lines)
+            line.trim().is_empty() && !is_blank_after_comment
         })
         .count()
 }
@@ -179,22 +198,39 @@ pub(crate) fn preserve_non_doc_lines<'a>(
     start: usize,
     count: usize,
 ) {
+    let mut just_added_comment = false;
+
     for i in 0..count {
         let idx = start + i;
-        if idx < original.len() {
-            let line = original[idx];
-            let trimmed = line.trim_start();
-            let no_spaces = trimmed.replace(" ", "");
+        if idx >= original.len() {
+            continue;
+        }
 
-            // Preserve any OUTER attribute line that's NOT a doc attribute
-            if (trimmed.starts_with("#[") && !no_spaces.starts_with("#[doc") && !no_spaces.contains("omnidoc"))
-                // Preserve any INNER attribute line that's NOT a doc attribute
-                || (no_spaces.starts_with("#![") && !no_spaces.starts_with("#![doc"))
-                // Also preserve regular comments (not doc comments)
-                || (trimmed.starts_with("//") && !trimmed.starts_with("///") && !trimmed.starts_with("//!"))
-            {
-                result.push(line);
-            }
+        let line = original[idx];
+        let trimmed = line.trim_start();
+        let no_spaces = trimmed.replace(" ", "");
+
+        // Check if non-doc comment
+        let is_non_doc_comment =
+            trimmed.starts_with("//") && !trimmed.starts_with("///") && !trimmed.starts_with("//!");
+
+        // Preserve non-doc attributes and comments
+        if (trimmed.starts_with("#[")
+            && !no_spaces.starts_with("#[doc")
+            && !no_spaces.contains("omnidoc"))
+            || (no_spaces.starts_with("#![") && !no_spaces.starts_with("#![doc"))
+            || is_non_doc_comment
+        {
+            result.push(line);
+            just_added_comment = is_non_doc_comment;
+        }
+        // DON'T preserve blank lines - they're handled by count_blank_lines
+        // EXCEPT: preserve one blank line after a non-doc comment (not counted by count_blank_lines)
+        else if line.trim().is_empty() && just_added_comment {
+            result.push(line);
+            just_added_comment = false;
+        } else {
+            just_added_comment = false;
         }
     }
 }

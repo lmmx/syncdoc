@@ -621,8 +621,8 @@ impl AppState {
         self.wrap_width.saturating_sub(indent)
     }
 
-
     // --- Section List Movement ---
+
     pub fn start_move(&mut self) {
         if let Some(section_idx) = self.get_current_section_index() {
             self.moving_section_index = Some(section_idx);

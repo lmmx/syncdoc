@@ -674,6 +674,7 @@ impl AppState {
     }
 
     // --- Section List Movement ---
+
     /// Start moving the current section
     pub fn start_move(&mut self) {
         if let Some(section_idx) = self.get_current_section_index() {
