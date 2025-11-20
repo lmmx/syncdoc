@@ -46,6 +46,14 @@ where
     let mut orig_idx = 0;
 
     for h in &ordered_hunks {
+        #[cfg(debug_assertions)]
+        crate::syncdoc_debug!(
+            "Before hunk: orig_idx={}, hunk at before[{}..{}]",
+            orig_idx,
+            h.before_start,
+            h.before_start + h.before_count
+        );
+
         // ONLY apply relevant hunks (doc-related or restore-related)
         if !is_relevant(h, &original_lines, &after_lines) {
             #[cfg(debug_assertions)]
@@ -106,6 +114,8 @@ where
 
         // Skip removed lines in original
         orig_idx += h.before_count;
+        #[cfg(debug_assertions)]
+        crate::syncdoc_debug!("After hunk: orig_idx={}", orig_idx);
 
         // Add new lines from after (but skip non-doc attributes we've already preserved)
         for i in h.after_start..h.after_start + h.after_count {

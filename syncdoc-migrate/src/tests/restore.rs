@@ -25,6 +25,64 @@ fn setup_test_with_docs(source: &str, docs: &[(&str, &str)]) -> (TempDir, std::p
 }
 
 #[test]
+fn test_restore_section_struct_full_case_reduced() {
+    // Reduction of the EXACT bug case reported - item doc bunches up with the module doc
+    let source = r#"
+#![doc = syncdoc::module_doc!()]
+
+#[syncdoc::omnidoc]
+pub struct Section;
+"#;
+
+    let (temp, source_path) = setup_test_with_docs(
+        source,
+        &[
+            ("test.md", "Section representation for tree-sitter parsed documents.\n\nA section represents a hierarchical division of a document, typically\ncorresponding to a heading in markdown. Sections track their position\nin the document tree through parent/child relationships and maintain\nprecise byte and line coordinates for content extraction and modification.\n"),
+            ("Section.md", "Hierarchical document division with precise coordinates for extraction and modification.\n"),
+        ],
+    );
+
+    let parsed = parse_file(&source_path).unwrap();
+    let restored = restore_file(&parsed, temp.path().join("docs").to_str().unwrap()).unwrap();
+
+    eprintln!("\n=== RESTORED OUTPUT (first 30 lines) ===");
+    for (i, line) in restored.lines().take(30).enumerate() {
+        eprintln!("{:3}: {:?}", i, line);
+    }
+    eprintln!("=========================================\n");
+
+    let lines: Vec<&str> = restored.lines().collect();
+
+    // Find critical positions
+    let last_module_doc = lines
+        .iter()
+        .rposition(|l| l.starts_with("//!"))
+        .expect("Should have module docs");
+
+    let first_item_doc = lines
+        .iter()
+        .position(|l| l.starts_with("///"))
+        .expect("Should have item docs");
+
+    eprintln!("Last module doc at line: {}", last_module_doc);
+    eprintln!("First item doc at line: {}", first_item_doc);
+
+    // CRITICAL ASSERTIONS for the bug
+    assert!(
+        lines[last_module_doc + 1].trim().is_empty(),
+        "Should have blank line after module docs at line {}. Got: {:?}",
+        last_module_doc + 1,
+        lines.get(last_module_doc + 1)
+    );
+
+    assert!(!restored.contains("omnidoc"), "Should not contain omnidoc");
+    assert!(
+        !restored.contains("module_doc!"),
+        "Should not contain module_doc!"
+    );
+}
+
+#[test]
 fn test_restore_simple_function() {
     let source = r#"
 #[syncdoc::omnidoc]
@@ -320,4 +378,133 @@ pub enum MyEnum {
     assert!(restored.contains("/// Field A"));
     assert!(restored.contains("/// Field B"));
     assert!(!restored.contains("omnidoc"));
+}
+
+#[test]
+#[ignore = "Ain't nobody got time for all this hunk logging"]
+fn test_restore_section_struct_full_case() {
+    // This is the EXACT bug case reported - item doc appears after #[derive] instead of before
+    let source = r#"
+#![doc = syncdoc::module_doc!()]
+
+#[syncdoc::omnidoc]
+#[derive(Clone)]
+pub struct Section {
+    pub title: String,
+    pub level: usize,
+    pub line_start: i64,
+    pub line_end: i64,
+    pub column_start: i64,
+    pub column_end: i64,
+    pub byte_start: usize,
+    pub byte_end: usize,
+    pub file_path: String,
+    pub parent_index: Option<usize>,
+    pub children_indices: Vec<usize>,
+    pub section_content: Option<Vec<String>>,
+    pub chunk_type: Option<ChunkType>,
+    pub lhs_content: Option<String>,
+    pub rhs_content: Option<String>,
+}
+
+#[syncdoc::omnidoc]
+#[derive(Clone)]
+pub enum ChunkType {
+    Added,
+    Deleted,
+    Modified,
+    Unchanged,
+}
+"#;
+
+    let (temp, source_path) = setup_test_with_docs(
+        source,
+        &[
+            ("test.md", "Section representation for tree-sitter parsed documents.\n\nA section represents a hierarchical division of a document, typically\ncorresponding to a heading in markdown. Sections track their position\nin the document tree through parent/child relationships and maintain\nprecise byte and line coordinates for content extraction and modification.\n"),
+            ("Section.md", "Hierarchical document division with precise coordinates for extraction and modification.\n"),
+            ("Section/title.md", "Section heading text without markup symbols.\n"),
+            ("Section/level.md", "Nesting depth in the document hierarchy (1 for top-level).\n"),
+            ("Section/line_start.md", "First line of section content (after the heading).\n"),
+            ("Section/line_end.md", "Line where the next section begins or file ends.\n"),
+            ("Section/column_start.md", "Starting column of the section heading.\n"),
+            ("Section/column_end.md", "Ending column of the section heading.\n"),
+            ("Section/byte_start.md", "Byte offset where section content begins.\n"),
+            ("Section/byte_end.md", "Byte offset where section content ends.\n"),
+            ("Section/file_path.md", "Source file containing this section.\n"),
+            ("Section/parent_index.md", "Index of the containing section in the hierarchy.\n"),
+            ("Section/children_indices.md", "Indices of directly nested subsections.\n"),
+            ("Section/section_content.md", "Edited content for this section (if modified)\n"),
+            ("Section/chunk_type.md", "The chunk type (for diffs)\n"),
+            ("Section/lhs_content.md", "The LHS (for diffs)\n"),
+            ("Section/rhs_content.md", "The RHS (for diffs)\n"),
+            ("ChunkType.md", "What sort of hunk (syntactic diff atomic unit) it is.\n"),
+            ("ChunkType/Added.md", "Only RHS exists\n"),
+            ("ChunkType/Deleted.md", "Only LHS exists\n"),
+            ("ChunkType/Modified.md", "Both LHS and RHS exist (and differ)\n"),
+            ("ChunkType/Unchanged.md", "Both LHS and RHS exist (and are the same, at least syntactically)\n"),
+        ],
+    );
+
+    let parsed = parse_file(&source_path).unwrap();
+    let restored = restore_file(&parsed, temp.path().join("docs").to_str().unwrap()).unwrap();
+
+    eprintln!("\n=== RESTORED OUTPUT (first 30 lines) ===");
+    for (i, line) in restored.lines().take(30).enumerate() {
+        eprintln!("{:3}: {:?}", i, line);
+    }
+    eprintln!("=========================================\n");
+
+    let lines: Vec<&str> = restored.lines().collect();
+
+    // Find critical positions
+    let last_module_doc = lines
+        .iter()
+        .rposition(|l| l.starts_with("//!"))
+        .expect("Should have module docs");
+
+    let first_item_doc = lines
+        .iter()
+        .position(|l| l.starts_with("///"))
+        .expect("Should have item docs");
+
+    let first_derive = lines
+        .iter()
+        .position(|l| l.contains("#[derive(Clone)]"))
+        .expect("Should have derive");
+
+    eprintln!("Last module doc at line: {}", last_module_doc);
+    eprintln!("First item doc at line: {}", first_item_doc);
+    eprintln!("First #[derive] at line: {}", first_derive);
+
+    // CRITICAL ASSERTIONS for the bug
+    assert!(
+        lines[last_module_doc + 1].trim().is_empty(),
+        "Should have blank line after module docs at line {}. Got: {:?}",
+        last_module_doc + 1,
+        lines.get(last_module_doc + 1)
+    );
+
+    assert!(
+        first_item_doc < first_derive,
+        "BUG REPRODUCED: Item doc (line {}) should come BEFORE #[derive] (line {}), not after!\nLine {}: {:?}\nLine {}: {:?}",
+        first_item_doc,
+        first_derive,
+        first_item_doc,
+        lines[first_item_doc],
+        first_derive,
+        lines[first_derive]
+    );
+
+    // The item doc should be immediately before (or within a few lines of) the derive
+    assert!(
+        first_derive - first_item_doc <= 2,
+        "Item doc should be within 2 lines of #[derive], but gap is {}",
+        first_derive - first_item_doc
+    );
+
+    assert!(!restored.contains("omnidoc"), "Should not contain omnidoc");
+    assert!(
+        !restored.contains("module_doc!"),
+        "Should not contain module_doc!"
+    );
 }

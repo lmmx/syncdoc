@@ -1,6 +1,6 @@
 ---
-source: syncdoc-migrate/src/tests/diff/whitespace.rs
-expression: restored
+source: syncdoc-migrate/src/tests/diff/apply.rs
+expression: result
 ---
 //! Section representation for tree-sitter parsed documents.
 //!
@@ -11,16 +11,4 @@ expression: restored
 
 /// Hierarchical document division with precise coordinates for extraction and modification.
 #[derive(Clone)]
-pub struct Section {
-    /// Section heading text without markup symbols.
-    pub title: String,
-}
-
-/// What sort of hunk (syntactic diff atomic unit) it is.
-#[derive(Clone)]
-pub enum ChunkType {
-    /// Only RHS exists
-    Added,
-    /// Only LHS exists
-    Deleted,
-}
+pub struct Section {}

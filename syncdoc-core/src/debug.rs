@@ -41,6 +41,6 @@ pub fn is_enabled() -> bool {
 /// Automatically enable debug output for tests, respecting the env var.
 #[cfg(test)]
 #[ctor::ctor]
-fn init_debug_for_tests() {
+fn init_debug() {
     init_from_env();
 }

@@ -1,3 +1,7 @@
+---
+source: syncdoc-migrate/src/tests/diff/apply.rs
+expression: result
+---
 //! Section representation for tree-sitter parsed documents.
 //!
 //! A section represents a hierarchical division of a document, typically
