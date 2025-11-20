@@ -22,6 +22,172 @@ pub mod inner {
         parse_file, restore_file, rewrite_file, write_extractions, DocsPathMode,
     };
 
+    /// Enum to represent the result of processing a single file
+    #[derive(Debug)]
+    enum ProcessResult {
+        Migrated {
+            extractions: Vec<syncdoc_migrate::DocExtraction>,
+            rewritten: bool,
+            touched: usize,
+        },
+        Restored {
+            dry_run: bool,
+        },
+        NoChange,
+        Error(String),
+    }
+
+    /// Process a single file (called by worker threads)
+    ///
+    /// Preserves all steps: parsing, RESTORE mode, MIGRATION mode, touching missing files,
+    /// and rewriting the source file if requested. Comments explicitly mirror the sequential version.
+    fn process_one_file(
+        file_path: &Path,
+        args: &Args,
+        docs_root: &str,
+        docs_mode: DocsPathMode,
+    ) -> ProcessResult {
+        // === Step 1: Verbose info about file being processed ===
+        if args.verbose {
+            eprintln!("Processing: {}", file_path.display());
+        }
+
+        // === Step 2: Parse the file ===
+        let parsed = match parse_file(file_path) {
+            Ok(p) => p,
+            Err(e) => {
+                let error_msg = format!("Failed to parse {}: {}", file_path.display(), e);
+                if args.verbose {
+                    eprintln!("  Warning: {}", error_msg);
+                }
+                return ProcessResult::Error(error_msg);
+            }
+        };
+
+        // === Step 3: RESTORE MODE ===
+        // If restore is requested, we early exit after restoring (equivalent to `continue`)
+        if args.restore {
+            if let Some(restored) = restore_file(&parsed, docs_root) {
+                if args.dry_run {
+                    if args.verbose {
+                        eprintln!("  Would restore: {}", file_path.display());
+                    }
+                    return ProcessResult::Restored { dry_run: true };
+                } else {
+                    match fs::write(file_path, restored) {
+                        Ok(_) => {
+                            if args.verbose {
+                                eprintln!("  Restored: {}", file_path.display());
+                            }
+                            return ProcessResult::Restored { dry_run: false };
+                        }
+                        Err(e) => {
+                            return ProcessResult::Error(format!(
+                                "Failed to write {}: {}",
+                                file_path.display(),
+                                e
+                            ));
+                        }
+                    }
+                }
+            } else {
+                // No restoration needed
+                return ProcessResult::NoChange;
+            }
+        }
+
+        // === Step 4: MIGRATION MODE ===
+        // Extract documentation from the parsed file
+        let extractions = extract_all_docs(&parsed, docs_root);
+
+        if args.verbose && !extractions.is_empty() {
+            eprintln!("  Found {} doc extraction(s)", extractions.len());
+        }
+
+        let mut all_extractions = extractions;
+
+        // === Step 5: Touch missing files if needed ===
+        if args.touch && args.annotate {
+            // Determine expected doc paths
+            let expected_paths = find_expected_doc_paths(&parsed, docs_root);
+
+            if args.verbose {
+                eprintln!("  Found {} expected doc path(s)", expected_paths.len());
+            }
+
+            // Filter paths: exclude those already in extractions and those already on disk
+            let existing_paths: std::collections::HashSet<_> =
+                all_extractions.iter().map(|e| &e.markdown_path).collect();
+
+            let missing_paths: Vec<_> = expected_paths
+                .into_iter()
+                .filter(|extraction| {
+                    !existing_paths.contains(&extraction.markdown_path)
+                        && !extraction.markdown_path.exists()
+                })
+                .collect();
+
+            if !missing_paths.is_empty() && args.verbose {
+                eprintln!("  Will touch {} missing file(s)", missing_paths.len());
+            }
+
+            let touched_count = missing_paths.len();
+            all_extractions.extend(missing_paths);
+
+            // === Step 6: Rewrite source file if requested ===
+            let rewritten = if args.strip_docs || args.annotate {
+                if let Some(rewritten) = rewrite_file(
+                    &parsed,
+                    docs_root,
+                    docs_mode,
+                    args.strip_docs,
+                    args.annotate,
+                ) {
+                    if args.dry_run {
+                        if args.verbose {
+                            eprintln!("  Would rewrite: {}", file_path.display());
+                        }
+                        true
+                    } else {
+                        match fs::write(file_path, rewritten) {
+                            Ok(_) => {
+                                if args.verbose {
+                                    eprintln!("  Rewrote: {}", file_path.display());
+                                }
+                                true
+                            }
+                            Err(e) => {
+                                return ProcessResult::Error(format!(
+                                    "Failed to write {}: {}",
+                                    file_path.display(),
+                                    e
+                                ));
+                            }
+                        }
+                    }
+                } else {
+                    false
+                }
+            } else {
+                false
+            };
+
+            // Return full migration result
+            return ProcessResult::Migrated {
+                extractions: all_extractions,
+                rewritten,
+                touched: touched_count,
+            };
+        }
+
+        // If touch mode was not requested, return migrated result with 0 touched files
+        ProcessResult::Migrated {
+            extractions: all_extractions,
+            rewritten: false,
+            touched: 0,
+        }
+    }
+
     #[derive(Facet)]
     struct Args {
         /// Path to source directory to process
@@ -150,8 +316,9 @@ pub mod inner {
         // Get docs root path and mode
         let (docs_root, docs_mode) = if args.inline_paths || args.docs.is_some() {
             // Explicit --inline-paths or --docs flag means inline mode
-            let path = args.docs.unwrap_or_else(|| "docs".to_string());
-            (path, DocsPathMode::InlinePaths)
+            let path = args.docs.as_deref().unwrap_or("docs");
+            let docs_root = path.to_string();
+            (docs_root, DocsPathMode::InlinePaths)
         } else {
             // Try to get from Cargo.toml, or use/create default
             match get_or_create_docs_path(source_path, args.dry_run) {
@@ -181,6 +348,46 @@ pub mod inner {
             eprintln!("Found {} Rust file(s)", rust_files.len());
         }
 
+        // Determine optimal chunk size with oversubscription for better load balancing
+        let num_threads = std::thread::available_parallelism().map_or(1, |n| n.get());
+
+        // Create 4x more chunks than threads to minimize straggler effects
+        let oversubscribe = 4;
+        let total_chunks = num_threads * oversubscribe;
+        let chunk_size = (rust_files.len() + total_chunks - 1) / total_chunks;
+        let chunk_size = chunk_size.max(1);
+
+        if args.verbose {
+            eprintln!(
+                "Processing with {} threads ({} chunks of ~{} files)",
+                num_threads, total_chunks, chunk_size
+            );
+        }
+
+        // Process files in parallel using thread::scope
+        let results: Vec<ProcessResult> = std::thread::scope(|s| {
+            let handles: Vec<_> = rust_files
+                .chunks(chunk_size)
+                .map(|chunk| {
+                    s.spawn(|| {
+                        chunk
+                            .iter()
+                            .map(|file_path| {
+                                process_one_file(file_path, &args, &docs_root, docs_mode)
+                            })
+                            .collect::<Vec<_>>()
+                    })
+                })
+                .collect();
+
+            // Collect results from all threads
+            handles
+                .into_iter()
+                .flat_map(|h| h.join().unwrap_or_default())
+                .collect()
+        });
+
+        // Aggregate results
         let mut total_extractions = 0;
         let mut files_processed = 0;
         let mut files_rewritten = 0;
@@ -188,107 +395,32 @@ pub mod inner {
         let mut parse_errors = Vec::new();
         let mut all_extractions = Vec::new();
 
-        // Process each file
-        for file_path in &rust_files {
-            if args.verbose {
-                eprintln!("Processing: {}", file_path.display());
-            }
-
-            // Parse the file
-            let parsed = match parse_file(file_path) {
-                Ok(p) => p,
-                Err(e) => {
-                    let error_msg = format!("Failed to parse {}: {}", file_path.display(), e);
-                    parse_errors.push(error_msg.clone());
-                    if args.verbose {
-                        eprintln!("  Warning: {}", error_msg);
+        for result in results {
+            match result {
+                ProcessResult::Migrated {
+                    extractions,
+                    rewritten,
+                    touched,
+                } => {
+                    files_processed += 1;
+                    total_extractions += extractions.len();
+                    all_extractions.extend(extractions);
+                    if rewritten {
+                        files_rewritten += 1;
                     }
-                    continue;
+                    files_touched += touched;
                 }
-            };
-
-            files_processed += 1;
-
-            // RESTORE MODE: early exit from loop iteration
-            if args.restore {
-                if let Some(restored) = restore_file(&parsed, &docs_root) {
-                    if args.dry_run {
-                        if args.verbose {
-                            eprintln!("  Would restore: {}", file_path.display());
-                        }
-                    } else {
-                        fs::write(file_path, restored)?;
-                        if args.verbose {
-                            eprintln!("  Restored: {}", file_path.display());
-                        }
+                ProcessResult::Restored { dry_run, .. } => {
+                    files_processed += 1;
+                    if !dry_run {
+                        files_rewritten += 1;
                     }
-                    files_rewritten += 1;
                 }
-                continue; // Skip the rest of the loop for this file
-            }
-
-            // MIGRATION MODE: existing code continues from here
-            // Extract documentation
-            let extractions = extract_all_docs(&parsed, &docs_root);
-            total_extractions += extractions.len();
-
-            if args.verbose && !extractions.is_empty() {
-                eprintln!("  Found {} doc extraction(s)", extractions.len());
-            }
-
-            all_extractions.extend(extractions);
-
-            // If touch mode and we're adding annotations, find expected paths
-            if args.touch && args.annotate {
-                let expected_paths = find_expected_doc_paths(&parsed, &docs_root);
-
-                if args.verbose {
-                    eprintln!("  Found {} expected doc path(s)", expected_paths.len());
+                ProcessResult::NoChange => {
+                    files_processed += 1;
                 }
-
-                // Filter to only those that don't already exist in all_extractions
-                // First create a set of paths we already have content for
-                let existing_paths: std::collections::HashSet<_> =
-                    all_extractions.iter().map(|e| &e.markdown_path).collect();
-
-                // Then filter expected paths to only those we don't have AND that don't exist on disk
-                let missing_paths: Vec<_> = expected_paths
-                    .into_iter()
-                    .filter(|extraction| {
-                        !existing_paths.contains(&extraction.markdown_path)
-                            && !extraction.markdown_path.exists()
-                    })
-                    .collect();
-
-                if !missing_paths.is_empty() {
-                    if args.verbose {
-                        eprintln!("  Will touch {} missing file(s)", missing_paths.len());
-                    }
-                    files_touched += missing_paths.len();
-                    all_extractions.extend(missing_paths);
-                }
-            }
-
-            // Rewrite source file if requested
-            if args.strip_docs || args.annotate {
-                if let Some(rewritten) = rewrite_file(
-                    &parsed,
-                    &docs_root,
-                    docs_mode,
-                    args.strip_docs,
-                    args.annotate,
-                ) {
-                    if args.dry_run {
-                        if args.verbose {
-                            eprintln!("  Would rewrite: {}", file_path.display());
-                        }
-                    } else {
-                        fs::write(file_path, rewritten)?;
-                        if args.verbose {
-                            eprintln!("  Rewrote: {}", file_path.display());
-                        }
-                    }
-                    files_rewritten += 1;
+                ProcessResult::Error(e) => {
+                    parse_errors.push(e);
                 }
             }
         }
