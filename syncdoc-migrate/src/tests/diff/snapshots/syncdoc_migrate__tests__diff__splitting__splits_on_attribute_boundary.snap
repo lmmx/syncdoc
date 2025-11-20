@@ -2,5 +2,5 @@
 source: syncdoc-migrate/src/tests/diff/splitting.rs
 expression: "summary.join(\"\\n\")"
 ---
-before[0..1] after[0..1]
-before[1..2] after[1..3]
+before[0..2] after[0..1]
+before[2..2] after[1..3]

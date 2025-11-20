@@ -127,7 +127,13 @@ pub fn split_hunk_if_mixed(hunk: &DiffHunk, after_lines: &[&str]) -> Vec<DiffHun
             hunk.after_start,
             hunk.after_start + hunk.after_count
         );
+        crate::syncdoc_debug!(
+            "after_count={}, before_count={}",
+            hunk.after_count,
+            hunk.before_count
+        );
     }
+
     // Don't try to split deletion-only or insertion-only hunks
     if hunk.after_count == 0 || hunk.before_count == 0 {
         #[cfg(debug_assertions)]
@@ -172,7 +178,6 @@ pub fn split_hunk_if_mixed(hunk: &DiffHunk, after_lines: &[&str]) -> Vec<DiffHun
                 if next_line.trim().is_empty() {
                     #[cfg(debug_assertions)]
                     crate::syncdoc_debug!("      -> Blank, skipping");
-
                     continue; // Skip blank lines
                 }
 
@@ -184,12 +189,9 @@ pub fn split_hunk_if_mixed(hunk: &DiffHunk, after_lines: &[&str]) -> Vec<DiffHun
                 // If we find an item-level attribute, split here
                 if next_trimmed.starts_with("#[") {
                     #[cfg(debug_assertions)]
-                    crate::syncdoc_debug!(
-                        "      -> FOUND ITEM DOC! Setting split point to {}",
-                        i + 1
-                    );
+                    crate::syncdoc_debug!("      -> FOUND ITEM DOC! Setting split point to {}", j);
 
-                    module_doc_end = Some(i + 1); // Split after the module doc line
+                    module_doc_end = Some(j); // Split AT the item doc line, not after module doc
                     break;
                 }
 
@@ -206,25 +208,53 @@ pub fn split_hunk_if_mixed(hunk: &DiffHunk, after_lines: &[&str]) -> Vec<DiffHun
     crate::syncdoc_debug!("module_doc_end = {:?}", module_doc_end);
 
     if let Some(split_point) = module_doc_end {
-        let lines_in_first = split_point - hunk.after_start;
+        let after_lines_in_first = split_point - hunk.after_start;
 
         #[cfg(debug_assertions)]
         crate::syncdoc_debug!(
-            "Attempting to split at line {} (lines_in_first={})",
+            "Attempting to split at line {} (after_lines_in_first={})",
             split_point,
-            lines_in_first
+            after_lines_in_first
+        );
+
+        // Determine the split point for the "before" side of the hunk.
+        //
+        // In restore operations, the "before" side contains compressed macro syntax
+        // (e.g., `#![doc = module_doc!()]` + blank line + `#[omnidoc]`) while the
+        // "after" side contains expanded doc attributes. The expansion is asymmetric:
+        // one module_doc!() macro becomes N module doc attributes.
+        //
+        // We split the "before" side to separate module-level changes from item-level
+        // changes. The module doc macro and its trailing blank line (lines 0-1) go in
+        // the first hunk; the omnidoc attribute (line 2+) goes in the second hunk.
+        //
+        // This count must not exceed the actual lines available in the hunk. If it
+        // would, the hunk structure doesn't match our assumptions about syncdoc's
+        // generated code, so we abort the split to avoid creating invalid hunks.
+
+        // Note: we can rely on this hardcoded line 2 because we control the migration we restore
+        // from. If syncdoc is used differently, this will break the expectation (...TODO)
+
+        // Before has: module_doc!() at line 0, blank at line 1, omnidoc at line 2
+        // So split before at line 2 (after module_doc + blank)
+        let before_lines_in_first = if hunk.before_count >= 2 { 2 } else { 1 };
+
+        #[cfg(debug_assertions)]
+        crate::syncdoc_debug!(
+            "before_lines_in_first={}, before_count={}",
+            before_lines_in_first,
+            hunk.before_count
         );
 
         // SAFETY CHECK: Ensure we have enough lines in before
-        if lines_in_first > hunk.before_count {
+        if before_lines_in_first > hunk.before_count {
             #[cfg(debug_assertions)]
             crate::syncdoc_debug!(
-                "CANNOT SPLIT: lines_in_first ({}) > before_count ({})",
-                lines_in_first,
+                "CANNOT SPLIT: before_lines_in_first ({}) > before_count ({})",
+                before_lines_in_first,
                 hunk.before_count
             );
 
-            // Can't split—not enough before content
             return vec![hunk.clone()];
         }
 
@@ -234,15 +264,15 @@ pub fn split_hunk_if_mixed(hunk: &DiffHunk, after_lines: &[&str]) -> Vec<DiffHun
         vec![
             DiffHunk {
                 before_start: hunk.before_start,
-                before_count: lines_in_first,
+                before_count: before_lines_in_first,
                 after_start: hunk.after_start,
-                after_count: lines_in_first,
+                after_count: after_lines_in_first,
             },
             DiffHunk {
-                before_start: hunk.before_start + lines_in_first,
-                before_count: hunk.before_count - lines_in_first,
+                before_start: hunk.before_start + before_lines_in_first,
+                before_count: hunk.before_count - before_lines_in_first,
                 after_start: split_point,
-                after_count: hunk.after_count - lines_in_first,
+                after_count: hunk.after_count - after_lines_in_first,
             },
         ]
     } else {
