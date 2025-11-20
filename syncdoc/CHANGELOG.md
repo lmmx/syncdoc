@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.5.0...syncdoc-v0.5.1) - 2025-11-20
+
+### <!-- 4 -->Documentation
+
+- remove warnings about CLI usage
+
+### <!-- 9 -->Other
+
+- parallelise cli ([#73](https://github.com/lmmx/syncdoc/pull/73))
+
 ## [0.5.0](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.3.7...syncdoc-v0.5.0) - 2025-11-17
 
 ### <!-- 9 -->Other

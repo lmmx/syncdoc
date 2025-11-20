@@ -14,7 +14,7 @@ name = "syncdoc"
 readme = "README.md"
 repository.workspace = true
 rust-version.workspace = true
-version = "0.5.0"
+version = "0.5.1"
 
 [package.metadata.binstall]
 pkg-fmt = "tgz"
