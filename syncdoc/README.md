@@ -88,7 +88,7 @@ cfg-attr = "doc"
 
 See the _Build Configuration_ section below for more details.
 
-### Migration (**beta**)
+### Migration
 
 The CLI automatically migrates code from doc comments to syncdoc `#[omnidoc]` attributes.
 
@@ -142,19 +142,20 @@ syncdoc --migrate (or `-m` for short, equal to `--cut --add --touch`)
 syncdoc --migrate --inline-paths
 ```
 
-#### `syncdoc-migrate` (preview)
+#### `syncdoc-migrate`
 
 The migration CLI uses a standard diffing algorithm ([Myers][myers], as used git), and should be able to correctly
-identify how to migrate your code to the omnidoc macro. For best results, call `rustfmt` on your
-Rust files in advance (but it's not necessary). The CLI tries to avoid reformatting your code
-unless it has to.
+identify how to migrate your code to the omnidoc macro. Syncdoc relies on `rustfmt` and will not
+work if `rustfmt` cannot process your code. The only effects from a "round trip" through syncdoc
+migrate/restore should be to 'fix' docstrings (move them above attribute macros, trim
+leading/trailing blank lines).
 
 [myers]: https://docs.rs/imara-diff/latest/imara_diff/
 
 After running, you should inspect the git diff and `cargo check` the output to confirm the codegen builds.
 If you run the `-m`/`--migrate` flag it should touch all the files it requires so the result still builds.
 
-Please send feedback on anything it gets wrong, ideally with a minimal repro (like the demo in `examples/migrate`).
+Please send feedback on anything it gets wrong, ideally with a minimal repro.
 
 ### Usage
 
