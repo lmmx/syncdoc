@@ -684,6 +684,7 @@ dependencies = [
  "ctor",
  "facet",
  "facet-args",
+ "imara-diff",
  "insta",
  "proc-macro2",
  "regex",

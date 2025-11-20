@@ -173,6 +173,28 @@ pub fn run_restore(project_dir: &Path, env_vars: HashMap<&str, &str>) -> String 
     normalize_debug_output(&stderr)
 }
 
+/// Show a unified diff between two strings
+pub fn show_diff(original: &str, restored: &str, label: &str) {
+    use imara_diff::{Algorithm, BasicLineDiffPrinter, Diff, InternedInput, UnifiedDiffConfig};
+
+    let input = InternedInput::new(original, restored);
+    let mut diff = Diff::compute(Algorithm::Histogram, &input);
+    diff.postprocess_lines(&input);
+
+    if diff.count_additions() == 0 && diff.count_removals() == 0 {
+        eprintln!("\n=== {}: [IDENTICAL] ===\n", label);
+    } else {
+        eprintln!("\n=== DIFF: {} ===", label);
+
+        let config = UnifiedDiffConfig::default();
+        let printer = BasicLineDiffPrinter(&input.interner);
+        let unified = diff.unified_diff(&printer, config, &input);
+
+        eprintln!("{}", unified);
+        eprintln!("=== END DIFF ===\n");
+    }
+}
+
 /// Run full round-trip: migrate then restore
 pub fn run_roundtrip(project_dir: &Path) -> RoundtripResult {
     let env_vars = HashMap::from([("SYNCDOC_DEBUG", "1")]);
@@ -213,6 +235,14 @@ pub fn run_roundtrip(project_dir: &Path) -> RoundtripResult {
     eprintln!("\n=== RESTORED SOURCE ===");
     for (path, content) in &restored_source {
         eprintln!("\n--- {:?} ---\n{}", path, content);
+    }
+
+    // Print diffs for comparison
+    eprintln!("\n=== SOURCE FILE DIFFS ===");
+    for (path, original_content) in &original_source {
+        if let Some(restored_content) = restored_source.get(path) {
+            show_diff(original_content, restored_content, &format!("{:?}", path));
+        }
     }
 
     RoundtripResult {
