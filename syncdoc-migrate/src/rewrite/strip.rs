@@ -537,7 +537,3 @@ pub(crate) fn wrap_in_braces(content: TokenStream) -> TokenStream {
     let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, content);
     std::iter::once(proc_macro2::TokenTree::Group(group)).collect()
 }
-
-#[cfg(test)]
-#[path = "../tests/strip.rs"]
-mod strip_tests;

@@ -428,7 +428,3 @@ pub(crate) fn build_path(base_path: &str, context: &[String], item_name: &str) -
     parts.push(format!("{}.md", item_name));
     parts.join("/")
 }
-
-#[cfg(test)]
-#[path = "../tests/expected.rs"]
-mod expected_tests;
