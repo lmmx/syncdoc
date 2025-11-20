@@ -84,7 +84,7 @@ pub struct Test;"#,
 
 #[test]
 fn snapshot_module_level_detection() {
-    let test_cases = vec![
+    let test_cases = [
         ("module_doc_macro", r#"#![doc = syncdoc::module_doc!()]"#),
         ("inner_doc", r#"#![doc = "//! Doc"]"#),
         ("outer_omnidoc", r#"#[syncdoc::omnidoc]"#),
