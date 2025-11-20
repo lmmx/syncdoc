@@ -13,11 +13,14 @@
 /// Command-line interface for migrating documentation to markdown.
 #[cfg(feature = "cli")]
 pub mod cli {
-    mod args;
-    mod worker;
+    pub mod args;
+    pub mod orchestrate;
+    pub mod report;
+    pub mod worker;
 
     use args::{print_usage, Args};
-    use worker::{sync, ProcessResult};
+    use orchestrate::sync_all;
+    use report::{aggregate_results, print_summary};
 
     use std::io;
     use std::path::Path;
@@ -122,126 +125,11 @@ pub mod cli {
         }
 
         // Process files in parallel using thread::scope
-        let results: Vec<ProcessResult> = std::thread::scope(|s| {
-            let handles: Vec<_> = rust_files
-                .chunks(chunk_size)
-                .map(|chunk| {
-                    s.spawn(|| {
-                        chunk
-                            .iter()
-                            .map(|file_path| sync(file_path, &args, &docs_root, docs_mode))
-                            .collect::<Vec<_>>()
-                    })
-                })
-                .collect();
+        let results = sync_all(&rust_files, &args, &docs_root, docs_mode);
+        let agg = aggregate_results(results);
 
-            // Collect results from all threads
-            handles
-                .into_iter()
-                .flat_map(|h| h.join().unwrap_or_default())
-                .collect()
-        });
-
-        // Aggregate results
-        let mut total_extractions = 0;
-        let mut files_processed = 0;
-        let mut files_rewritten = 0;
-        let mut files_touched = 0;
-        let mut parse_errors = Vec::new();
-        let mut all_extractions = Vec::new();
-
-        for result in results {
-            match result {
-                ProcessResult::Migrated {
-                    extractions,
-                    rewritten,
-                    touched,
-                } => {
-                    files_processed += 1;
-                    total_extractions += extractions.len();
-                    all_extractions.extend(extractions);
-                    if rewritten {
-                        files_rewritten += 1;
-                    }
-                    files_touched += touched;
-                }
-                ProcessResult::Restored { dry_run, .. } => {
-                    files_processed += 1;
-                    if !dry_run {
-                        files_rewritten += 1;
-                    }
-                }
-                ProcessResult::NoChange => {
-                    files_processed += 1;
-                }
-                ProcessResult::Error(e) => {
-                    parse_errors.push(e);
-                }
-            }
-        }
-
-        // Write all extractions
-        if !all_extractions.is_empty() {
-            let write_report = write_extractions(&all_extractions, args.dry_run)?;
-
-            if args.verbose {
-                eprintln!();
-                eprintln!("Write report:");
-                eprintln!("  Files written: {}", write_report.files_written);
-                eprintln!("  Files skipped: {}", write_report.files_skipped);
-                if !write_report.errors.is_empty() {
-                    eprintln!("  Errors:");
-                    for error in &write_report.errors {
-                        eprintln!("    - {}", error);
-                    }
-                }
-            }
-        }
-
-        // Print summary
-        eprintln!();
-        if args.dry_run {
-            eprintln!("=== Dry Run Summary ===");
-            eprintln!("Would process {} file(s)", files_processed);
-            if args.restore {
-                eprintln!("Would restore {} file(s)", files_rewritten);
-            } else {
-                eprintln!("Would extract {} documentation(s)", total_extractions);
-                if args.touch {
-                    eprintln!("Would touch {} missing file(s)", files_touched);
-                }
-                if args.strip_docs || args.annotate {
-                    eprintln!("Would rewrite {} file(s)", files_rewritten);
-                }
-            }
-        } else if args.restore {
-            eprintln!("=== Restore Summary ===");
-            eprintln!("Processed {} file(s)", files_processed);
-            eprintln!("Restored {} file(s)", files_rewritten);
-        } else {
-            eprintln!("=== Migration Summary ===");
-            eprintln!("Processed {} file(s)", files_processed);
-            eprintln!("Extracted {} documentation(s)", total_extractions);
-            if args.touch {
-                eprintln!("Touched {} missing file(s)", files_touched);
-            }
-            if args.strip_docs || args.annotate {
-                eprintln!("Rewrote {} file(s)", files_rewritten);
-            }
-        }
-
-        if !parse_errors.is_empty() {
-            eprintln!();
-            eprintln!("Parse errors: {}", parse_errors.len());
-            if !args.verbose {
-                eprintln!("Run with --verbose to see details");
-            }
-        }
-
-        if args.dry_run && !args.verbose {
-            eprintln!();
-            eprintln!("Dry run complete. Use -v to see detailed changes.");
-        }
+        write_extractions(&agg.all_extractions, args.dry_run)?;
+        print_summary(&agg, &args, args.dry_run, args.verbose);
 
         Ok(())
     }
