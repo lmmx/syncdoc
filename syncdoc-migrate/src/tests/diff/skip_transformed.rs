@@ -52,7 +52,7 @@ fn does_not_skip_regular_code() {
 
 #[test]
 fn snapshot_skip_decisions() {
-    let test_lines = vec![
+    let test_lines = [
         "#[derive(Debug)]",
         "#[cfg(test)]",
         "# [derive (Clone)]", // rustfmt'd spacing

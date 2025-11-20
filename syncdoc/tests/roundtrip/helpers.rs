@@ -332,7 +332,7 @@ fn read_rs_files_recursive(root: &Path, current: &Path, files: &mut HashMap<Path
     if let Ok(entries) = fs::read_dir(current) {
         for entry in entries.filter_map(|e| e.ok()) {
             let path = entry.path();
-            if path.is_file() && path.extension().map_or(false, |e| e == "rs") {
+            if path.is_file() && path.extension().is_some_and(|e| e == "rs") {
                 if let Ok(relative) = path.strip_prefix(root) {
                     if let Ok(content) = fs::read_to_string(&path) {
                         files.insert(relative.to_path_buf(), content);
@@ -360,7 +360,7 @@ fn read_md_files_recursive(root: &Path, current: &Path, files: &mut HashMap<Path
     if let Ok(entries) = fs::read_dir(current) {
         for entry in entries.filter_map(|e| e.ok()) {
             let path = entry.path();
-            if path.is_file() && path.extension().map_or(false, |e| e == "md") {
+            if path.is_file() && path.extension().is_some_and(|e| e == "md") {
                 if let Ok(relative) = path.strip_prefix(root) {
                     if let Ok(content) = fs::read_to_string(&path) {
                         files.insert(relative.to_path_buf(), content);

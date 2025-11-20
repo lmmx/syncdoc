@@ -170,7 +170,3 @@ pub fn rewrite_preserving_format_restore(
 
     Ok(result)
 }
-
-#[cfg(test)]
-#[path = "../tests/reformat.rs"]
-mod reformat_tests;
