@@ -83,7 +83,7 @@ pub(crate) fn strip_doc_attrs_from_item(item: &ModuleItem) -> TokenStream {
             ModuleItem::Other(_) => "Other",
         }
     );
-    syncdoc_debug!("Processing item: {:?}", item);
+    // syncdoc_debug!("Processing item: {:?}", item);
     match item {
         ModuleItem::TraitMethod(method) => {
             let stripped_attrs = strip_doc_attrs_from_attr_list(&method.attributes);

@@ -183,6 +183,9 @@ pub fn run_roundtrip(project_dir: &Path) -> RoundtripResult {
     // Run migration
     let migrate_stderr = run_migrate(project_dir, env_vars.clone());
 
+    // AUTO-PRINT DEBUG OUTPUT
+    eprintln!("\n=== MIGRATE STDERR ===\n{}", migrate_stderr);
+
     // Capture state after migration
     let migrated_source = read_all_rs_files(&project_dir.join("src"));
     let docs_files = read_all_md_files(&project_dir.join("docs"));
@@ -190,8 +193,27 @@ pub fn run_roundtrip(project_dir: &Path) -> RoundtripResult {
     // Run restore
     let restore_stderr = run_restore(project_dir, env_vars);
 
+    // AUTO-PRINT DEBUG OUTPUT
+    eprintln!("\n=== RESTORE STDERR ===\n{}", restore_stderr);
+
     // Capture restored source
     let restored_source = read_all_rs_files(&project_dir.join("src"));
+
+    // Print all source files for comparison
+    eprintln!("\n=== ORIGINAL SOURCE ===");
+    for (path, content) in &original_source {
+        eprintln!("\n--- {:?} ---\n{}", path, content);
+    }
+
+    eprintln!("\n=== MIGRATED SOURCE ===");
+    for (path, content) in &migrated_source {
+        eprintln!("\n--- {:?} ---\n{}", path, content);
+    }
+
+    eprintln!("\n=== RESTORED SOURCE ===");
+    for (path, content) in &restored_source {
+        eprintln!("\n--- {:?} ---\n{}", path, content);
+    }
 
     RoundtripResult {
         original_source,

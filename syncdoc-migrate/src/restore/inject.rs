@@ -14,6 +14,10 @@ pub fn inject_all_doc_comments(
     docs_root: &str,
     parsed: &ParsedFile,
 ) -> TokenStream {
+    syncdoc_debug!("\n=== INJECT_ALL_DOC_COMMENTS START ===");
+    syncdoc_debug!("Processing file: {:?}", parsed.path);
+    syncdoc_debug!("Number of items: {}", content.items.0.len());
+
     let mut output = TokenStream::new();
 
     // ALWAYS inject module doc FIRST if it exists
@@ -50,12 +54,19 @@ pub fn inject_all_doc_comments(
     }
 
     for item_delimited in &content.items.0 {
+        syncdoc_debug!("\n--- Processing item ---");
+        syncdoc_debug!(
+            "Item type: {:?}",
+            std::mem::discriminant(&item_delimited.value)
+        );
+
         output.extend(inject_item_docs(
             &item_delimited.value,
             context.clone(),
             docs_root,
         ));
     }
+    syncdoc_debug!("=== INJECT_ALL_DOC_COMMENTS END ===\n");
 
     output
 }
@@ -65,6 +76,9 @@ pub(crate) fn inject_item_docs(
     context: Vec<String>,
     docs_root: &str,
 ) -> TokenStream {
+    syncdoc_debug!("\n=== INJECT_ITEM_DOCS ===");
+    syncdoc_debug!("Context: {:?}", context);
+
     match item {
         ModuleItem::TraitMethod(method) => inject_trait_method_docs(method, &context, docs_root),
         ModuleItem::Function(func) => inject_function_docs(func, &context, docs_root),
@@ -82,10 +96,7 @@ pub(crate) fn inject_item_docs(
                 output.extend(super::generate_doc_comments(&content));
             }
 
-            let stripped_attrs = strip_doc_attrs_from_attr_list(&ta.attributes);
-            for attr in stripped_attrs {
-                quote::ToTokens::to_tokens(&attr, &mut output);
-            }
+            add_non_omnidoc_attrs(&ta.attributes, &mut output);
 
             if let Some(vis) = &ta.visibility {
                 quote::ToTokens::to_tokens(vis, &mut output);
@@ -102,6 +113,7 @@ pub(crate) fn inject_item_docs(
             output
         }
         ModuleItem::Const(c) => {
+            syncdoc_debug!("Processing Const: {}", c.name);
             let mut output = TokenStream::new();
 
             if let Some(content) =
@@ -110,10 +122,7 @@ pub(crate) fn inject_item_docs(
                 output.extend(super::generate_doc_comments(&content));
             }
 
-            let stripped_attrs = strip_doc_attrs_from_attr_list(&c.attributes);
-            for attr in stripped_attrs {
-                quote::ToTokens::to_tokens(&attr, &mut output);
-            }
+            add_non_omnidoc_attrs(&c.attributes, &mut output);
 
             if let Some(vis) = &c.visibility {
                 quote::ToTokens::to_tokens(vis, &mut output);
@@ -129,6 +138,7 @@ pub(crate) fn inject_item_docs(
             output
         }
         ModuleItem::Static(s) => {
+            syncdoc_debug!("Processing Static: {}", s.name);
             let mut output = TokenStream::new();
 
             if let Some(content) =
@@ -137,10 +147,7 @@ pub(crate) fn inject_item_docs(
                 output.extend(super::generate_doc_comments(&content));
             }
 
-            let stripped_attrs = strip_doc_attrs_from_attr_list(&s.attributes);
-            for attr in stripped_attrs {
-                quote::ToTokens::to_tokens(&attr, &mut output);
-            }
+            add_non_omnidoc_attrs(&s.attributes, &mut output);
 
             if let Some(vis) = &s.visibility {
                 quote::ToTokens::to_tokens(vis, &mut output);
@@ -159,6 +166,8 @@ pub(crate) fn inject_item_docs(
             output
         }
         ModuleItem::Other(t) => {
+            syncdoc_debug!("Processing Other item");
+            syncdoc_debug!("Other item tokens: {:?}", t);
             let mut ts = TokenStream::new();
             t.to_tokens(&mut ts);
             ts
