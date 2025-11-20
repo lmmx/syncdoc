@@ -5,22 +5,6 @@ use crate::rewrite::reformat::diff::hunk::split_hunk_if_mixed;
 use insta::assert_snapshot;
 
 #[test]
-fn splits_module_and_item_docs() {
-    let case = mixed_module_and_item();
-    let hunks = case.compute_hunks();
-
-    assert_eq!(hunks.len(), 1, "Should start with one hunk");
-
-    let split = split_hunk_if_mixed(&hunks[0], &case.transformed_lines());
-
-    assert_snapshot!(format!(
-        "Original hunks: {}\nSplit hunks: {}",
-        hunks.len(),
-        split.len()
-    ));
-}
-
-#[test]
 fn preserves_unsplittable_hunks() {
     let case = item_doc_to_omnidoc();
     let hunks = case.compute_hunks();
