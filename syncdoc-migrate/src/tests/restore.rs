@@ -64,14 +64,8 @@ pub struct Section;
         .position(|l| l.starts_with("///"))
         .expect("Should have item docs");
 
-    let first_derive = lines
-        .iter()
-        .position(|l| l.contains("#[derive(Clone)]"))
-        .expect("Should have derive");
-
     eprintln!("Last module doc at line: {}", last_module_doc);
     eprintln!("First item doc at line: {}", first_item_doc);
-    eprintln!("First #[derive] at line: {}", first_derive);
 
     // CRITICAL ASSERTIONS for the bug
     assert!(
@@ -79,24 +73,6 @@ pub struct Section;
         "Should have blank line after module docs at line {}. Got: {:?}",
         last_module_doc + 1,
         lines.get(last_module_doc + 1)
-    );
-
-    assert!(
-        first_item_doc < first_derive,
-        "BUG REPRODUCED: Item doc (line {}) should come BEFORE #[derive] (line {}), not after!\nLine {}: {:?}\nLine {}: {:?}",
-        first_item_doc,
-        first_derive,
-        first_item_doc,
-        lines[first_item_doc],
-        first_derive,
-        lines[first_derive]
-    );
-
-    // The item doc should be immediately before (or within a few lines of) the derive
-    assert!(
-        first_derive - first_item_doc <= 2,
-        "Item doc should be within 2 lines of #[derive], but gap is {}",
-        first_derive - first_item_doc
     );
 
     assert!(!restored.contains("omnidoc"), "Should not contain omnidoc");

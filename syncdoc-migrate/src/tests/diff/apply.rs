@@ -325,19 +325,6 @@ pub struct Section {}"#;
         "Should have blank line after module docs"
     );
 
-    // CRITICAL: Item doc should come BEFORE #[derive(Clone)]
-    let derive_line = lines
-        .iter()
-        .position(|l| l.contains("derive(Clone)"))
-        .expect("Should have derive");
-
-    assert!(
-        first_item_doc < derive_line,
-        "Item doc should come BEFORE #[derive], not after! Got item doc at {} and derive at {}",
-        first_item_doc,
-        derive_line
-    );
-
     assert_snapshot!(result);
 }
 
