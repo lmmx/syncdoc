@@ -12,9 +12,9 @@ use syncdoc_core::parse::{
 pub(crate) mod expected;
 pub use expected::find_expected_doc_paths;
 
-/// Represents a documentation extraction with its target path and metadata
+/// Represents one item of documentation extracted with its target path and metadata
 #[derive(Debug, Clone, PartialEq)]
-pub struct DocExtraction {
+pub struct DocExtract {
     /// Path where the markdown file should be written
     pub markdown_path: PathBuf,
     /// The documentation content to write
@@ -23,8 +23,8 @@ pub struct DocExtraction {
     pub source_location: String,
 }
 
-impl DocExtraction {
-    /// Creates a new DocExtraction and ensures content ends with a newline
+impl DocExtract {
+    /// Creates a new DocExtract and ensures content ends with a newline
     pub fn new(markdown_path: PathBuf, mut content: String, source_location: String) -> Self {
         if !content.ends_with('\n') {
             content.push('\n');
@@ -47,10 +47,10 @@ pub struct WriteReport {
 
 /// Extracts all documentation from a parsed file
 ///
-/// Returns a vector of `DocExtraction` structs, each representing a documentation
-/// comment that should be written to a markdown file.
-pub fn extract_all_docs(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+/// Returns a vector of `DocExtract` structs, each representing an item of documentation
+/// (docstring comment) that should be written to a markdown file.
+pub fn extract_all_docs(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
 
     // Extract module path from the source file
     let module_path = syncdoc_core::path_utils::extract_module_path(&parsed.path.to_string_lossy());
@@ -71,7 +71,7 @@ pub fn extract_all_docs(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtracti
             format!("{}/{}.md", docs_root, module_path)
         };
 
-        extractions.push(DocExtraction::new(
+        extracts.push(DocExtract::new(
             PathBuf::from(path),
             inner_doc,
             format!("{}:1", parsed.path.display()),
@@ -86,7 +86,7 @@ pub fn extract_all_docs(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtracti
 
     for item_delimited in &parsed.content.items.0 {
         let item = &item_delimited.value;
-        extractions.extend(extract_item_docs(
+        extracts.extend(extract_item_docs(
             item,
             context.clone(),
             docs_root,
@@ -94,7 +94,7 @@ pub fn extract_all_docs(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtracti
         ));
     }
 
-    extractions
+    extracts
 }
 
 /// Recursively extracts documentation from a single module item
@@ -103,8 +103,8 @@ pub(crate) fn extract_item_docs(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
 
     match item {
         ModuleItem::TraitMethod(method_sig) => {
@@ -115,7 +115,7 @@ pub(crate) fn extract_item_docs(
                     source_file.display(),
                     method_sig.name.span().start().line
                 );
-                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
+                extracts.push(DocExtract::new(PathBuf::from(path), content, location));
             }
         }
 
@@ -127,12 +127,12 @@ pub(crate) fn extract_item_docs(
                     source_file.display(),
                     func_sig.name.span().start().line
                 );
-                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
+                extracts.push(DocExtract::new(PathBuf::from(path), content, location));
             }
         }
 
         ModuleItem::ImplBlock(impl_block) => {
-            extractions.extend(extract_impl_docs(
+            extracts.extend(extract_impl_docs(
                 impl_block,
                 context,
                 base_path,
@@ -141,11 +141,11 @@ pub(crate) fn extract_item_docs(
         }
 
         ModuleItem::Module(module) => {
-            extractions.extend(extract_module_docs(module, context, base_path, source_file));
+            extracts.extend(extract_module_docs(module, context, base_path, source_file));
         }
 
         ModuleItem::Trait(trait_def) => {
-            extractions.extend(extract_trait_docs(
+            extracts.extend(extract_trait_docs(
                 trait_def,
                 context,
                 base_path,
@@ -154,11 +154,11 @@ pub(crate) fn extract_item_docs(
         }
 
         ModuleItem::Enum(enum_sig) => {
-            extractions.extend(extract_enum_docs(enum_sig, context, base_path, source_file));
+            extracts.extend(extract_enum_docs(enum_sig, context, base_path, source_file));
         }
 
         ModuleItem::Struct(struct_sig) => {
-            extractions.extend(extract_struct_docs(
+            extracts.extend(extract_struct_docs(
                 struct_sig,
                 context,
                 base_path,
@@ -174,7 +174,7 @@ pub(crate) fn extract_item_docs(
                     source_file.display(),
                     type_alias.name.span().start().line
                 );
-                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
+                extracts.push(DocExtract::new(PathBuf::from(path), content, location));
             }
         }
 
@@ -186,7 +186,7 @@ pub(crate) fn extract_item_docs(
                     source_file.display(),
                     const_sig.name.span().start().line
                 );
-                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
+                extracts.push(DocExtract::new(PathBuf::from(path), content, location));
             }
         }
 
@@ -198,7 +198,7 @@ pub(crate) fn extract_item_docs(
                     source_file.display(),
                     static_sig.name.span().start().line
                 );
-                extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
+                extracts.push(DocExtract::new(PathBuf::from(path), content, location));
             }
         }
 
@@ -206,7 +206,7 @@ pub(crate) fn extract_item_docs(
         ModuleItem::Other(_) => {}
     }
 
-    extractions
+    extracts
 }
 
 /// Extracts documentation from an impl block and its methods
@@ -215,8 +215,8 @@ pub(crate) fn extract_impl_docs(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
 
     // Determine the context path for the impl block
     // If this is `impl Trait for Type`, context is [Type, Trait]
@@ -267,7 +267,7 @@ pub(crate) fn extract_impl_docs(
     // Access parsed items directly
     let module_content = &impl_block.items.content;
     for item_delimited in &module_content.items.0 {
-        extractions.extend(extract_item_docs(
+        extracts.extend(extract_item_docs(
             &item_delimited.value,
             new_context.clone(),
             base_path,
@@ -275,7 +275,7 @@ pub(crate) fn extract_impl_docs(
         ));
     }
 
-    extractions
+    extracts
 }
 
 /// Extracts documentation from a module and its contents
@@ -284,8 +284,8 @@ pub(crate) fn extract_module_docs(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
 
     // Extract module's own documentation if present
     if let Some(content) = extract_doc_content(&module.attributes) {
@@ -295,7 +295,7 @@ pub(crate) fn extract_module_docs(
             source_file.display(),
             module.name.span().start().line
         );
-        extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
+        extracts.push(DocExtract::new(PathBuf::from(path), content, location));
     }
 
     // Update context with module name
@@ -305,7 +305,7 @@ pub(crate) fn extract_module_docs(
     // Access parsed items directly
     let module_content = &module.items.content;
     for item_delimited in &module_content.items.0 {
-        extractions.extend(extract_item_docs(
+        extracts.extend(extract_item_docs(
             &item_delimited.value,
             new_context.clone(),
             base_path,
@@ -313,7 +313,7 @@ pub(crate) fn extract_module_docs(
         ));
     }
 
-    extractions
+    extracts
 }
 
 /// Extracts documentation from a trait and its methods
@@ -322,8 +322,8 @@ pub(crate) fn extract_trait_docs(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
 
     // Extract trait's own documentation if present
     if let Some(content) = extract_doc_content(&trait_def.attributes) {
@@ -333,7 +333,7 @@ pub(crate) fn extract_trait_docs(
             source_file.display(),
             trait_def.name.span().start().line
         );
-        extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
+        extracts.push(DocExtract::new(PathBuf::from(path), content, location));
     }
 
     // Update context with trait name
@@ -343,7 +343,7 @@ pub(crate) fn extract_trait_docs(
     // Access parsed items directly
     let module_content = &trait_def.items.content;
     for item_delimited in &module_content.items.0 {
-        extractions.extend(extract_item_docs(
+        extracts.extend(extract_item_docs(
             &item_delimited.value,
             new_context.clone(),
             base_path,
@@ -351,7 +351,7 @@ pub(crate) fn extract_trait_docs(
         ));
     }
 
-    extractions
+    extracts
 }
 
 /// Extracts documentation from an enum and its variants
@@ -360,8 +360,8 @@ pub(crate) fn extract_enum_docs(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
     let enum_name = enum_sig.name.to_string();
 
     // Extract enum's own documentation
@@ -372,7 +372,7 @@ pub(crate) fn extract_enum_docs(
             source_file.display(),
             enum_sig.name.span().start().line
         );
-        extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
+        extracts.push(DocExtract::new(PathBuf::from(path), content, location));
     }
 
     // Access parsed variants directly
@@ -385,7 +385,7 @@ pub(crate) fn extract_enum_docs(
                     &context,
                     &format!("{}/{}", enum_name, variant.name),
                 );
-                extractions.push(DocExtraction::new(
+                extracts.push(DocExtract::new(
                     PathBuf::from(path),
                     content,
                     format!(
@@ -407,7 +407,7 @@ pub(crate) fn extract_enum_docs(
                                 &context,
                                 &format!("{}/{}/{}", enum_name, variant.name, field.name),
                             );
-                            extractions.push(DocExtraction::new(
+                            extracts.push(DocExtract::new(
                                 PathBuf::from(path),
                                 content,
                                 format!(
@@ -423,7 +423,7 @@ pub(crate) fn extract_enum_docs(
         }
     }
 
-    extractions
+    extracts
 }
 
 /// Extracts documentation from a struct and its fields
@@ -432,8 +432,8 @@ pub(crate) fn extract_struct_docs(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
     let struct_name = struct_sig.name.to_string();
 
     // Extract struct's own documentation
@@ -444,7 +444,7 @@ pub(crate) fn extract_struct_docs(
             source_file.display(),
             struct_sig.name.span().start().line
         );
-        extractions.push(DocExtraction::new(PathBuf::from(path), content, location));
+        extracts.push(DocExtract::new(PathBuf::from(path), content, location));
     }
 
     // Extract field documentation (only for named fields)
@@ -458,7 +458,7 @@ pub(crate) fn extract_struct_docs(
                         &context,
                         &format!("{}/{}", struct_name, field.name),
                     );
-                    extractions.push(DocExtraction::new(
+                    extracts.push(DocExtract::new(
                         PathBuf::from(path),
                         content,
                         format!(
@@ -472,26 +472,21 @@ pub(crate) fn extract_struct_docs(
         }
     }
 
-    extractions
+    extracts
 }
 
-/// Writes documentation extractions to markdown files
+/// Writes documentation extracts to markdown files
 ///
 /// If `dry_run` is true, validates paths and reports what would be written
 /// without actually creating files.
-pub fn write_extractions(
-    extractions: &[DocExtraction],
-    dry_run: bool,
-) -> std::io::Result<WriteReport> {
+pub fn write_extracts(extracts: &[DocExtract], dry_run: bool) -> std::io::Result<WriteReport> {
     let mut report = WriteReport::default();
 
     // Group by parent directory for efficient directory creation
-    let mut dirs: HashMap<PathBuf, Vec<&DocExtraction>> = HashMap::new();
-    for extraction in extractions {
-        if let Some(parent) = extraction.markdown_path.parent() {
-            dirs.entry(parent.to_path_buf())
-                .or_default()
-                .push(extraction);
+    let mut dirs: HashMap<PathBuf, Vec<&DocExtract>> = HashMap::new();
+    for extract in extracts {
+        if let Some(parent) = extract.markdown_path.parent() {
+            dirs.entry(parent.to_path_buf()).or_default().push(extract);
         }
     }
 
@@ -510,19 +505,19 @@ pub fn write_extractions(
     }
 
     // Write files
-    for extraction in extractions {
+    for extract in extracts {
         if dry_run {
-            println!("Would write: {}", extraction.markdown_path.display());
+            println!("Would write: {}", extract.markdown_path.display());
             report.files_written += 1;
         } else {
-            match fs::write(&extraction.markdown_path, &extraction.content) {
+            match fs::write(&extract.markdown_path, &extract.content) {
                 Ok(_) => {
                     report.files_written += 1;
                 }
                 Err(e) => {
                     report.errors.push(format!(
                         "Failed to write {}: {}",
-                        extraction.markdown_path.display(),
+                        extract.markdown_path.display(),
                         e
                     ));
                     report.files_skipped += 1;

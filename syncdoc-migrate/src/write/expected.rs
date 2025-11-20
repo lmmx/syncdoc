@@ -5,7 +5,7 @@
 //! are present. It's used to identify missing documentation files that should
 //! be created.
 
-use crate::write::DocExtraction;
+use crate::write::DocExtract;
 pub(crate) use std::path::{Path, PathBuf};
 use syncdoc_core::parse::{
     EnumSig, EnumVariantData, ImplBlockSig, ModuleItem, ModuleSig, StructSig, TraitSig,
@@ -15,10 +15,10 @@ use super::ParsedFile;
 
 /// Finds all documentation paths that are expected based on code structure
 ///
-/// Returns a vector of `DocExtraction` structs with empty content, representing
+/// Returns a vector of `DocExtract` structs with empty content, representing
 /// the markdown files that should exist for the given source file's structure.
-pub fn find_expected_doc_paths(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+pub fn find_expected_doc_paths(parsed: &ParsedFile, docs_root: &str) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
     let module_path = syncdoc_core::path_utils::extract_module_path(&parsed.path.to_string_lossy());
 
     // Module-level documentation path
@@ -34,7 +34,7 @@ pub fn find_expected_doc_paths(parsed: &ParsedFile, docs_root: &str) -> Vec<DocE
         format!("{}/{}.md", docs_root, module_path)
     };
 
-    extractions.push(DocExtraction::new(
+    extracts.push(DocExtract::new(
         PathBuf::from(path),
         String::new(),
         format!("{}:1", parsed.path.display()),
@@ -47,7 +47,7 @@ pub fn find_expected_doc_paths(parsed: &ParsedFile, docs_root: &str) -> Vec<DocE
 
     // Find all item documentation paths
     for item_delimited in &parsed.content.items.0 {
-        extractions.extend(find_item_paths(
+        extracts.extend(find_item_paths(
             &item_delimited.value,
             context.clone(),
             docs_root,
@@ -55,7 +55,7 @@ pub fn find_expected_doc_paths(parsed: &ParsedFile, docs_root: &str) -> Vec<DocE
         ));
     }
 
-    extractions
+    extracts
 }
 
 /// Recursively finds documentation paths for a single item
@@ -64,8 +64,8 @@ pub(crate) fn find_item_paths(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
 
     match item {
         ModuleItem::TraitMethod(method_sig) => {
@@ -75,7 +75,7 @@ pub(crate) fn find_item_paths(
                 source_file.display(),
                 method_sig.name.span().start().line
             );
-            extractions.push(DocExtraction::new(
+            extracts.push(DocExtract::new(
                 PathBuf::from(path),
                 String::new(),
                 location,
@@ -89,7 +89,7 @@ pub(crate) fn find_item_paths(
                 source_file.display(),
                 func_sig.name.span().start().line
             );
-            extractions.push(DocExtraction::new(
+            extracts.push(DocExtract::new(
                 PathBuf::from(path),
                 String::new(),
                 location,
@@ -97,23 +97,23 @@ pub(crate) fn find_item_paths(
         }
 
         ModuleItem::ImplBlock(impl_block) => {
-            extractions.extend(find_impl_paths(impl_block, context, base_path, source_file));
+            extracts.extend(find_impl_paths(impl_block, context, base_path, source_file));
         }
 
         ModuleItem::Module(module) => {
-            extractions.extend(find_module_paths(module, context, base_path, source_file));
+            extracts.extend(find_module_paths(module, context, base_path, source_file));
         }
 
         ModuleItem::Trait(trait_def) => {
-            extractions.extend(find_trait_paths(trait_def, context, base_path, source_file));
+            extracts.extend(find_trait_paths(trait_def, context, base_path, source_file));
         }
 
         ModuleItem::Enum(enum_sig) => {
-            extractions.extend(find_enum_paths(enum_sig, context, base_path, source_file));
+            extracts.extend(find_enum_paths(enum_sig, context, base_path, source_file));
         }
 
         ModuleItem::Struct(struct_sig) => {
-            extractions.extend(find_struct_paths(
+            extracts.extend(find_struct_paths(
                 struct_sig,
                 context,
                 base_path,
@@ -128,7 +128,7 @@ pub(crate) fn find_item_paths(
                 source_file.display(),
                 type_alias.name.span().start().line
             );
-            extractions.push(DocExtraction::new(
+            extracts.push(DocExtract::new(
                 PathBuf::from(path),
                 String::new(),
                 location,
@@ -142,7 +142,7 @@ pub(crate) fn find_item_paths(
                 source_file.display(),
                 const_sig.name.span().start().line
             );
-            extractions.push(DocExtraction::new(
+            extracts.push(DocExtract::new(
                 PathBuf::from(path),
                 String::new(),
                 location,
@@ -156,7 +156,7 @@ pub(crate) fn find_item_paths(
                 source_file.display(),
                 static_sig.name.span().start().line
             );
-            extractions.push(DocExtraction::new(
+            extracts.push(DocExtract::new(
                 PathBuf::from(path),
                 String::new(),
                 location,
@@ -166,7 +166,7 @@ pub(crate) fn find_item_paths(
         ModuleItem::Other(_) => {}
     }
 
-    extractions
+    extracts
 }
 
 pub(crate) fn find_impl_paths(
@@ -174,8 +174,8 @@ pub(crate) fn find_impl_paths(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
 
     // Determine the context path for the impl block
     // If this is `impl Trait for Type`, context is [Type, Trait]
@@ -225,7 +225,7 @@ pub(crate) fn find_impl_paths(
 
     let module_content = &impl_block.items.content;
     for item_delimited in &module_content.items.0 {
-        extractions.extend(find_item_paths(
+        extracts.extend(find_item_paths(
             &item_delimited.value,
             new_context.clone(),
             base_path,
@@ -233,7 +233,7 @@ pub(crate) fn find_impl_paths(
         ));
     }
 
-    extractions
+    extracts
 }
 
 pub(crate) fn find_module_paths(
@@ -241,8 +241,8 @@ pub(crate) fn find_module_paths(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
 
     let path = build_path(base_path, &context, &module.name.to_string());
     let location = format!(
@@ -250,7 +250,7 @@ pub(crate) fn find_module_paths(
         source_file.display(),
         module.name.span().start().line
     );
-    extractions.push(DocExtraction::new(
+    extracts.push(DocExtract::new(
         PathBuf::from(path),
         String::new(),
         location,
@@ -261,7 +261,7 @@ pub(crate) fn find_module_paths(
 
     let module_content = &module.items.content;
     for item_delimited in &module_content.items.0 {
-        extractions.extend(find_item_paths(
+        extracts.extend(find_item_paths(
             &item_delimited.value,
             new_context.clone(),
             base_path,
@@ -269,7 +269,7 @@ pub(crate) fn find_module_paths(
         ));
     }
 
-    extractions
+    extracts
 }
 
 pub(crate) fn find_trait_paths(
@@ -277,8 +277,8 @@ pub(crate) fn find_trait_paths(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
 
     let path = build_path(base_path, &context, &trait_def.name.to_string());
     let location = format!(
@@ -286,7 +286,7 @@ pub(crate) fn find_trait_paths(
         source_file.display(),
         trait_def.name.span().start().line
     );
-    extractions.push(DocExtraction::new(
+    extracts.push(DocExtract::new(
         PathBuf::from(path),
         String::new(),
         location,
@@ -297,7 +297,7 @@ pub(crate) fn find_trait_paths(
 
     let module_content = &trait_def.items.content;
     for item_delimited in &module_content.items.0 {
-        extractions.extend(find_item_paths(
+        extracts.extend(find_item_paths(
             &item_delimited.value,
             new_context.clone(),
             base_path,
@@ -305,7 +305,7 @@ pub(crate) fn find_trait_paths(
         ));
     }
 
-    extractions
+    extracts
 }
 
 pub(crate) fn find_enum_paths(
@@ -313,8 +313,8 @@ pub(crate) fn find_enum_paths(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
     let enum_name = enum_sig.name.to_string();
 
     let path = build_path(base_path, &context, &enum_name);
@@ -323,7 +323,7 @@ pub(crate) fn find_enum_paths(
         source_file.display(),
         enum_sig.name.span().start().line
     );
-    extractions.push(DocExtraction::new(
+    extracts.push(DocExtract::new(
         PathBuf::from(path),
         String::new(),
         location,
@@ -338,7 +338,7 @@ pub(crate) fn find_enum_paths(
                 &context,
                 &format!("{}/{}", enum_name, variant.name),
             );
-            extractions.push(DocExtraction::new(
+            extracts.push(DocExtract::new(
                 PathBuf::from(path),
                 String::new(),
                 format!(
@@ -358,7 +358,7 @@ pub(crate) fn find_enum_paths(
                             &context,
                             &format!("{}/{}/{}", enum_name, variant.name, field.name),
                         );
-                        extractions.push(DocExtraction::new(
+                        extracts.push(DocExtract::new(
                             PathBuf::from(path),
                             String::new(),
                             format!(
@@ -373,7 +373,7 @@ pub(crate) fn find_enum_paths(
         }
     }
 
-    extractions
+    extracts
 }
 
 pub(crate) fn find_struct_paths(
@@ -381,8 +381,8 @@ pub(crate) fn find_struct_paths(
     context: Vec<String>,
     base_path: &str,
     source_file: &Path,
-) -> Vec<DocExtraction> {
-    let mut extractions = Vec::new();
+) -> Vec<DocExtract> {
+    let mut extracts = Vec::new();
     let struct_name = struct_sig.name.to_string();
 
     let path = build_path(base_path, &context, &struct_name);
@@ -391,7 +391,7 @@ pub(crate) fn find_struct_paths(
         source_file.display(),
         struct_sig.name.span().start().line
     );
-    extractions.push(DocExtraction::new(
+    extracts.push(DocExtract::new(
         PathBuf::from(path),
         String::new(),
         location,
@@ -406,7 +406,7 @@ pub(crate) fn find_struct_paths(
                     &context,
                     &format!("{}/{}", struct_name, field.name),
                 );
-                extractions.push(DocExtraction::new(
+                extracts.push(DocExtract::new(
                     PathBuf::from(path),
                     String::new(),
                     format!(
@@ -419,7 +419,7 @@ pub(crate) fn find_struct_paths(
         }
     }
 
-    extractions
+    extracts
 }
 
 pub(crate) fn build_path(base_path: &str, context: &[String], item_name: &str) -> String {

@@ -2,16 +2,16 @@
 
 use super::args::Args;
 use super::worker::ProcessResult;
-use syncdoc_migrate::DocExtraction;
+use syncdoc_migrate::DocExtract;
 
 /// Aggregated results of a CLI run.
 pub(crate) struct AggregatedResults {
     pub files_processed: usize,
     pub files_rewritten: usize,
     pub files_touched: usize,
-    pub total_extractions: usize,
+    pub total_extracts: usize,
     pub parse_errors: Vec<String>,
-    pub all_extractions: Vec<DocExtraction>,
+    pub all_extracts: Vec<DocExtract>,
 }
 
 impl AggregatedResults {
@@ -21,27 +21,27 @@ impl AggregatedResults {
             files_processed: 0,
             files_rewritten: 0,
             files_touched: 0,
-            total_extractions: 0,
+            total_extracts: 0,
             parse_errors: Vec::new(),
-            all_extractions: Vec::new(),
+            all_extracts: Vec::new(),
         }
     }
 }
 
-/// Aggregate a vector of `ProcessResult` into counts and extractions.
+/// Aggregate a vector of `ProcessResult` into counts and extracts.
 pub(crate) fn aggregate_results(results: Vec<ProcessResult>) -> AggregatedResults {
     let mut agg = AggregatedResults::new();
 
     for result in results {
         match result {
             ProcessResult::Migrated {
-                extractions,
+                extracts,
                 rewritten,
                 touched,
             } => {
                 agg.files_processed += 1;
-                agg.total_extractions += extractions.len();
-                agg.all_extractions.extend(extractions);
+                agg.total_extracts += extracts.len();
+                agg.all_extracts.extend(extracts);
                 if rewritten {
                     agg.files_rewritten += 1;
                 }
@@ -67,8 +67,8 @@ pub(crate) fn aggregate_results(results: Vec<ProcessResult>) -> AggregatedResult
 
 /// Print a CLI summary report based on aggregated results.
 pub(crate) fn print_summary(agg: &AggregatedResults, args: &Args, dry_run: bool, verbose: bool) {
-    // Write all extractions report (still delegates to syncdoc_migrate::write_extractions in main)
-    if !agg.all_extractions.is_empty() && verbose {
+    // Write all extracts report (still delegates to syncdoc_migrate::write_extracts in main)
+    if !agg.all_extracts.is_empty() && verbose {
         eprintln!();
         eprintln!("Write report:");
         // Actual writing is done outside, so this just prints a placeholder
@@ -82,7 +82,7 @@ pub(crate) fn print_summary(agg: &AggregatedResults, args: &Args, dry_run: bool,
         if args.restore {
             eprintln!("Would restore {} file(s)", agg.files_rewritten);
         } else {
-            eprintln!("Would extract {} documentation(s)", agg.total_extractions);
+            eprintln!("Would extract {} documentation(s)", agg.total_extracts);
             if args.touch {
                 eprintln!("Would touch {} missing file(s)", agg.files_touched);
             }
@@ -97,7 +97,7 @@ pub(crate) fn print_summary(agg: &AggregatedResults, args: &Args, dry_run: bool,
     } else {
         eprintln!("=== Migration Summary ===");
         eprintln!("Processed {} file(s)", agg.files_processed);
-        eprintln!("Extracted {} documentation(s)", agg.total_extractions);
+        eprintln!("Extracted {} documentation(s)", agg.total_extracts);
         if args.touch {
             eprintln!("Touched {} missing file(s)", agg.files_touched);
         }
