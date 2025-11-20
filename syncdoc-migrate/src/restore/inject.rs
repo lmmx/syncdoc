@@ -651,36 +651,6 @@ pub(crate) fn add_non_omnidoc_attrs(attrs: &Option<Many<Attribute>>, output: &mu
     }
 }
 
-// Add this at the bottom of inject.rs
-pub(crate) fn strip_doc_attrs_from_attr_list(
-    attrs: &Option<unsynn::Many<Attribute>>,
-) -> Vec<Attribute> {
-    let Some(attr_list) = attrs else {
-        return Vec::new();
-    };
-
-    attr_list
-        .0
-        .iter()
-        .filter_map(|attr_delimited| {
-            let attr = &attr_delimited.value;
-            if is_outer_doc_attr(attr) {
-                None
-            } else {
-                Some(attr.clone())
-            }
-        })
-        .collect()
-}
-
-pub(crate) fn is_outer_doc_attr(attr: &Attribute) -> bool {
-    use unsynn::ToTokens;
-    let mut ts = TokenStream::new();
-    attr.to_tokens(&mut ts);
-    let s = ts.to_string().replace(' ', "");
-    s.contains("#[doc=")
-}
-
 pub(crate) fn wrap_in_braces(content: TokenStream) -> TokenStream {
     let group = proc_macro2::Group::new(proc_macro2::Delimiter::Brace, content);
     std::iter::once(proc_macro2::TokenTree::Group(group)).collect()
