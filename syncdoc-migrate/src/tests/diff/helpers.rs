@@ -141,16 +141,3 @@ pub enum ChunkType {
 }"#,
     )
 }
-
-pub fn mixed_module_and_item() -> TestCase {
-    TestCase::new(
-        r#"//! Module doc
-
-/// Item doc
-pub fn test() {}"#,
-        r#"#![doc = syncdoc::module_doc!()]
-
-#[syncdoc::omnidoc]
-pub fn test() {}"#,
-    )
-}
