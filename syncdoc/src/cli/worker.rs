@@ -1,14 +1,17 @@
+use super::args::Args;
+use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
 use syncdoc_migrate::{
-    extract_all_docs, find_expected_doc_paths, parse_file, restore_file, rewrite_file, DocsPathMode,
+    extract_all_docs, find_expected_doc_paths, parse_file, restore_file, rewrite_file,
+    DocExtraction, DocsPathMode,
 };
 
 /// Enum to represent the result of processing a single file
 #[derive(Debug)]
 pub enum ProcessResult {
     Migrated {
-        extractions: Vec<syncdoc_migrate::DocExtraction>,
+        extractions: Vec<DocExtraction>,
         rewritten: bool,
         touched: usize,
     },
@@ -25,7 +28,7 @@ pub enum ProcessResult {
 /// and rewriting the source file if requested. Comments explicitly mirror the sequential version.
 pub fn sync(
     file_path: &Path,
-    args: &crate::cli::Args,
+    args: &Args,
     docs_root: &str,
     docs_mode: DocsPathMode,
 ) -> ProcessResult {
@@ -98,8 +101,7 @@ pub fn sync(
         }
 
         // Filter paths: exclude those already in extractions and those already on disk
-        let existing_paths: std::collections::HashSet<_> =
-            all_extractions.iter().map(|e| &e.markdown_path).collect();
+        let existing_paths: HashSet<_> = all_extractions.iter().map(|e| &e.markdown_path).collect();
 
         let missing_paths: Vec<_> = expected_paths
             .into_iter()
