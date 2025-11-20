@@ -14,6 +14,7 @@
 #[cfg(feature = "cli")]
 pub mod cli {
     pub mod args;
+    pub mod logs;
     pub mod orchestrate;
     pub mod report;
     pub mod worker;
