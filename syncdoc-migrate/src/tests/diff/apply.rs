@@ -244,6 +244,7 @@ pub fn test() {}"#;
     assert_snapshot!(result);
 }
 
+#[allow(clippy::needless_range_loop)]
 #[test]
 fn restore_preserves_blank_line_and_correct_doc_order() {
     // This is the ACTUAL bug case from your report
