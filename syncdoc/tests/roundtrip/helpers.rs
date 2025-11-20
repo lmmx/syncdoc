@@ -173,28 +173,6 @@ pub fn run_restore(project_dir: &Path, env_vars: HashMap<&str, &str>) -> String 
     normalize_debug_output(&stderr)
 }
 
-/// Show a unified diff between two strings
-pub fn show_diff(original: &str, restored: &str, label: &str) {
-    use imara_diff::{Algorithm, BasicLineDiffPrinter, Diff, InternedInput, UnifiedDiffConfig};
-
-    let input = InternedInput::new(original, restored);
-    let mut diff = Diff::compute(Algorithm::Histogram, &input);
-    diff.postprocess_lines(&input);
-
-    if diff.count_additions() == 0 && diff.count_removals() == 0 {
-        eprintln!("\n=== {}: [IDENTICAL] ===\n", label);
-    } else {
-        eprintln!("\n=== DIFF: {} ===", label);
-
-        let config = UnifiedDiffConfig::default();
-        let printer = BasicLineDiffPrinter(&input.interner);
-        let unified = diff.unified_diff(&printer, config, &input);
-
-        eprintln!("{}", unified);
-        eprintln!("=== END DIFF ===\n");
-    }
-}
-
 /// Run full round-trip: migrate then restore
 pub fn run_roundtrip(project_dir: &Path) -> RoundtripResult {
     let env_vars = HashMap::from([("SYNCDOC_DEBUG", "1")]);
@@ -241,7 +219,12 @@ pub fn run_roundtrip(project_dir: &Path) -> RoundtripResult {
     eprintln!("\n=== SOURCE FILE DIFFS ===");
     for (path, original_content) in &original_source {
         if let Some(restored_content) = restored_source.get(path) {
-            show_diff(original_content, restored_content, &format!("{:?}", path));
+            let diff = FileDiff {
+                path: path.clone(),
+                original: original_content.clone(),
+                restored: restored_content.clone(),
+            };
+            diff.show_diff();
         }
     }
 
@@ -272,21 +255,6 @@ impl RoundtripResult {
     /// Check if source was perfectly restored
     pub fn is_perfectly_restored(&self) -> bool {
         self.original_source == self.restored_source
-    }
-
-    /// Get diff for a specific file
-    pub fn get_file_diff(&self, rel_path: &str) -> Option<FileDiff> {
-        let path = PathBuf::from(rel_path);
-
-        let original = self.original_source.get(&path)?;
-        let restored = self.restored_source.get(&path)?;
-
-        Some(FileDiff {
-            path: path.clone(),
-            original: original.clone(),
-            restored: restored.clone(),
-            matches: original == restored,
-        })
     }
 
     /// Get all files that differ
@@ -361,12 +329,33 @@ impl RoundtripResult {
 
 #[derive(Debug)]
 pub struct FileDiff {
-    #[allow(dead_code)]
     pub path: PathBuf,
     pub original: String,
     pub restored: String,
-    #[allow(dead_code)]
-    pub matches: bool,
+}
+
+impl FileDiff {
+    /// Show a unified diff between original and restored
+    pub fn show_diff(&self) {
+        use imara_diff::{Algorithm, BasicLineDiffPrinter, Diff, InternedInput, UnifiedDiffConfig};
+
+        let input = InternedInput::new(&self.original[..], &self.restored[..]);
+        let mut diff = Diff::compute(Algorithm::Histogram, &input);
+        diff.postprocess_lines(&input);
+
+        if diff.count_additions() == 0 && diff.count_removals() == 0 {
+            eprintln!("\n=== {:?}: [IDENTICAL] ===\n", self.path);
+        } else {
+            eprintln!("\n=== DIFF: {:?} ===", self.path);
+
+            let config = UnifiedDiffConfig::default();
+            let printer = BasicLineDiffPrinter(&input.interner);
+            let unified = diff.unified_diff(&printer, config, &input);
+
+            eprintln!("{}", unified);
+            eprintln!("=== END DIFF ===\n");
+        }
+    }
 }
 
 fn read_all_rs_files(dir: &Path) -> HashMap<PathBuf, String> {
