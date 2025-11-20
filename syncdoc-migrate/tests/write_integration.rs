@@ -2,7 +2,7 @@ use braces::{brace_paths, BraceConfig};
 use insta::assert_snapshot;
 use syncdoc_migrate::{
     discover::parse_file,
-    write::{extract_all_docs, write_extractions},
+    write::{extract_all_docs, write_extracts},
 };
 
 mod helpers;
@@ -16,8 +16,8 @@ fn to_braces(paths: &[&str]) -> String {
 fn parse_and_get_paths(source: &str, filename: &str, docs_dir: &str) -> Vec<String> {
     let (_temp_dir, file_path) = setup_test_file(source, filename);
     let parsed = parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, docs_dir);
-    extractions
+    let extracts = extract_all_docs(&parsed, docs_dir);
+    extracts
         .iter()
         .map(|e| e.markdown_path.to_str().unwrap().to_string())
         .collect()
@@ -53,8 +53,8 @@ fn test_extract_and_write_function_docs() {
         "test.rs",
     );
     let parsed = parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, "docs");
-    assert_eq!(extractions[0].content, "A simple function\n");
+    let extracts = extract_all_docs(&parsed, "docs");
+    assert_eq!(extracts[0].content, "A simple function\n");
 }
 
 #[test]
@@ -85,15 +85,15 @@ fn test_extract_and_write_module_docs() {
         "test.rs",
     );
     let parsed = parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, "docs");
+    let extracts = extract_all_docs(&parsed, "docs");
 
-    let module_doc = extractions
+    let module_doc = extracts
         .iter()
         .find(|e| e.markdown_path.to_str().unwrap() == "docs/my_module.md")
         .expect("Should find module doc");
     assert_eq!(module_doc.content, "Module documentation\n");
 
-    let func_doc = extractions
+    let func_doc = extracts
         .iter()
         .find(|e| e.markdown_path.to_str().unwrap() == "docs/my_module/inner_func.md")
         .expect("Should find inner function doc");
@@ -225,7 +225,7 @@ fn test_nested_modules_create_correct_paths() {
 }
 
 #[test]
-fn test_write_extractions_creates_files() {
+fn test_write_extracts_creates_files() {
     let source = r#"
         /// A function
         fn my_func() {}
@@ -240,9 +240,9 @@ fn test_write_extractions_creates_files() {
     let docs_dir = temp_dir.path().join("docs");
 
     let parsed = parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, docs_dir.to_str().unwrap());
+    let extracts = extract_all_docs(&parsed, docs_dir.to_str().unwrap());
 
-    let report = write_extractions(&extractions, false).unwrap();
+    let report = write_extracts(&extracts, false).unwrap();
     assert_report(&report, 2);
 
     assert_file(docs_dir.join("my_func.md"), "A function\n");
@@ -260,9 +260,9 @@ fn test_dry_run_does_not_create_files() {
     let docs_dir = temp_dir.path().join("docs");
 
     let parsed = parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, docs_dir.to_str().unwrap());
+    let extracts = extract_all_docs(&parsed, docs_dir.to_str().unwrap());
 
-    let report = write_extractions(&extractions, true).unwrap();
+    let report = write_extracts(&extracts, true).unwrap();
 
     assert_eq!(report.files_written, 1);
     assert!(!docs_dir.exists(), "Dry run should not create directories");

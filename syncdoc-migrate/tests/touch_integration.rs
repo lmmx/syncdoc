@@ -1,7 +1,7 @@
 use braces::{brace_paths, BraceConfig};
 use insta::assert_snapshot;
 use std::fs;
-use syncdoc_migrate::write::write_extractions;
+use syncdoc_migrate::write::write_extracts;
 
 mod helpers;
 use helpers::*;
@@ -11,8 +11,8 @@ fn to_braces(paths: &[&str]) -> String {
     brace_paths(paths, &braces_config).expect("Brace error")
 }
 
-fn get_paths_as_strings(extractions: &[syncdoc_migrate::write::DocExtraction]) -> Vec<String> {
-    extractions
+fn get_paths_as_strings(extracts: &[syncdoc_migrate::write::DocExtract]) -> Vec<String> {
+    extracts
         .iter()
         .map(|e| e.markdown_path.to_str().unwrap().to_string())
         .collect()
@@ -46,10 +46,10 @@ pub struct Foo {
     let docs_dir = temp_dir.path().join("docs");
     let docs_root = docs_dir.to_str().unwrap();
 
-    let (mut extractions, missing) = parse_and_extract(&file_path, docs_root);
+    let (mut extracts, missing) = parse_and_extract(&file_path, docs_root);
 
     // Snapshot extracted paths (with content)
-    let extracted_paths = get_paths_as_strings(&extractions);
+    let extracted_paths = get_paths_as_strings(&extracts);
     let relative = strip_prefix_from_paths(&extracted_paths, docs_root);
     let refs: Vec<&str> = relative.iter().map(|s| s.as_str()).collect();
     assert_snapshot!(to_braces(&refs), @"{lib,Foo/{a,}}.md");
@@ -61,13 +61,13 @@ pub struct Foo {
     assert_snapshot!(to_braces(&missing_refs), @"Foo/b.md");
 
     // Verify content
-    let foo_doc = extractions
+    let foo_doc = extracts
         .iter()
         .find(|e| e.markdown_path.to_str().unwrap().ends_with("Foo.md"))
         .expect("Should find Foo.md");
     assert_eq!(foo_doc.content, "Docstring for Foo\n");
 
-    let field_a_doc = extractions
+    let field_a_doc = extracts
         .iter()
         .find(|e| e.markdown_path.to_str().unwrap().ends_with("Foo/a.md"))
         .expect("Should find Foo/a.md");
@@ -79,9 +79,9 @@ pub struct Foo {
     );
 
     // Add missing paths and write everything
-    extractions.extend(missing);
+    extracts.extend(missing);
 
-    let report = write_extractions(&extractions, false).unwrap();
+    let report = write_extracts(&extracts, false).unwrap();
     assert_report(&report, 4);
 
     // Verify files exist and have correct content
@@ -104,10 +104,10 @@ pub fn undocumented() {}
     let (temp_dir, file_path) = setup_test_file(source, "test.rs");
     let docs_root = temp_dir.path().join("docs").to_str().unwrap().to_string();
 
-    let (extractions, missing) = parse_and_extract(&file_path, &docs_root);
+    let (extracts, missing) = parse_and_extract(&file_path, &docs_root);
 
     // Snapshot what has docs
-    let extracted_paths = get_paths_as_strings(&extractions);
+    let extracted_paths = get_paths_as_strings(&extracts);
     let relative = strip_prefix_from_paths(&extracted_paths, &docs_root);
     let refs: Vec<&str> = relative.iter().map(|s| s.as_str()).collect();
     assert_snapshot!(to_braces(&refs), @"{test,documented}.md");
@@ -119,11 +119,11 @@ pub fn undocumented() {}
     assert_snapshot!(to_braces(&missing_refs), @"undocumented.md");
 
     // Verify content
-    let doc_extraction = extractions
+    let doc_extract = extracts
         .iter()
         .find(|e| e.markdown_path.to_str().unwrap().ends_with("documented.md"))
         .unwrap();
-    assert_eq!(doc_extraction.content, "Documented function\n");
+    assert_eq!(doc_extract.content, "Documented function\n");
 
     assert_eq!(missing[0].content, "\n");
 }
@@ -161,7 +161,7 @@ impl MarkdownFormat {
     let docs_dir = temp_dir.path().join("docs");
     let docs_root = docs_dir.to_str().unwrap();
 
-    let (mut extractions, missing) = parse_and_extract(&file_path, docs_root);
+    let (mut extracts, missing) = parse_and_extract(&file_path, docs_root);
 
     // Snapshot missing paths
     let missing_paths = get_paths_as_strings(&missing);
@@ -175,8 +175,8 @@ impl MarkdownFormat {
     }
 
     // Combine and write
-    extractions.extend(missing);
-    let report = write_extractions(&extractions, false).unwrap();
+    extracts.extend(missing);
+    let report = write_extracts(&extracts, false).unwrap();
     assert_eq!(report.files_skipped, 0);
     assert!(report.errors.is_empty());
 
@@ -203,10 +203,10 @@ pub fn my_function() {}
     fs::create_dir_all(&docs_dir).unwrap();
     fs::write(docs_dir.join("my_function.md"), "Existing documentation\n").unwrap();
 
-    let (mut extractions, missing) = parse_and_extract(&file_path, docs_root);
+    let (mut extracts, missing) = parse_and_extract(&file_path, docs_root);
 
     // Should have only test.md (module)
-    let extracted_paths = get_paths_as_strings(&extractions);
+    let extracted_paths = get_paths_as_strings(&extracts);
     let relative = strip_prefix_from_paths(&extracted_paths, docs_root);
     let refs: Vec<&str> = relative.iter().map(|s| s.as_str()).collect();
     assert_snapshot!(to_braces(&refs), @"test.md");
@@ -214,8 +214,8 @@ pub fn my_function() {}
     // Should have no missing since my_function.md exists on disk
     assert!(missing.is_empty());
 
-    extractions.extend(missing);
-    write_extractions(&extractions, false).unwrap();
+    extracts.extend(missing);
+    write_extracts(&extracts, false).unwrap();
 
     // Verify existing file was not overwritten
     assert_file(docs_dir.join("my_function.md"), "Existing documentation\n");

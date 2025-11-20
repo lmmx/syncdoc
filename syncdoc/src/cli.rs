@@ -25,7 +25,7 @@ pub mod cli {
     use std::io;
     use std::path::Path;
     use syncdoc_migrate::{
-        discover_rust_files, get_or_create_docs_path, write_extractions, DocsPathMode,
+        discover_rust_files, get_or_create_docs_path, write_extracts, DocsPathMode,
     };
 
     /// Entry point for the `syncdoc` command-line interface.
@@ -128,7 +128,7 @@ pub mod cli {
         let results = sync_all(&rust_files, &args, &docs_root, docs_mode);
         let agg = aggregate_results(results);
 
-        write_extractions(&agg.all_extractions, args.dry_run)?;
+        write_extracts(&agg.all_extracts, args.dry_run)?;
         print_summary(&agg, &args, args.dry_run, args.verbose);
 
         Ok(())

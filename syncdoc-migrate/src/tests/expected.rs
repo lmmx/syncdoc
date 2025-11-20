@@ -48,7 +48,7 @@ fn test_find_expected_simple_function() {
         .collect();
     assert_snapshot!(to_braces(&paths), @"docs/{test,my_function}.md");
 
-    // Content should be empty (just a newline from DocExtraction::new)
+    // Content should be empty (just a newline from DocExtract::new)
     let contents: Vec<&str> = expected.iter().map(|e| e.content.as_str()).collect();
     assert_snapshot!(to_braces(&contents), @"\n");
 }

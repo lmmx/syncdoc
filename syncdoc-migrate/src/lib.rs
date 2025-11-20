@@ -17,7 +17,7 @@ pub use extract::{extract_doc_content, has_doc_attrs};
 pub use restore::restore_file;
 pub use rewrite::{inject_module_doc_attr, inject_omnidoc_attr, rewrite_file, strip_doc_attrs};
 pub use write::{
-    extract_all_docs, find_expected_doc_paths, write_extractions, DocExtraction, WriteReport,
+    extract_all_docs, find_expected_doc_paths, write_extracts, DocExtract, WriteReport,
 };
 
 #[cfg(test)]

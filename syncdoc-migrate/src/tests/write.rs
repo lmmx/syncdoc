@@ -19,8 +19,8 @@ fn setup_test_file(source: &str, filename: &str) -> (TempDir, PathBuf) {
 fn parse_and_get_paths(source: &str, filename: &str, docs_dir: &str) -> Vec<String> {
     let (_temp_dir, file_path) = setup_test_file(source, filename);
     let parsed = crate::discover::parse_file(&file_path).unwrap();
-    let extractions = extract_all_docs(&parsed, docs_dir);
-    extractions
+    let extracts = extract_all_docs(&parsed, docs_dir);
+    extracts
         .iter()
         .map(|e| e.markdown_path.to_str().unwrap().to_string())
         .collect()
@@ -90,27 +90,27 @@ fn test_write_creates_directories() {
     let temp_dir = TempDir::new().unwrap();
     let docs_path = temp_dir.path().join("docs");
 
-    let extractions = vec![
-        DocExtraction {
+    let extracts = vec![
+        DocExtract {
             markdown_path: docs_path.join("module/submodule/func.md"),
             content: "Function docs".to_string(),
             source_location: "test.rs:10".to_string(),
         },
-        DocExtraction {
+        DocExtract {
             markdown_path: docs_path.join("other/item.md"),
             content: "Other docs".to_string(),
             source_location: "test.rs:20".to_string(),
         },
     ];
 
-    let report = write_extractions(&extractions, false).unwrap();
+    let report = write_extracts(&extracts, false).unwrap();
 
     assert_eq!(report.files_written, 2);
     assert_eq!(report.files_skipped, 0);
     assert!(report.errors.is_empty());
 
     // Verify files exist with brace snapshot
-    let created_paths: Vec<String> = extractions
+    let created_paths: Vec<String> = extracts
         .iter()
         .map(|e| {
             e.markdown_path
@@ -134,13 +134,13 @@ fn test_dry_run_no_files_created() {
     let temp_dir = TempDir::new().unwrap();
     let docs_path = temp_dir.path().join("docs");
 
-    let extractions = vec![DocExtraction {
+    let extracts = vec![DocExtract {
         markdown_path: docs_path.join("test.md"),
         content: "Test".to_string(),
         source_location: "test.rs:1".to_string(),
     }];
 
-    let report = write_extractions(&extractions, true).unwrap();
+    let report = write_extracts(&extracts, true).unwrap();
 
     assert_eq!(report.files_written, 1);
     assert!(!docs_path.join("test.md").exists());

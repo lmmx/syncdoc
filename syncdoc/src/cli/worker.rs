@@ -3,15 +3,15 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
 use syncdoc_migrate::{
-    extract_all_docs, find_expected_doc_paths, parse_file, restore_file, rewrite_file,
-    DocExtraction, DocsPathMode,
+    extract_all_docs, find_expected_doc_paths, parse_file as syncdoc_parse_file, restore_file,
+    rewrite_file, DocExtract, DocsPathMode, ParsedFile,
 };
 
 /// Enum to represent the result of processing a single file
 #[derive(Debug)]
 pub enum ProcessResult {
     Migrated {
-        extractions: Vec<DocExtraction>,
+        extracts: Vec<DocExtract>,
         rewritten: bool,
         touched: usize,
     },
@@ -20,6 +20,142 @@ pub enum ProcessResult {
     },
     NoChange,
     Error(String),
+}
+
+/// Helper macro for verbose logging, expecting the last argument(s) in braces
+macro_rules! vlog {
+    ($args:expr, { $($arg:tt)* }) => {
+        if $args.verbose {
+            eprintln!($($arg)*);
+        }
+    };
+}
+
+/// Helper macro for conditional verbose logging, expecting the last argument(s) in braces
+macro_rules! vlog_if {
+    ($args:expr, $cond:expr, { $($arg:tt)* }) => {
+        if $args.verbose && $cond {
+            eprintln!($($arg)*);
+        }
+    };
+}
+
+/// === Step 2: Parse the file ===
+fn parse_file_with_error_handling(
+    file_path: &Path,
+    args: &Args,
+) -> Result<ParsedFile, ProcessResult> {
+    match syncdoc_parse_file(file_path) {
+        Ok(p) => Ok(p),
+        Err(e) => {
+            let error_msg = format!("Failed to parse {}: {}", file_path.display(), e);
+            vlog!(args, {"  Warning: {}", error_msg});
+            Err(ProcessResult::Error(error_msg))
+        }
+    }
+}
+
+/// === Step 3: RESTORE MODE ===
+/// If restore is requested, we early exit after restoring (equivalent to `continue`)
+fn handle_restore(
+    file_path: &Path,
+    parsed: &ParsedFile,
+    args: &Args,
+    docs_root: &str,
+) -> Option<ProcessResult> {
+    if !args.restore {
+        return None;
+    }
+
+    if let Some(restored) = restore_file(parsed, docs_root) {
+        if args.dry_run {
+            vlog!(args, {"  Would restore: {}", file_path.display()});
+            Some(ProcessResult::Restored { dry_run: true })
+        } else {
+            match fs::write(file_path, restored) {
+                Ok(_) => {
+                    vlog!(args, {"  Restored: {}", file_path.display()});
+                    Some(ProcessResult::Restored { dry_run: false })
+                }
+                Err(e) => Some(ProcessResult::Error(format!(
+                    "Failed to write {}: {}",
+                    file_path.display(),
+                    e
+                ))),
+            }
+        }
+    } else {
+        // No restoration needed
+        Some(ProcessResult::NoChange)
+    }
+}
+
+/// === Step 5: Touch missing files if needed ===
+/// === Step 6: Rewrite source file if requested ===
+fn handle_touch_and_rewrite(
+    file_path: &Path,
+    parsed: &ParsedFile,
+    args: &Args,
+    docs_root: &str,
+    docs_mode: DocsPathMode,
+    all_extracts: &mut Vec<DocExtract>,
+) -> Result<(bool, usize), ProcessResult> {
+    let mut touched_count = 0;
+
+    // === Step 5: Touch missing files if needed ===
+    if args.touch && args.annotate {
+        // Determine expected doc paths
+        let expected_paths = find_expected_doc_paths(parsed, docs_root);
+
+        vlog!(args, {"  Found {} expected doc path(s)", expected_paths.len()});
+
+        // Filter paths: exclude those already in extracts and those already on disk
+        let existing_paths: HashSet<_> = all_extracts.iter().map(|e| &e.markdown_path).collect();
+
+        let missing: Vec<_> = expected_paths
+            .into_iter()
+            .filter(|extract| {
+                !existing_paths.contains(&extract.markdown_path) && !extract.markdown_path.exists()
+            })
+            .collect();
+
+        vlog_if!(args, !missing.is_empty(), {"  Will touch {} missing file(s)", missing.len()});
+
+        touched_count = missing.len();
+        all_extracts.extend(missing);
+    }
+
+    // === Step 6: Rewrite source file if requested ===
+    let rewritten = if args.strip_docs || args.annotate {
+        if let Some(rewritten) =
+            rewrite_file(parsed, docs_root, docs_mode, args.strip_docs, args.annotate)
+        {
+            if args.dry_run {
+                vlog!(args, {"  Would rewrite: {}", file_path.display()});
+                true
+            } else {
+                match fs::write(file_path, rewritten) {
+                    Ok(_) => {
+                        vlog!(args, {"  Rewrote: {}", file_path.display()});
+                        true
+                    }
+                    Err(e) => {
+                        return Err(ProcessResult::Error(format!(
+                            "Failed to write {}: {}",
+                            file_path.display(),
+                            e
+                        )));
+                    }
+                }
+            }
+        } else {
+            false
+        }
+    } else {
+        false
+    };
+
+    Ok((rewritten, touched_count))
 }
 
 /// Process a single file (called by worker threads)
@@ -32,142 +168,37 @@ pub fn sync(
     docs_root: &str,
     docs_mode: DocsPathMode,
 ) -> ProcessResult {
-    // === Step 1: Verbose info about file being processed ===
-    if args.verbose {
-        eprintln!("Processing: {}", file_path.display());
-    }
-
-    // === Step 2: Parse the file ===
-    let parsed = match parse_file(file_path) {
+    vlog!(args, {"Processing: {}", file_path.display()});
+    let parsed = match parse_file_with_error_handling(file_path, args) {
         Ok(p) => p,
-        Err(e) => {
-            let error_msg = format!("Failed to parse {}: {}", file_path.display(), e);
-            if args.verbose {
-                eprintln!("  Warning: {}", error_msg);
-            }
-            return ProcessResult::Error(error_msg);
-        }
+        Err(e) => return e,
+    };
+    // RESTORE MODE: Put documentation back into docstrings from markdown
+    if let Some(result) = handle_restore(file_path, &parsed, args, docs_root) {
+        return result; // early exit
+    }
+    // MIGRATION MODE: Extract documentation from the parsed file
+    let mut extracts = extract_all_docs(&parsed, docs_root);
+
+    vlog_if!(args, !extracts.is_empty(), {"  Extracted {} doc(s)", extracts.len()});
+
+    // === Step 5 & 6: Touch missing files and rewrite source file ===
+    let (rewritten, touched) = match handle_touch_and_rewrite(
+        file_path,
+        &parsed,
+        args,
+        docs_root,
+        docs_mode,
+        &mut extracts,
+    ) {
+        Ok(result) => result,
+        Err(e) => return e,
     };
 
-    // === Step 3: RESTORE MODE ===
-    // If restore is requested, we early exit after restoring (equivalent to `continue`)
-    if args.restore {
-        if let Some(restored) = restore_file(&parsed, docs_root) {
-            if args.dry_run {
-                if args.verbose {
-                    eprintln!("  Would restore: {}", file_path.display());
-                }
-                return ProcessResult::Restored { dry_run: true };
-            } else {
-                match fs::write(file_path, restored) {
-                    Ok(_) => {
-                        if args.verbose {
-                            eprintln!("  Restored: {}", file_path.display());
-                        }
-                        return ProcessResult::Restored { dry_run: false };
-                    }
-                    Err(e) => {
-                        return ProcessResult::Error(format!(
-                            "Failed to write {}: {}",
-                            file_path.display(),
-                            e
-                        ));
-                    }
-                }
-            }
-        } else {
-            // No restoration needed
-            return ProcessResult::NoChange;
-        }
-    }
-
-    // === Step 4: MIGRATION MODE ===
-    // Extract documentation from the parsed file
-    let extractions = extract_all_docs(&parsed, docs_root);
-
-    if args.verbose && !extractions.is_empty() {
-        eprintln!("  Found {} doc extraction(s)", extractions.len());
-    }
-
-    let mut all_extractions = extractions;
-
-    // === Step 5: Touch missing files if needed ===
-    if args.touch && args.annotate {
-        // Determine expected doc paths
-        let expected_paths = find_expected_doc_paths(&parsed, docs_root);
-
-        if args.verbose {
-            eprintln!("  Found {} expected doc path(s)", expected_paths.len());
-        }
-
-        // Filter paths: exclude those already in extractions and those already on disk
-        let existing_paths: HashSet<_> = all_extractions.iter().map(|e| &e.markdown_path).collect();
-
-        let missing_paths: Vec<_> = expected_paths
-            .into_iter()
-            .filter(|extraction| {
-                !existing_paths.contains(&extraction.markdown_path)
-                    && !extraction.markdown_path.exists()
-            })
-            .collect();
-
-        if !missing_paths.is_empty() && args.verbose {
-            eprintln!("  Will touch {} missing file(s)", missing_paths.len());
-        }
-
-        let touched_count = missing_paths.len();
-        all_extractions.extend(missing_paths);
-
-        // === Step 6: Rewrite source file if requested ===
-        let rewritten = if args.strip_docs || args.annotate {
-            if let Some(rewritten) = rewrite_file(
-                &parsed,
-                docs_root,
-                docs_mode,
-                args.strip_docs,
-                args.annotate,
-            ) {
-                if args.dry_run {
-                    if args.verbose {
-                        eprintln!("  Would rewrite: {}", file_path.display());
-                    }
-                    true
-                } else {
-                    match fs::write(file_path, rewritten) {
-                        Ok(_) => {
-                            if args.verbose {
-                                eprintln!("  Rewrote: {}", file_path.display());
-                            }
-                            true
-                        }
-                        Err(e) => {
-                            return ProcessResult::Error(format!(
-                                "Failed to write {}: {}",
-                                file_path.display(),
-                                e
-                            ));
-                        }
-                    }
-                }
-            } else {
-                false
-            }
-        } else {
-            false
-        };
-
-        // Return full migration result
-        return ProcessResult::Migrated {
-            extractions: all_extractions,
-            rewritten,
-            touched: touched_count,
-        };
-    }
-
-    // If touch mode was not requested, return migrated result with 0 touched files
+    // Return full migration result
     ProcessResult::Migrated {
-        extractions: all_extractions,
-        rewritten: false,
-        touched: 0,
+        extracts,
+        rewritten,
+        touched,
     }
 }
