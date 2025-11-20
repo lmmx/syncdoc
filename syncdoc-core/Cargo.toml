@@ -15,6 +15,7 @@ version = "0.4.0"
 default = []
 
 [dependencies]
+ctor = "0.6.1"
 proc-macro2.workspace = true
 quote.workspace = true
 ropey.workspace = true

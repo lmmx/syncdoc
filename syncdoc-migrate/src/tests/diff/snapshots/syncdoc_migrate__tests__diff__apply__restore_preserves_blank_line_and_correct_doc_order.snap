@@ -1,0 +1,14 @@
+---
+source: syncdoc-migrate/src/tests/diff/apply.rs
+expression: result
+---
+//! Section representation for tree-sitter parsed documents.
+//!
+//! A section represents a hierarchical division of a document, typically
+//! corresponding to a heading in markdown. Sections track their position
+//! in the document tree through parent/child relationships and maintain
+//! precise byte and line coordinates for content extraction and modification.
+
+/// Hierarchical document division with precise coordinates for extraction and modification.
+#[derive(Clone)]
+pub struct Section {}

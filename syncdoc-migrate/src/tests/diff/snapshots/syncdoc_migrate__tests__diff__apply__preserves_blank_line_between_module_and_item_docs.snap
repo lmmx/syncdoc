@@ -1,0 +1,8 @@
+---
+source: syncdoc-migrate/src/tests/diff/apply.rs
+expression: result
+---
+#![doc = syncdoc::module_doc!()]
+
+#[syncdoc::omnidoc]
+pub fn test() {}
