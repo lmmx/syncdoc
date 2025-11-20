@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.5.1...syncdoc-v0.5.2) - 2025-11-20
+
+### <!-- 5 -->Refactor
+
+- worker module ([#77](https://github.com/lmmx/syncdoc/pull/77))
+
 ## [0.5.1](https://github.com/lmmx/syncdoc/compare/syncdoc-v0.5.0...syncdoc-v0.5.1) - 2025-11-20
 
 ### <!-- 4 -->Documentation
