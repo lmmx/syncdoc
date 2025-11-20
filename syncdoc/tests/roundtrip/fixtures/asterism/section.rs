@@ -5,8 +5,8 @@
 //! in the document tree through parent/child relationships and maintain
 //! precise byte and line coordinates for content extraction and modification.
 
-#[derive(Clone)]
 /// Hierarchical document division with precise coordinates for extraction and modification.
+#[derive(Clone)]
 pub struct Section {
     /// Section heading text without markup symbols.
     pub title: String,
