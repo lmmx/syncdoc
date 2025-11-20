@@ -344,6 +344,13 @@ pub mod inner {
         // Discover Rust files
         let rust_files = discover_rust_files(source_path)?;
 
+        if rust_files.is_empty() {
+            if args.verbose {
+                eprintln!("No Rust files found in source directory, nothing to process.");
+            }
+            return Ok(()); // early exit, nothing to do
+        }
+
         if args.verbose {
             eprintln!("Found {} Rust file(s)", rust_files.len());
         }
@@ -354,8 +361,7 @@ pub mod inner {
         // Create 4x more chunks than threads to minimize straggler effects
         let oversubscribe = 4;
         let total_chunks = num_threads * oversubscribe;
-        let chunk_size = (rust_files.len() + total_chunks - 1) / total_chunks;
-        let chunk_size = chunk_size.max(1);
+        let chunk_size = rust_files.len().div_ceil(total_chunks);
 
         if args.verbose {
             eprintln!(
